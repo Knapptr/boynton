@@ -1,0 +1,6 @@
+node_modules/
+credentials.json
+.env
+token.json
+output/
+config.json
