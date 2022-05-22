@@ -1,18 +1,22 @@
 const pool = require("../db/index");
 
 class Camper {
-	constructor({ firstName, lastName, gender, id, sessions }) {
+	constructor({ firstName, lastName, gender, id, sessions, age }) {
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.sessions = sessions;
+		this.gender = gender;
+		this.id = id;
+		this.age = age;
 	}
-	static _parseResults({ first_name, last_name, gender, id, sessions }) {
+	static _parseResults({ first_name, last_name, gender, id, sessions, age }) {
 		return {
 			firstName: first_name,
 			lastName: last_name,
 			gender,
 			id,
 			sessions,
+			age,
 		};
 	}
 	static async getAll() {

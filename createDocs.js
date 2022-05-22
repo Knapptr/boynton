@@ -20,7 +20,6 @@ const createDocsPPT = async (awardType, awards, templateList) => {
 	//get correct template from awardType
 	const filePath = templateList.ppt[awardType];
 
-	console.log("using file path", filePath);
 	// throw error if no template provided
 	if (!filePath) {
 		throw new Error("no template provided");
@@ -33,7 +32,6 @@ const createDocsPPT = async (awardType, awards, templateList) => {
 		const template = new Templater(zip);
 		// format data
 		const awardData = generateAwardFields(award);
-		console.log(awardData);
 		//fill in template with info
 		template.render(awardData);
 		const fileBuffer = template
