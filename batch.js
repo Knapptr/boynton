@@ -12,7 +12,6 @@ const createAwardBatch = async (awards, format) => {
 		pptx: createDocsPPT,
 	}[format];
 	for (programArea of programAreas) {
-		console.log(programArea);
 		try {
 			await createDocsFormat(
 				programArea,

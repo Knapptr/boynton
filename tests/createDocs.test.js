@@ -3,13 +3,17 @@ const fs = require("fs/promises");
 const config = require("../config.json");
 const PizZip = require("pizzip");
 const Templater = require("docxtemplater");
+const pdfFillForm = require("pdf-fill-form");
+
 jest.mock("docxtemplater");
 jest.mock("pizzip");
+jest.mock("pdf-fill-form");
 afterEach(() => {
 	jest.clearAllMocks();
 });
 jest.spyOn(fs, "writeFile").mockImplementation();
 jest.spyOn(fs, "readFile").mockImplementation();
+
 describe("file creation", () => {
 	test("creates two arts awards for yarn bombing", async () => {
 		const data = {
