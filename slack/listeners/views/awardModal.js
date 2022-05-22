@@ -26,9 +26,10 @@ const awardOrAwards = (namesList) => {
 const submitAwardView = async ({ ack, view, client }) => {
 	await ack();
 	const awardFor = view.state.values.awardFor.text.value;
-	const names = view.state.values.camperNames.select.selected_options.map(
-		(camper) => JSON.parse(camper.value)
-	);
+	const names =
+		view.state.values.camperNames.camper_options.selected_options.map(
+			(camper) => JSON.parse(camper.value)
+		);
 	const programArea =
 		view.state.values.programArea.select.selected_option.value;
 	awards.add(programArea, mapAwards(names, awardFor));

@@ -101,7 +101,7 @@ const getBlocks = async (index = 0) => {
 				// type: "multi_static_select",
 				type: "multi_external_select",
 				placeholder: { type: "plain_text", text: "Select Campers" },
-				action_id: "external_action",
+				action_id: "camper_options",
 				// action_id: "select",
 				// option_groups: await createCamperSelectionOptions(),
 			},
