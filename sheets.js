@@ -1,6 +1,6 @@
 const { GoogleSpreadsheet } = require("google-spreadsheet");
+const { formatmmddyyyy, getWeek, getYear } = require("./utils/getDates");
 const { weeks } = require("./config.json");
-
 const sheetID = "16uE5u4bsjz798eLWDVoh0n8JHjSsmecnZneFCcH8F5E";
 
 const loginCredentials = {
@@ -8,31 +8,6 @@ const loginCredentials = {
 	private_key: process.env.GOOGLE_PRIVATE_KEY,
 };
 
-const getWeek = (dateArg) => {
-	const date = dateArg ? Date.parse(dateArg) : new Date();
-	const keys = Object.keys(weeks);
-	const week = keys.find((key) => {
-		const start = Date.parse(weeks[key].start);
-		const end = Date.parse(weeks[key].end);
-		console.log({ start, end, date });
-		if (date >= start && date <= end) {
-			return true;
-		} else {
-			return false;
-		}
-	});
-	return week || "non";
-};
-const getYear = () => {
-	return new Date().getFullYear();
-};
-
-const formatmmddyyyy = (date) => {
-	const mm = date.getMonth() + 1;
-	const dd = date.getDate();
-	const yyyy = date.getFullYear();
-	return `${mm}/${dd}/${yyyy}`;
-};
 const addAwards = async (list) => {
 	const doc = new GoogleSpreadsheet(sheetID);
 	await doc.useServiceAccountAuth(loginCredentials);
@@ -52,7 +27,7 @@ const addAwards = async (list) => {
 	sheet.addRows(awardList);
 };
 
-const getAwards = async (week) => {
+const getAwards = async (week = getWeek()) => {
 	const doc = new GoogleSpreadsheet(sheetID);
 	await doc.useServiceAccountAuth(loginCredentials);
 	await doc.loadInfo();

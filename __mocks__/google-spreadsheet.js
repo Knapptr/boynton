@@ -1,8 +1,24 @@
+const { getYear, getWeek, getTodayFormatted } = require("../utils/getDates");
+
 const mockAddRows = jest.fn();
 
 const mockRows = [
-	{ for: "Archery", programArea: "challenge", first: "Tyler", last: "Knapp" },
-	{ for: "Yarn Bombing", programArea: "arts", first: "Lilly", last: "Rushe" },
+	{
+		awardFor: "Archery",
+		programArea: "challenge",
+		first: "Tyler",
+		last: "Knapp",
+		date: getTodayFormatted(),
+		commandEntry: "",
+	},
+	{
+		awardFor: "Yarn Bombing",
+		programArea: "arts",
+		first: "Lilly",
+		last: "Rushe",
+		date: getTodayFormatted(),
+		commandEntry: "",
+	},
 ];
 
 const mockGetRows = jest.fn().mockImplementation(() => mockRows);
@@ -11,7 +27,7 @@ const mock = jest.fn().mockImplementation(() => {
 		useServiceAccountAuth: jest.fn(),
 		loadInfo: jest.fn(),
 		sheetsByTitle: {
-			"2022-1": {
+			[`${getYear()}-${getWeek()}`]: {
 				getRows: mockGetRows,
 				addRows: mockAddRows,
 			},

@@ -13,22 +13,22 @@ afterEach(() => {
 	jest.clearAllMocks();
 });
 
-test("calls createDocs for each award in key ", () => {
+test("calls createDocs for each award in key 1 ", async () => {
 	const mockData = {
 		arts: [{ for: "Noodles", first: "Timmy", last: "McGillicutty" }],
 	};
-	createAwardBatch(mockData, "pdf");
-	expect(createDocsPDF).toBeCalledTimes(1);
+	await createAwardBatch(mockData, "pptx");
+	expect(createDocsPPT).toBeCalledTimes(1);
 });
-test("calls createDocs for each award in key ", () => {
+test("calls createDocs for each award in key 2", async () => {
 	const mockData = {
 		arts: [{ for: "Noodles", first: "Timmy", last: "McGillicutty" }],
 		challenge: [{ for: "Jousting", first: "Timmy", last: "McGillicutty" }],
 	};
-	createAwardBatch(mockData, "pdf");
-	expect(createDocsPDF).toBeCalledTimes(2);
+	await createAwardBatch(mockData, "pptx");
+	expect(createDocsPPT).toBeCalledTimes(2);
 });
-test("only calls once per area", () => {
+test("only calls once per area", async () => {
 	const mockData = {
 		arts: [
 			{ for: "Bootles", first: "Timmy", last: "McGillicutty" },
@@ -36,10 +36,10 @@ test("only calls once per area", () => {
 		],
 		challenge: [{ for: "Jousting", first: "Timmy", last: "McGillicutty" }],
 	};
-	createAwardBatch(mockData, "pdf");
+	await createAwardBatch(mockData, "pdf");
 	expect(createDocsPDF).toBeCalledTimes(2);
 });
-test("throws error if not pdf or ppt", () => {
+test("throws error if not pdf or pptx", () => {
 	const mockData = {
 		arts: [
 			{ for: "Bootles", first: "Timmy", last: "McGillicutty" },

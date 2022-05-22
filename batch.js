@@ -12,17 +12,18 @@ const createAwardBatch = async (awards, format) => {
 		pptx: createDocsPPT,
 	}[format];
 	for (programArea of programAreas) {
+		console.log(programArea);
 		try {
-			console.log(`creating ${programArea} awards:`);
 			await createDocsFormat(
 				programArea,
 				awards[programArea],
 				templatePaths
 			);
 		} catch (e) {
-			console.log("ERROR:", e);
+			throw new Error(e);
 		}
 	}
+	return true;
 };
 
 module.exports = createAwardBatch;

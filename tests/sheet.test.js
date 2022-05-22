@@ -1,50 +1,71 @@
 const { GoogleSpreadsheet, mockAddRows } = require("google-spreadsheet");
 const { addAwards, getAwards } = require("../sheets");
-
+const { getTodayFormatted } = require("../utils/getDates");
 jest.mock("google-spreadsheet");
 
-test("adds 1 award to week 1", async () => {
-	const providedList = [
+test("adds 1 award to current week", async () => {
+	const expectedList = [
 		{
-			for: "Noodle Races",
+			awardFor: "Noodle Races",
 			programArea: "challenge",
 			first: "Tyler",
 			last: "Knapp",
+			date: getTodayFormatted(),
+			commandEntry: "",
 		},
 	];
-	await addAwards(1, [
+	await addAwards([
 		{
-			for: "Noodle Races",
+			awardFor: "Noodle Races",
 			programArea: "challenge",
 			first: "Tyler",
 			last: "Knapp",
 		},
 	]);
-	expect(mockAddRows).toHaveBeenCalledWith(providedList);
+	expect(mockAddRows).toHaveBeenCalledWith(expectedList);
 });
-test("adds 2 award to week 1", async () => {
+test("adds 2 award to current week", async () => {
 	const providedList = [
 		{
-			for: "Noodle Races",
+			awardFor: "Noodle Races",
 			programArea: "challenge",
 			first: "Anja",
 			last: "Golden",
 		},
 		{
-			for: "Noodle Races",
+			awardFor: "Noodle Races",
 			programArea: "challenge",
 			first: "Tyler",
 			last: "Knapp",
 		},
 	];
-	await addAwards(1, providedList);
-	expect(mockAddRows).toHaveBeenCalledWith(providedList);
+	const expectedList = providedList.map((entry) => {
+		return { ...entry, date: getTodayFormatted(), commandEntry: "" };
+	});
+	await addAwards(providedList);
+	expect(mockAddRows).toHaveBeenCalledWith(expectedList);
 });
-test("returns awards from mock sheet week 1", async () => {
-	const fetchedAwards = await getAwards(1);
+test("returns awards from current week", async () => {
+	const fetchedAwards = await getAwards();
 	const expectedAwards = {
-		arts: [{ for: "Yarn Bombing", first: "Lilly", last: "Rushe" }],
-		challenge: [{ for: "Archery", first: "Tyler", last: "Knapp" }],
+		arts: [
+			{
+				awardFor: "Yarn Bombing",
+				first: "Lilly",
+				last: "Rushe",
+				date: getTodayFormatted(),
+				commandEntry: "",
+			},
+		],
+		challenge: [
+			{
+				awardFor: "Archery",
+				first: "Tyler",
+				last: "Knapp",
+				date: getTodayFormatted(),
+				commandEntry: "",
+			},
+		],
 	};
 	expect(fetchedAwards).toEqual(expectedAwards);
 });
