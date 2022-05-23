@@ -34,7 +34,7 @@ class Activity {
 		const values = [name, description, periodID];
 		const result = await pool.query(query, values);
 		const id = result.rows[0].id;
-		return new Activity({ name, description, id });
+		return new Activity({ name, description, id, periodID });
 	}
 	async addCamper(camperID) {
 		const query =

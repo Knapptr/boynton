@@ -26,6 +26,13 @@ class Period {
 			id: dbResponse.id,
 		};
 	}
+	static async get(id) {
+		const query = "SELECT * from periods WHERE id = $1";
+		const values = [id];
+		const results = await pool.query(query, values);
+		const { periodNumber, dayID } = Period._parseResponse(results.rows[0]);
+		return new Period({ periodNumber, dayID, id });
+	}
 	async getActivities() {
 		const query = "SELECT * from activities WHERE period_id = $1";
 		const values = [this.id];
@@ -35,11 +42,28 @@ class Period {
 		);
 		return activities;
 	}
+	async addActivity({ name, description }) {
+		const activity = await Activity.create({
+			name,
+			description,
+			periodID: this.id,
+		});
+		return activity;
+	}
 }
 module.exports = Period;
 
 //test
-// (async () => {
-// 	const period = await Period.create({ periodNumber: 1, dayID: 1 });
-// 	console.log(period);
-// })();
+(async () => {
+	// 	const period = await Period.create({ periodNumber: 1, dayID: 1 });
+	// 	console.log(period);
+	const period = await Period.get(346);
+	// console.log(period);
+	const activities = await period.getActivities();
+	console.log(activities);
+	// const activity = await period.addActivity({
+	// 	name: "Tenniball",
+	// 	description: "Baseball, but with a tennis ball and racket",
+	// });
+	// console.log(activity);
+})();

@@ -58,6 +58,6 @@ class Week {
 module.exports = Week;
 
 //test
-(async () => {
-	await Week.DestructivelyInitFromConfig();
-})();
+// (async () => {
+// 	await Week.DestructivelyInitFromConfig();
+// })();
