@@ -1,9 +1,18 @@
 const pool = require("../db/index");
 const { scheduleDays, weeks } = require("../config.json");
+const { fetchOneAndCreate, fetchManyAndCreate } = require("../utils/pgWrapper");
+
+const Camper = require("./camper");
 class Week {
 	constructor({ title, number }) {
 		this.title = title;
 		this.number = number;
+	}
+	static _parseResults(dbResponse) {
+		return {
+			title: dbResponse.title,
+			number: dbResponse.number,
+		};
 	}
 	static async DestructivelyInitFromConfig() {
 		//will clear all weeks,periods and cabin sessions! DO NOT USE THIS IN THE MIDDLE OF A SUMMER
@@ -23,6 +32,28 @@ class Week {
 			await week.createDays();
 		}
 	}
+	static async get(id) {
+		const query = "SELECT * from weeks WHERE number = $1";
+		const values = [id];
+		const week = await fetchOneAndCreate({ query, values, Model: Week });
+		return week;
+	}
+	static async getAll() {
+		const query = "SELECT * from weeks";
+		const weeks = await fetchManyAndCreate({ query, Model: Week });
+		return weeks;
+	}
+	async getCampers() {
+		const query =
+			"SELECT * from camper_weeks JOIN campers on camper_id = campers.id WHERE week_id = $1";
+		const values = [this.number];
+		const campers = await fetchManyAndCreate({
+			query,
+			values,
+			Model: Camper,
+		});
+		return campers;
+	}
 	async createDays() {
 		// create days and periods for each day
 		for (let day of scheduleDays) {
@@ -39,12 +70,6 @@ class Week {
 				await pool.query(periodQuery, periodValues);
 			}
 		}
-	}
-	static _parseResults(dbResponse) {
-		return {
-			title: dbResponse.title,
-			number: dbResponse.number,
-		};
 	}
 	static async create({ title, number }) {
 		const query =

@@ -16,6 +16,14 @@ class Activity {
 			description: dbResponse.description,
 		};
 	}
+	static async getAllForPeriod(periodID) {
+		const query = "SELECT * from activities WHERE period_id = $1";
+		const values = [periodID];
+		const results = await pool.query(query, values);
+		const activities = results.rows.map(
+			(db) => new Activity(Activity._parseResponse(db))
+		);
+	}
 	static async get(id) {
 		const query = "SELECT * from activities WHERE id = $1";
 		const values = [id];
@@ -52,7 +60,6 @@ class Activity {
 		const result = await pool.query(query, values);
 		return result.rows[0];
 	}
-
 	async getCampers() {
 		const query =
 			"SELECT * FROM camper_activities JOIN campers ON  campers.id = camper_id WHERE activity_id = $1";

@@ -1,5 +1,6 @@
 const pool = require("../db/index");
 const Camper = require("./camper");
+const { fetchOne, fetchMany } = require("../utils/pgWrapper");
 
 class Cabin {
 	constructor({ name, capacity, area }) {

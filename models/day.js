@@ -28,27 +28,27 @@ class Day {
 			weekID: dbResponse.week_id,
 		};
 	}
+	static async getAllForWeek(weekNumber) {
+		const query = "SELECT * from days WHERE week_id = $1";
+		const values = [weekNumber];
+		const results = await fetchMany(query, values);
+		const days = results
+			? results.map((db) => new Day(Day._parseResponse(db)))
+			: false;
+		return days;
+	}
+	static async getByWeekAndName(week, name) {
+		const query = "SELECT * from days WHERE week_id = $1 AND name = $2";
+		const values = [week, name];
+		const results = await fetchMany(query, values);
+		const day = results ? new Day(Day._parseResponse(results)) : false;
+		return day;
+	}
 	static async get(id) {
 		const query = "SELECT * from days WHERE id = $1";
 		const values = [id];
-		const result = await pool.query(query, values);
-		const day = result.rows[0];
-		console.log({ day });
-		return new Day(Day._parseResponse(day));
-	}
-	async getPeriods() {
-		const query = "SELECT * from periods WHERE day_id = $1";
-		const values = [this.id];
-		const results = await pool.query(query, values);
-		const periodResponse = results.rows.map((per) => {
-			return {
-				periodNumber: per.period_number,
-				id: per.id,
-				dayID: per.day_id,
-			};
-		});
-		const periods = periodResponse.map((per) => new Period(per));
-		return periods;
+		const day = await fetchOne(query, values);
+		return day ? new Day(Day._parseResponse(day)) : false;
 	}
 }
 module.exports = Day;

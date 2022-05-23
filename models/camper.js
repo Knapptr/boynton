@@ -1,4 +1,5 @@
 const pool = require("../db/index");
+const { fetchOne, fetchManyAndCreate } = require("../utils/pgWrapper");
 
 class Camper {
 	constructor({ firstName, lastName, gender, id, sessions, age }) {
@@ -20,31 +21,35 @@ class Camper {
 		};
 	}
 	static async getAll() {
-		const results = await pool.query("select * from campers;");
-		const camperResults = results.rows;
-		const campers = camperResults.map((camper) => {
-			return new Camper(Camper._parseResults(camper));
-		});
+		const query = "SELECT * FROM campers";
+		const campers = await fetchManyAndCreate({ query, Model: Camper });
 		return campers;
 	}
 	static async getById(id) {
-		const results = await pool.query(
-			"SELECT * from campers where id = $1",
-			[id]
-		);
-		const camperResult = results.rows[0];
-		return new Camper(Camper._parseResults(camperResult));
+		const query = "SELECT * FROM campers WHERE id = $1";
+		const values = [id];
+		const camper = await fetchOneAndCreate({
+			query,
+			values,
+			Model: Camper,
+		});
+		return camper;
 	}
-	static async getByFullName({ firstName, lastName }) {
-		try {
-			const results = await pool.query(
-				"SELECT * FROM campers WHERE first_name = $1 AND last_name = $2",
-				[firstName, lastName]
-			);
-			return new Camper(Camper._parseResults(results.rows[0]));
-		} catch (e) {
-			throw new Error("Error getting Camper");
+	static async getByArea(area) {
+		area = area.toUpperCase();
+		if (area !== "GA" && area !== "BA") {
+			console.log("Non BA or GA ara requested");
+			return false;
 		}
+		const gender = { BA: "Male", GA: "Female" }[area];
+		const query = "SELECT * from campers WHERE gender = $1";
+		const values = [gender];
+		const campers = await fetchManyAndCreate({
+			query,
+			values,
+			Model: Camper,
+		});
+		return campers;
 	}
 	get fullName() {
 		return `${this.firstName} ${this.lastName}`;
