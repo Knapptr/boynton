@@ -1,4 +1,9 @@
 const pool = require("../db/index");
+const {
+	fetchManyAndCreate,
+	fetchOneAndCreate,
+	fetchOne,
+} = require("../utils/pgWrapper");
 const Camper = require("./camper");
 
 class Activity {
@@ -8,7 +13,7 @@ class Activity {
 		this.description = description || "none";
 		this.periodID = periodID;
 	}
-	static _parseResponse(dbResponse) {
+	static _parseResults(dbResponse) {
 		return {
 			name: dbResponse.name,
 			id: dbResponse.id,
@@ -19,64 +24,67 @@ class Activity {
 	static async getAllForPeriod(periodID) {
 		const query = "SELECT * from activities WHERE period_id = $1";
 		const values = [periodID];
-		const results = await pool.query(query, values);
-		const activities = results.rows.map(
-			(db) => new Activity(Activity._parseResponse(db))
-		);
+		const activities = await fetchManyAndCreate({
+			query,
+			values,
+			Model: Activity,
+		});
 	}
 	static async get(id) {
 		const query = "SELECT * from activities WHERE id = $1";
 		const values = [id];
-		const results = await pool.query(query, values);
-		const activity = results.rows[0];
-		return new Activity({
-			name: activity.name,
-			description: activity.description,
-			id: activity.id,
-			periodID: activity.period_id,
+		const activity = await fetchOneAndCreate({
+			query,
+			values,
+			Model: Activity,
 		});
+		return activity;
 	}
 	static async create({ name, description, periodID }) {
 		const query =
-			"INSERT INTO activities (name,description,period_id) VALUES ($1,$2,$3) RETURNING id, name, description";
+			"INSERT INTO activities (name,description,period_id) VALUES ($1,$2,$3) RETURNING id, name, description period_id";
 		const values = [name, description, periodID];
-		const result = await pool.query(query, values);
-		const id = result.rows[0].id;
-		return new Activity({ name, description, id, periodID });
+		const activity = await fetchOneAndCreate({
+			query,
+			values,
+			Model: Activity,
+		});
+		return activity;
 	}
 	async addCamper(camperID) {
 		const query =
 			"INSERT INTO camper_activities (camper_id,activity_id) VALUES ($1,$2) RETURNING id";
 		const values = [camperID, this.id];
-		const result = await pool.query(query, values);
-		const camperActivityID = result.rows[0].id;
+		const result = await fetchOne(query, values);
+		const camperActivityID = result.id;
 		return camperActivityID;
 	}
 
 	async removeCamper(camperID) {
 		const query =
-			"DELETE from camper_activities WHERE activity_id = $1 AND camper_id = $2 RETURNING camper_id";
+			"DELETE from camper_activities WHERE activity_id = $1 AND camper_id = $2 RETURNING *";
 		const values = [this.id, camperID];
-		const result = await pool.query(query, values);
-		return result.rows[0];
+		const deletedCamperActivity = await fetchOne(query, values);
+		const deletedCamperID = deletedCamperActivity.camper_id;
+		const camperQuery = "SELECT * from campers WHERE id = $1";
+		const camperValues = [deletedCamperID];
+		const deletedCamper = await fetchOneAndCreate({
+			query: camperQuery,
+			values: camperValues,
+			Model: Camper,
+		});
+		return deletedCamper;
 	}
 	async getCampers() {
 		const query =
-			"SELECT * FROM camper_activities JOIN campers ON  campers.id = camper_id WHERE activity_id = $1";
+			"SELECT * FROM camper_activities JOIN camper_weeks ON camper_weeks.id = camper_activities.camper_week_id JOIN campers ON campers.id = camper_weeks.camper_id WHERE activity_id = $1";
 		const values = [this.id];
-		const results = await pool.query(query, values);
-		const campers = results.rows;
-		return results.rows.map(
-			(camper) =>
-				new Camper({
-					firstName: camper.first_name,
-					lastName: camper.last_name,
-					id: camper.id,
-					gender: camper.gender,
-					age: camper.age,
-					sessions: camper.sessions,
-				})
-		);
+		const campers = await fetchManyAndCreate({
+			query,
+			values,
+			Model: Camper,
+		});
+		return campers;
 	}
 }
 

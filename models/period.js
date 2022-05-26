@@ -1,5 +1,6 @@
 const pool = require("../db/index");
 const error = require("../utils/jsonError");
+const Camper = require("./camper");
 const Activity = require("./activity");
 const { fetchOneAndCreate, fetchManyAndCreate } = require("../utils/pgWrapper");
 
@@ -28,37 +29,13 @@ class Period {
 		});
 		return period;
 	}
-	static async getForWeek(weekNumber) {
-		const query =
-			"SELECT * from periods JOIN days ON periods.day_id = days.id WHERE days.week_id = $1";
-		const values = [weekNumber];
+	static async getAll() {
+		const query = "SELECT * from periods";
 		const periods = await fetchManyAndCreate({
 			query,
-			values,
 			Model: Period,
 		});
 		return periods;
-	}
-	static async getForDay(dayID) {
-		const query = "SELECT * from periods WHERE day_id = $1";
-		const values = [dayID];
-		const periods = await fetchManyAndCreate({
-			query,
-			values,
-			Model: Period,
-		});
-		return periods;
-	}
-	static async getByDayAndPeriod(dayID, periodNumber) {
-		const query =
-			"SELECT * from periods WHERE day_id = $1 AND period_number =$2 ";
-		const values = [dayID, periodNumber];
-		const period = await fetchOneAndCreate({
-			query,
-			values,
-			Model: Period,
-		});
-		return period;
 	}
 	static async get(id) {
 		const query = "SELECT * from periods WHERE id = $1";
@@ -73,10 +50,11 @@ class Period {
 	async getActivities() {
 		const query = "SELECT * from activities WHERE period_id = $1";
 		const values = [this.id];
-		const results = await pool.query(query, values);
-		const activities = results.rows.map(
-			(act) => new Activity(Activity._parseResponse(act))
-		);
+		const activities = await fetchManyAndCreate({
+			query,
+			values,
+			Model: Activity,
+		});
 		return activities;
 	}
 	async addActivity({ name, description }) {

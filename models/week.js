@@ -1,8 +1,8 @@
 const pool = require("../db/index");
 const { scheduleDays, weeks } = require("../config.json");
 const { fetchOneAndCreate, fetchManyAndCreate } = require("../utils/pgWrapper");
-
 const Camper = require("./camper");
+
 class Week {
 	constructor({ title, number }) {
 		this.title = title;
@@ -43,7 +43,8 @@ class Week {
 		const weeks = await fetchManyAndCreate({ query, Model: Week });
 		return weeks;
 	}
-	async getCampers() {
+	async getCampers(init=false) {
+		console.log({init});
 		const query =
 			"SELECT * from camper_weeks JOIN campers on camper_id = campers.id WHERE week_id = $1";
 		const values = [this.number];
@@ -52,6 +53,9 @@ class Week {
 			values,
 			Model: Camper,
 		});
+		if(init){
+			await Promise.all(campers.map(camper=>camper.init()))
+		}
 		return campers;
 	}
 	async createDays() {

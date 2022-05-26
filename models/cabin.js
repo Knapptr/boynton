@@ -1,14 +1,20 @@
 const pool = require("../db/index");
 const Camper = require("./camper");
-const { fetchOne, fetchMany } = require("../utils/pgWrapper");
+const {
+	fetchOneAndCreate,
+	fetchManyAndCreate,
+	fetchOne,
+	fetchMany,
+} = require("../utils/pgWrapper");
 
 class Cabin {
-	constructor({ name, capacity, area }) {
+	constructor({ name, capacity, area, sessions }) {
 		this.name = name;
 		this.capacity = capacity;
 		this.area = area;
+		this.sessions = sessions;
 	}
-	static _parseResponse(dbResponse) {
+	static _parseResults(dbResponse) {
 		return {
 			name: dbResponse.name,
 			capacity: dbResponse.capacity,
@@ -26,43 +32,51 @@ class Cabin {
 			"INSERT INTO cabins (name,capacity,area) VALUES ($1,$2,$3) returning *";
 		const values = [name, capacity, area];
 		const result = await pool.query(query, values);
-		return new Cabin(Cabin._parseResponse(result.rows[0]));
+		return new Cabin(Cabin._parseResults(result.rows[0]));
 	}
-	static async getAll() {
+	static async getAll(init = false) {
 		const query = "SELECT * from cabins";
-		const results = pool.query(query);
-		const cabins = results.rows.map(
-			(cabin) => new Cabin({ name: cabin.name, capacity: cabin.capacity })
-		);
+		const cabins = await fetchManyAndCreate({
+			query,
+			Model: Cabin,
+		});
+		if (init) {
+			await Promise.all(cabins.map((cabin) => cabin.init()));
+		}
 		return cabins;
 	}
 	static async getAllArea(area) {
 		const query = "SELECT * from cabins WHERE area = $1";
 		const values = [area];
-		const results = await pool.query(query, values);
-		const cabins = results.rows.map(
-			(cabin) =>
-				new Cabin({
-					name: cabin.name,
-					capacity: cabin.capacity,
-					area: cabin.area,
-				})
-		);
+		const cabins = await fetchManyAndCreate({
+			query,
+			values,
+			Model: Cabin,
+		});
 		return cabins;
 	}
 	static async getOne({ name }) {
-		try {
-			const query = "SELECT * from cabins where name = $1";
-			const values = [name];
-			const results = await pool.query(query, values);
-			if (results.rows.length === 0) {
-				return false;
-			}
-			const cabin = results.rows[0];
-			return new Cabin(Cabin._parseResponse(cabin));
-		} catch (e) {
-			throw new Error(`Error getting one cabin: ${e}`);
-		}
+		const query = "SELECT * from cabins where name = $1";
+		const values = [name];
+		const cabin = await fetchOneAndCreate({
+			query,
+			values,
+			Model: Cabin,
+		});
+		return cabin;
+	}
+	async getAllSessions() {
+		const query = "SELECT * from cabin_sessions WHERE cabin_name = $1";
+		const values = [this.name];
+		let sessions = await fetchMany(query, values);
+		sessions = sessions.map((session) => {
+			return {};
+		});
+		return sessions;
+	}
+	async init() {
+		const sessions = await this.getAllSessions();
+		this.sessions = sessions || [];
 	}
 	async createSession(weekID) {
 		const query =
@@ -76,12 +90,8 @@ class Cabin {
 		const query =
 			"SELECT id  from cabin_sessions WHERE week_id = $1 AND cabin_name= $2";
 		const values = [weekID, this.name];
-		const result = await pool.query(query, values);
-		if (result.rows.length === 0) {
-			return false;
-		}
-		const id = result.rows[0].id;
-		return id;
+		const session = await fetchOne(query, values);
+		return session.id;
 	}
 	async addCampers({ campers, weekID }) {
 		// get session ID
@@ -111,18 +121,19 @@ ON campers.id = camper_cabin_sessions.camper_id
 WHERE cabin_sessions.cabin_name = $1 AND cabin_sessions.week_id = $2`;
 
 		const values = [this.name, weekID];
-		const results = await pool.query(query, values);
-		const campers = results.rows.map((camper) => {
-			return new Camper({
-				firstName: camper.first_name,
-				age: camper.age,
-				lastName: camper.last_name,
-				id: camper.id,
-				gender: camper.gender,
-				sessions: camper.sessions,
-			});
+
+		const campers = await fetchManyAndCreate({
+			query,
+			values,
+			Model: Camper,
 		});
 		return campers;
+	}
+	async setSession(weekNumber) {
+		const query = "SELECT * from cabin_sessions WHERE week_id = $1";
+		const values = [weekNumber];
+		const session = await fetchOne(query, values);
+		this.session = session.id;
 	}
 }
 
