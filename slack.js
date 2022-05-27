@@ -7,7 +7,7 @@ const Awarder = require("./Awarder");
 const express = require("express");
 const awards = Awarder(1);
 const pool = require("./db/index");
-const receiver = require("./express/index");
+const receiver = require("./server/index");
 
 const app = new App({
 	token: process.env.BOT_TOKEN,
@@ -22,6 +22,7 @@ registerListeners(app);
 (async () => {
 	try {
 		await app.start(3000);
+		console.log("listening on port 3000");
 	} catch (e) {
 		console.log(e);
 	}
