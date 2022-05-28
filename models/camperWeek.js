@@ -8,6 +8,7 @@ const Cabin = require("./cabin");
 class CamperWeek {
 	constructor({
 		firstName,
+		gender,
 		lastName,
 		weekNumber,
 		weekTitle,
@@ -15,8 +16,11 @@ class CamperWeek {
 		id,
 		cabinSessionID,
 		cabinName,
+		age,
 	}) {
 		this.weekNumber = weekNumber;
+		this.gender = gender;
+		this.age = age;
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.weekTitle = weekTitle;
@@ -27,6 +31,8 @@ class CamperWeek {
 	}
 	static _parseResults({
 		first_name,
+		gender,
+		age,
 		last_name,
 		week_id,
 		camper_id,
@@ -36,7 +42,9 @@ class CamperWeek {
 	}) {
 		return {
 			weekNumber: week_id,
+			gender: gender,
 			firstName: first_name,
+			age: age,
 			lastName: last_name,
 			camperID: camper_id,
 			weekTitle: title,
@@ -46,7 +54,7 @@ class CamperWeek {
 	}
 	static async getAll() {
 		const query =
-			"SELECT first_name,last_name, weeks.title,camper_id,week_id,camper_weeks.id, camper_weeks.cabin_session_id FROM camper_weeks JOIN weeks ON weeks.number = camper_weeks.week_id JOIN campers ON campers.id = camper_weeks.camper_id";
+			"SELECT first_name,last_name,age,gender, weeks.title,camper_id,week_id,camper_weeks.id, camper_weeks.cabin_session_id FROM camper_weeks JOIN weeks ON weeks.number = camper_weeks.week_id JOIN campers ON campers.id = camper_weeks.camper_id";
 		const camperWeek = await fetchManyAndCreate({
 			query,
 			Model: CamperWeek,
@@ -55,7 +63,7 @@ class CamperWeek {
 	}
 	static async getOne(id) {
 		const query =
-			"SELECT first_name,last_name,weeks.title,camper_id,week_id,camper_weeks.id, camper_weeks.cabin_session_id FROM camper_weeks JOIN weeks ON weeks.number = camper_weeks.week_id JOIN campers ON campers.id = camper_weeks.camper_id WHERE id = $1";
+			"SELECT first_name,last_name,age,gender,weeks.title,camper_id,week_id,camper_weeks.id, camper_weeks.cabin_session_id FROM camper_weeks JOIN weeks ON weeks.number = camper_weeks.week_id JOIN campers ON campers.id = camper_weeks.camper_id WHERE camper_weeks.id = $1";
 		const values = [id];
 		const camperWeek = await fetchOneAndCreate({
 			query,

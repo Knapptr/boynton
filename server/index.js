@@ -23,9 +23,10 @@ receiver.router.use(
 receiver.router.get("/", (req, res) => {
 	console.log("request made");
 });
-receiver.router.get("/serveTest", (req, res, next) => {
+receiver.router.use("/api", apiRouter);
+
+receiver.router.get("*", (req, res, next) => {
 	res.sendFile(path.join(__dirname, "..", "frontend", "build", "index.html"));
 });
-receiver.router.use("/api", apiRouter);
 
 module.exports = receiver;

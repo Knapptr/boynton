@@ -41,7 +41,7 @@ module.exports = class CabinSession {
 		return cabins;
 	}
 	async getCampers() {
-		const query = `SELECT cabins.name,first_name,last_name,weeks.title,camper_id,camper_weeks.week_id,camper_weeks.id,camper_weeks.cabin_session_id 
+		const query = `SELECT age, cabins.name,first_name,last_name,weeks.title,camper_id,camper_weeks.week_id,camper_weeks.id,camper_weeks.cabin_session_id 
 		FROM  camper_weeks 
 		JOIN weeks ON weeks.number = camper_weeks.week_id 
 		JOIN campers ON campers.id = camper_weeks.camper_id 
