@@ -21,9 +21,6 @@ module.exports = {
 		const cabinSessionID = req.params.cabinSessionID;
 		const cabinSession = await CabinSession.get(cabinSessionID);
 		const campers = await cabinSession.getCampers();
-		if (campers) {
-			await Promise.all(campers.map((camper) => camper.init()));
-		}
 		res.json(campers);
 	},
 };

@@ -5,9 +5,14 @@ const Camper = require("../../models/camper");
 const error = require("../../utils/jsonError");
 
 const weekHandler = {
-	async getAllWeeks(req, res, next) {
+	async getAll(req, res, next) {
 		const weeks = await Week.getAll();
 		res.json(weeks);
+	},
+	async getOne(req, res, next) {
+		const weekID = req.params.weekNumber;
+		const week = await Week.get(weekID);
+		res.json(week);
 	},
 	async getWeekCampers(req, res, next) {
 		const weekID = req.params.number;
@@ -32,11 +37,6 @@ const weekHandler = {
 		const day = await Day.getByWeekAndName(weekID, dayName);
 		const periods = await Period.getForDay(day.id);
 		res.json(periods);
-	},
-	async getWeek(req, res, next) {
-		const weekID = req.params.number;
-		const week = await Week.get(weekID);
-		res.json(week);
 	},
 	async getPeriodActivities(req, res, next) {
 		const periodID = req.params.periodID;

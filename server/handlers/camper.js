@@ -7,7 +7,7 @@ const areaToGender = {
 };
 const handler = {
 	async getAllCampers(req, res, next) {
-		let campers = await Camper.getAll(true);
+		let campers = await Camper.getAll();
 		if (req.query.area) {
 			const area = req.query.area.toUpperCase();
 			campers = campers.filter(

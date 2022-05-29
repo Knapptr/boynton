@@ -4,7 +4,6 @@ module.exports = {
 	async getAll(req, res, next) {
 		const { cabin, camperID, week, area } = req.query;
 		let camperWeeks = await CamperWeek.getAll();
-		await Promise.all(camperWeeks.map((camperWeek) => camperWeek.init()));
 		if (camperID) {
 			camperWeeks = camperWeeks.filter(
 				(camper) => camper.camperID === Number.parseInt(camperID)
