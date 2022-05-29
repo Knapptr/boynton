@@ -19,7 +19,7 @@ const CabinAssignmentRoutes = () => {
 			routes.push(
 				<Route
 					key={`cabinRoute-${area}${week}]`}
-					path={`/cabin-assignment/${area}/${week}`}
+					path={`assignment/${area}/${week}`}
 					element={<CabinAssignment area={area} weekNumber={week} />}
 				/>
 			);
@@ -61,9 +61,9 @@ const CabinAssignment = ({ area, weekNumber }) => {
 			];
 			updatedCabinList[cabin.cabinName] = [];
 		}
-		for (let camper of newlyUnassignedCampers) {
-			await assignCabin(camper, false);
-		}
+		await Promise.all(
+			newlyUnassignedCampers.map((c) => assignCabin(c, false))
+		);
 		campers = [...campers, ...newlyUnassignedCampers];
 		setCampers(campers);
 		setCabinList(updatedCabinList);

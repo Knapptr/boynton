@@ -1,44 +1,94 @@
-const pool = require("../db/index");
+const mapManyToOne = require("../utils/remap");
 const {
-	fetchManyAndCreate,
 	fetchOneAndCreate,
 	fetchOne,
+	fetchMany,
 } = require("../utils/pgWrapper");
 const Camper = require("./camper");
 
 class Activity {
-	constructor({ name, description, id, periodID }) {
+	constructor({ name, description, campers, id, periodID }) {
 		this.name = name;
 		this.id = id;
 		this.description = description || "none";
 		this.periodID = periodID;
+		this.campers = campers;
 	}
-	static _parseResults(dbResponse) {
+	static _parseResults(dbr) {
 		return {
-			name: dbResponse.name,
-			id: dbResponse.id,
-			periodID: dbResponse.period_id,
-			description: dbResponse.description,
+			sessionID: dbr.camper_session_id,
+			camperID: dbr.camper_id,
+			firstName: dbr.first_name,
+			lastName: dbr.last_name,
+			name: dbr.name,
+			id: dbr.id,
+			periodID: dbr.period_id,
+			description: dbr.description,
 		};
 	}
-	static async getAllForPeriod(periodID) {
-		const query = "SELECT * from activities WHERE period_id = $1";
-		const values = [periodID];
-		const activities = await fetchManyAndCreate({
-			query,
-			values,
-			Model: Activity,
+	static async getAll() {
+		const query = `
+SELECT
+act.name AS name,
+act.id,
+act.period_id,
+act.description,
+cw.id AS camper_session_id,
+cw.camper_id AS camper_id,
+c.first_name,
+c.last_name
+FROM activities act
+LEFT JOIN camper_activities ca ON ca.activity_id = act.id
+LEFT JOIN camper_weeks cw ON cw.id = ca.camper_week_id
+LEFT JOIN campers c ON cw.camper_id = c.id
+
+		`;
+		const results = await fetchMany(query);
+		const parsedResults = results.map((result) =>
+			Activity._parseResults(result)
+		);
+		const mappedResults = mapManyToOne({
+			array: parsedResults,
+			identifier: "id",
+			newField: "campers",
+			fieldsToMap: ["sessionID", "camperID", "firstName", "lastName"],
+			fieldsToRemain: ["name", "id", "periodID", "description"],
 		});
+		const activities = mappedResults.map((act) => new Activity(act));
+
+		return activities;
 	}
 	static async get(id) {
-		const query = "SELECT * from activities WHERE id = $1";
+		const query = `
+SELECT
+act.name AS name,
+act.id,
+act.period_id,
+act.description,
+cw.id AS camper_session_id,
+cw.camper_id AS camper_id,
+c.first_name,
+c.last_name
+FROM activities act
+LEFT JOIN camper_activities ca ON ca.activity_id = act.id
+LEFT JOIN camper_weeks cw ON cw.id = ca.camper_week_id
+LEFT JOIN campers c ON cw.camper_id = c.id
+WHERE act.id = $1 `;
 		const values = [id];
-		const activity = await fetchOneAndCreate({
-			query,
-			values,
-			Model: Activity,
+		const results = await fetchMany(query, values);
+		const parsedResults = results.map((result) =>
+			Activity._parseResults(result)
+		);
+		const mappedResults = mapManyToOne({
+			array: parsedResults,
+			identifier: "id",
+			newField: "campers",
+			fieldsToMap: ["sessionID", "camperID", "firstName", "lastName"],
+			fieldsToRemain: ["name", "id", "periodID", "description"],
 		});
-		return activity;
+		const activities = mappedResults.map((act) => new Activity(act));
+
+		return activities[0];
 	}
 	static async create({ name, description, periodID }) {
 		const query =
@@ -58,33 +108,6 @@ class Activity {
 		const result = await fetchOne(query, values);
 		const camperActivityID = result.id;
 		return camperActivityID;
-	}
-
-	async removeCamper(camperID) {
-		const query =
-			"DELETE from camper_activities WHERE activity_id = $1 AND camper_id = $2 RETURNING *";
-		const values = [this.id, camperID];
-		const deletedCamperActivity = await fetchOne(query, values);
-		const deletedCamperID = deletedCamperActivity.camper_id;
-		const camperQuery = "SELECT * from campers WHERE id = $1";
-		const camperValues = [deletedCamperID];
-		const deletedCamper = await fetchOneAndCreate({
-			query: camperQuery,
-			values: camperValues,
-			Model: Camper,
-		});
-		return deletedCamper;
-	}
-	async getCampers() {
-		const query =
-			"SELECT * FROM camper_activities JOIN camper_weeks ON camper_weeks.id = camper_activities.camper_week_id JOIN campers ON campers.id = camper_weeks.camper_id WHERE activity_id = $1";
-		const values = [this.id];
-		const campers = await fetchManyAndCreate({
-			query,
-			values,
-			Model: Camper,
-		});
-		return campers;
 	}
 }
 

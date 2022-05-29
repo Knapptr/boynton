@@ -2,21 +2,25 @@ const pool = require("../db");
 const {
 	fetchOneAndCreate,
 	fetchManyAndCreate,
+	fetchMany,
 	fetchOne,
 } = require("../utils/pgWrapper");
 const Cabin = require("./cabin");
+const mapManyToOne = require("../utils/remap");
+
 class CamperWeek {
 	constructor({
+		id,
 		firstName,
-		gender,
 		lastName,
+		age,
+		gender,
 		weekNumber,
 		weekTitle,
 		camperID,
-		id,
 		cabinSessionID,
 		cabinName,
-		age,
+		activities,
 	}) {
 		this.weekNumber = weekNumber;
 		this.gender = gender;
@@ -28,75 +32,144 @@ class CamperWeek {
 		this.id = id;
 		this.cabinSessionID = cabinSessionID;
 		this.cabinName = cabinName || "unassigned";
+		this.activities = activities;
 	}
 	static _parseResults({
-		first_name,
-		gender,
-		age,
-		last_name,
-		week_id,
-		camper_id,
 		id,
-		title,
+		camper_id,
+		first_name,
+		last_name,
+		age,
+		gender,
+		week_number,
+		week_title,
 		cabin_session_id,
+		cabin_name,
+		camper_activity_id,
+		activity_id,
+		period_id,
+		activity_name,
+		activity_description,
 	}) {
 		return {
-			weekNumber: week_id,
-			gender: gender,
-			firstName: first_name,
-			age: age,
-			lastName: last_name,
+			id: id,
 			camperID: camper_id,
-			weekTitle: title,
+			firstName: first_name,
+			lastName: last_name,
+			age: age,
+			gender: gender,
+			weekNumber: week_number,
+			weekTitle: week_title,
 			cabinSessionID: cabin_session_id,
-			id,
+			cabinName: cabin_name,
+			camperActivityID: camper_activity_id,
+			activityID: activity_id,
+			periodID: period_id,
+			activityName: activity_name,
+			activityDescription: activity_description,
 		};
 	}
 	static async getAll() {
-		const query =
-			"SELECT first_name,last_name,age,gender, weeks.title,camper_id,week_id,camper_weeks.id, camper_weeks.cabin_session_id FROM camper_weeks JOIN weeks ON weeks.number = camper_weeks.week_id JOIN campers ON campers.id = camper_weeks.camper_id";
-		const camperWeek = await fetchManyAndCreate({
-			query,
-			Model: CamperWeek,
+		const query = `
+			SELECT 
+			cw.id,
+			cw.camper_id,c.first_name,c.last_name,c.age,c.gender,
+			w.number as week_number,w.title as week_title,
+			cw.cabin_session_id,cab.name as cabin_name,
+			ca.id as camper_activity_id,ca.activity_id as activity_id,ca.period_id,
+			a.name as activity_name, a.description as activity_description
+
+			FROM camper_weeks cw
+			JOIN weeks w ON w.number = cw.week_id
+			LEFT JOIN cabin_sessions cs ON cs.id = cw.cabin_session_id
+			LEFT JOIN cabins cab ON cab.name = cs.cabin_name
+			JOIN campers c ON c.id = cw.camper_id
+			LEFT JOIN camper_activities ca ON ca.camper_week_id = cw.id
+			LEFT JOIN activities a ON a.id = ca.activity_id
+
+		`;
+		const dbResult = await fetchMany(query);
+		const parsedResult = dbResult.map((oneResult) =>
+			CamperWeek._parseResults(oneResult)
+		);
+		const remappedCamperWeeks = mapManyToOne({
+			array: parsedResult,
+			identifier: "id",
+			newField: "activities",
+			fieldsToMap: [
+				"camperActivityID",
+				"activityID",
+				"periodID",
+				"activityName",
+				"activityDescription",
+			],
+			fieldsToRemain: [
+				"id",
+				"camperID",
+				"firstName",
+				"lastName",
+				"age",
+				"gender",
+				"weekNumber",
+				"weekTitle",
+				"cabinSessionID",
+				"cabinName",
+			],
 		});
-		return camperWeek;
+		const camperWeeks = remappedCamperWeeks.map((cw) => new CamperWeek(cw));
+		return camperWeeks;
 	}
 	static async getOne(id) {
-		const query =
-			"SELECT first_name,last_name,age,gender,weeks.title,camper_id,week_id,camper_weeks.id, camper_weeks.cabin_session_id FROM camper_weeks JOIN weeks ON weeks.number = camper_weeks.week_id JOIN campers ON campers.id = camper_weeks.camper_id WHERE camper_weeks.id = $1";
+		const query = `
+			SELECT 
+			cw.id,
+			cw.camper_id,c.first_name,c.last_name,c.age,c.gender,
+			w.number as week_number,w.title as week_title,
+			cw.cabin_session_id,cab.name as cabin_name,
+			ca.id as activity_id,ca.period_id,
+			a.name as activity_name, a.description as activity_description
+
+			FROM camper_weeks cw
+			JOIN weeks w ON w.number = cw.week_id
+			LEFT JOIN cabin_sessions cs ON cs.id = cw.cabin_session_id
+			LEFT JOIN cabins cab ON cab.name = cs.cabin_name
+			JOIN campers c ON c.id = cw.camper_id
+			LEFT JOIN camper_activities ca ON ca.camper_week_id = cw.id
+			LEFT JOIN activities a ON a.id = ca.activity_id
+			WHERE cw.id = $1
+
+		`;
 		const values = [id];
-		const camperWeek = await fetchOneAndCreate({
-			query,
-			values,
-			Model: CamperWeek,
+		const dbResult = await fetchMany(query, values);
+		const parsedResult = dbResult.map((oneResult) =>
+			CamperWeek._parseResults(oneResult)
+		);
+		const remappedCamperWeeks = mapManyToOne({
+			array: parsedResult,
+			identifier: "id",
+			newField: "activities",
+			fieldsToMap: [
+				"camperActivityID",
+				"activityID",
+				"periodID",
+				"activityName",
+				"activityDescription",
+			],
+			fieldsToRemain: [
+				"id",
+				"camperID",
+				"firstName",
+				"lastName",
+				"age",
+				"gender",
+				"weekNumber",
+				"weekTitle",
+				"cabinSessionID",
+				"cabinName",
+			],
 		});
-		return camperWeek;
-	}
-	static async getAllCamper(camperID, init = false) {
-		const query =
-			"SELECT weeks.title,camper_id,week_id,camper_weeks.id, cabin_session_id FROM camper_weeks JOIN weeks ON weeks.number=camper_weeks.week_id WHERE camper_id = $1";
-		const values = [camperID];
-		const camperWeeks = await fetchManyAndCreate({
-			query,
-			values,
-			Model: CamperWeek,
-		});
-		if (init) {
-			await Promise.all(
-				camperWeeks.map((camperWeek) => camperWeek.init())
-			);
-		}
-		return camperWeeks || [];
-	}
-	async init() {
-		const cabinSessionID = this.cabinSessionID;
-		if (cabinSessionID) {
-			const cabinQuery =
-				"SELECT cabins.name,cabins.capacity from cabin_sessions JOIN cabins ON cabins.name = cabin_sessions.cabin_name WHERE cabin_sessions.id = $1";
-			const cabinValues = [cabinSessionID];
-			const cabin = await fetchOne(cabinQuery, cabinValues);
-			this.cabinName = cabin.name;
-		}
+		const camperWeeks = remappedCamperWeeks.map((cw) => new CamperWeek(cw));
+		return camperWeeks[0];
 	}
 	async assignCabin(cabinSessionID) {
 		const query =

@@ -1,13 +1,19 @@
 const pool = require("../db/index");
+const mapManyToOne = require("../utils/remap");
 const error = require("../utils/jsonError");
 const Camper = require("./camper");
 const Activity = require("./activity");
-const { fetchOneAndCreate, fetchManyAndCreate } = require("../utils/pgWrapper");
+const {
+	fetchOneAndCreate,
+	fetchManyAndCreate,
+	fetchMany,
+} = require("../utils/pgWrapper");
 
 class Period {
-	constructor({ periodNumber, dayID, id }) {
+	constructor({ periodNumber, dayID, id, activities }) {
 		this.periodNumber = periodNumber;
 		this.dayID = dayID;
+		this.activities = activities || [];
 		this.id = id;
 	}
 	static _parseResults(dbResponse) {
@@ -15,6 +21,9 @@ class Period {
 			periodNumber: dbResponse.period_number,
 			dayID: dbResponse.day_id,
 			id: dbResponse.id,
+			activityName: dbResponse.name,
+			activityDescription: dbResponse.description,
+			activityID: dbResponse.activity_id,
 		};
 		return period;
 	}
@@ -30,11 +39,25 @@ class Period {
 		return period;
 	}
 	static async getAll() {
-		const query = "SELECT * from periods";
-		const periods = await fetchManyAndCreate({
-			query,
-			Model: Period,
+		const query = `
+SELECT 
+day_id,period_number,p.id, 
+a.name,a.description,a.id as activity_id
+FROM periods p 
+LEFT JOIN activities a ON a.period_id = p.id
+		`;
+		const results = await fetchMany(query);
+		const parsedResults = results.map((result) =>
+			Period._parseResults(result)
+		);
+		const periods = mapManyToOne({
+			array: parsedResults,
+			identifier: "id",
+			newField: "activities",
+			fieldsToRemain: ["dayID", "number", "id"],
+			fieldsToMap: ["activityName", "activityDescription", "activityID"],
 		});
+
 		return periods;
 	}
 	static async get(id) {

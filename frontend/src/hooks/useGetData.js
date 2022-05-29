@@ -26,11 +26,13 @@ const useGetDataOnMount = ({
 	beforeSet,
 	afterSet,
 	optionalSortFunction,
+	runOn = [],
 }) => {
 	const [data, setData] = useState(initialState);
 	useEffect(() => {
 		fetchAndSet(url, beforeSet, setData, afterSet, optionalSortFunction);
-	}, []);
+	}, [...runOn]);
+
 	return [data, setData];
 };
 

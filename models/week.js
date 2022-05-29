@@ -1,17 +1,106 @@
 const pool = require("../db/index");
+const mapManyToOne = require("../utils/remap");
 const { scheduleDays, weeks } = require("../config.json");
-const { fetchOneAndCreate, fetchManyAndCreate } = require("../utils/pgWrapper");
+const {
+	fetchOneAndCreate,
+	fetchManyAndCreate,
+	fetchMany,
+} = require("../utils/pgWrapper");
 const Camper = require("./camper");
 
 class Week {
-	constructor({ title, number }) {
+	constructor({ title, days, number }) {
 		this.title = title;
+		this.days = days;
 		this.number = number;
 	}
-	static _parseResults(dbResponse) {
+	static async get(id) {
+		const weeksQuery = `
+		SELECT title,number,d.name as day_name,d.id as day_id FROM weeks w JOIN days d ON d.week_id = w.number WHERE w.number = $1
+		`;
+		const values = [id];
+		const weeksResponse = await fetchMany(weeksQuery, values);
+		const parsedWeeks = weeksResponse.map((r) => Week._parseResults(r));
+		const mappedWeeks = mapManyToOne({
+			array: parsedWeeks,
+			newField: "days",
+			identifier: "number",
+			fieldsToMap: ["dayName", "dayID"],
+			fieldsToRemain: ["title", "number"],
+		});
+
+		const periodsQuery = "SELECT day_id,period_number,id FROM periods  ";
+		const periodsResponse = await fetchMany(periodsQuery);
+		const parsedPeriods = periodsResponse.map((dbr) => {
+			return {
+				periodNumber: dbr.period_number,
+				id: dbr.id,
+				dayID: dbr.day_id,
+			};
+		});
+
+		const periodsByDay = parsedPeriods.reduce((acc, cv) => {
+			acc[cv.dayID] = acc[cv.dayID] || [];
+			const { dayID, ...periodData } = cv;
+			acc[cv.dayID].push(periodData);
+			return acc;
+		}, {});
+
+		const weeks = mappedWeeks.map((week) => {
+			week.days.forEach((day) => {
+				day.periods = periodsByDay[day.dayID];
+			});
+			return new Week(week);
+		});
+
+		return weeks[0];
+	}
+	static async getAll() {
+		const weeksQuery = `
+		SELECT title,number,d.name as day_name,d.id as day_id FROM weeks w JOIN days d ON d.week_id = w.number 
+		`;
+		const weeksResponse = await fetchMany(weeksQuery);
+		const parsedWeeks = weeksResponse.map((r) => Week._parseResults(r));
+		const mappedWeeks = mapManyToOne({
+			array: parsedWeeks,
+			newField: "days",
+			identifier: "number",
+			fieldsToMap: ["dayName", "dayID"],
+			fieldsToRemain: ["title", "number"],
+		});
+
+		const periodsQuery = "SELECT day_id,period_number,id FROM periods ";
+		const periodsResponse = await fetchMany(periodsQuery);
+		const parsedPeriods = periodsResponse.map((dbr) => {
+			return {
+				periodNumber: dbr.period_number,
+				id: dbr.id,
+				dayID: dbr.day_id,
+			};
+		});
+
+		const periodsByDay = parsedPeriods.reduce((acc, cv) => {
+			acc[cv.dayID] = acc[cv.dayID] || [];
+			const { dayID, ...periodData } = cv;
+			acc[cv.dayID].push(periodData);
+			return acc;
+		}, {});
+
+		const weeks = mappedWeeks.map((week) => {
+			week.days.forEach((day) => {
+				day.periods = periodsByDay[day.dayID];
+			});
+			return new Week(week);
+		});
+
+		return weeks;
+	}
+	static _parseResults(dbr) {
 		return {
-			title: dbResponse.title,
-			number: dbResponse.number,
+			title: dbr.title,
+			number: dbr.number,
+			dayName: dbr.day_name,
+			dayID: dbr.day_id,
 		};
 	}
 	static async DestructivelyInitFromConfig() {
@@ -32,19 +121,8 @@ class Week {
 			await week.createDays();
 		}
 	}
-	static async get(id) {
-		const query = "SELECT * from weeks WHERE number = $1";
-		const values = [id];
-		const week = await fetchOneAndCreate({ query, values, Model: Week });
-		return week;
-	}
-	static async getAll() {
-		const query = "SELECT * from weeks";
-		const weeks = await fetchManyAndCreate({ query, Model: Week });
-		return weeks;
-	}
-	async getCampers(init=false) {
-		console.log({init});
+	async getCampers(init = false) {
+		console.log({ init });
 		const query =
 			"SELECT * from camper_weeks JOIN campers on camper_id = campers.id WHERE week_id = $1";
 		const values = [this.number];
@@ -53,8 +131,8 @@ class Week {
 			values,
 			Model: Camper,
 		});
-		if(init){
-			await Promise.all(campers.map(camper=>camper.init()))
+		if (init) {
+			await Promise.all(campers.map((camper) => camper.init()));
 		}
 		return campers;
 	}

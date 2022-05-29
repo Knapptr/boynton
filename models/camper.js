@@ -1,10 +1,5 @@
-const CamperWeek = require("./camperWeek");
-
-const {
-	fetchOne,
-	fetchOneAndCreate,
-	fetchManyAndCreate,
-} = require("../utils/pgWrapper");
+const mapManyToOne = require("../utils/remap");
+const { fetchMany } = require("../utils/pgWrapper");
 
 class Camper {
 	constructor({ firstName, lastName, gender, id, age, weeks = undefined }) {
@@ -15,85 +10,112 @@ class Camper {
 		this.id = id;
 		this.age = age;
 	}
-	static _parseResults({ first_name, last_name, gender, id, age }) {
+	static _parseResults({
+		first_name,
+		last_name,
+		gender,
+		id,
+		age,
+		week_number,
+		week_title,
+		camper_week_id,
+		cabin_session_id,
+		cabin_name,
+	}) {
 		return {
-			firstName: first_name,
-			lastName: last_name,
 			gender,
 			id,
 			age,
+			firstName: first_name,
+			lastName: last_name,
+			weekNumber: week_number,
+			weekTitle: week_title,
+			camperWeekID: camper_week_id,
+			cabinSessionID: cabin_session_id,
+			cabinName: cabin_name,
 		};
 	}
-	static async getAll(init = false) {
-		const query = "SELECT * FROM campers";
-		const campers = await fetchManyAndCreate({ query, Model: Camper });
-		if (init) {
-			await Promise.all(campers.map((camper) => camper.init()));
-		}
+	static async getAll() {
+		const query = `
+SELECT 
+
+c.first_name,
+c.last_name ,
+c.gender,c.id,c.age,
+w.number AS week_number, w.title AS week_title,
+cw.id AS camper_week_id,
+cw.cabin_session_id AS cabin_session_id,
+cab.name AS cabin_name
+
+
+FROM campers c
+JOIN camper_weeks cw ON cw.camper_id = c.id
+JOIN weeks w ON cw.week_id = w.number
+LEFT JOIN cabin_sessions cs ON cs.id = cw.cabin_session_id 
+LEFT JOIN cabins cab ON cs.cabin_name = cab.name `;
+		const dbResponse = await fetchMany(query);
+		const parsedResponse = dbResponse.map((response) =>
+			Camper._parseResults(response)
+		);
+		const mappedResponse = mapManyToOne({
+			array: parsedResponse,
+			identifier: "id",
+			newField: "weeks",
+			fieldsToMap: [
+				"cabinName",
+				"cabinSessionID",
+				"camperWeekID",
+				"weekTitle",
+				"weekNumber",
+			],
+			fieldsToRemain: ["firstName", "lastName", "gender", "age", "id"],
+		});
+		const campers = mappedResponse.map((c) => new Camper(c));
 		return campers;
 	}
-	static async getById(id, init = false) {
-		const query = "SELECT * FROM campers WHERE id = $1";
+	static async getById(id) {
+		const query = `
+SELECT 
+
+c.first_name,
+c.last_name ,
+c.gender,c.id,c.age,
+w.number AS week_number, w.title AS week_title,
+cw.id AS camper_week_id,
+cw.cabin_session_id AS cabin_session_id,
+cab.name AS cabin_name
+
+
+FROM campers c
+JOIN camper_weeks cw ON cw.camper_id = c.id
+JOIN weeks w ON cw.week_id = w.number
+LEFT JOIN cabin_sessions cs ON cs.id = cw.cabin_session_id 
+LEFT JOIN cabins cab ON cs.cabin_name = cab.name 
+WHERE c.id = $1
+`;
 		const values = [id];
-		const camper = await fetchOneAndCreate({
-			query,
-			values,
-			Model: Camper,
+		const dbResponse = await fetchMany(query, values);
+		//fetchMany is used here because of how the mapping works with mapManyToOne
+		const parsedResponse = dbResponse.map((response) =>
+			Camper._parseResults(response)
+		);
+		const mappedResponse = mapManyToOne({
+			array: parsedResponse,
+			identifier: "id",
+			newField: "weeks",
+			fieldsToMap: [
+				"cabinName",
+				"cabinSessionID",
+				"camperWeekID",
+				"weekTitle",
+				"weekNumber",
+			],
+			fieldsToRemain: ["firstName", "lastName", "gender", "age", "id"],
 		});
-		if (init) {
-			await camper.init();
-		}
-		return camper;
-	}
-	static async getByArea(area, init) {
-		area = area.toUpperCase();
-		if (area !== "GA" && area !== "BA") {
-			console.log("Non BA or GA ara requested");
-			return false;
-		}
-		const gender = { BA: "Male", GA: "Female" }[area];
-		const query = "SELECT * from campers WHERE gender = $1";
-		const values = [gender];
-		const campers = await fetchManyAndCreate({
-			query,
-			values,
-			Model: Camper,
-		});
-		if (init) {
-			await Promise.all(campers.map((camper) => camper.init()));
-		}
-		return campers;
-	}
-	static async getByWeek(weekNumber, area = "none") {
-		const query =
-			"SELECT * FROM camper_weeks JOIN campers ON campers.id = camper_id WHERE week_id = $1 AND gender = $2";
-		const areas = {
-			BA: "Male",
-			GA: "Female",
-			none: "gender",
-		};
-		const values = [weekNumber, areas[area]];
-		const campers = await fetchManyAndCreate({
-			query,
-			values,
-			Model: Camper,
-		});
-		return campers;
-	}
-	async init() {
-		const weeks = await CamperWeek.getAllCamper(this.id, true);
-		this.weeks = weeks;
+		const campers = mappedResponse.map((c) => new Camper(c));
+
+		return campers[0];
 	}
 }
-
-//tests
-// (async () => {
-// 	// const campers = await Camper.getAll();
-// 	const campers = await Camper.getByFullName({
-// 		firstName: "Solomon",
-// 		lastName: "Blorn",
-// 	});
-// 	console.log(campers.fullName);
-// })();
 
 module.exports = Camper;

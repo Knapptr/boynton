@@ -41,23 +41,7 @@ const Cabin = ({ session, list, allOpenState, unassignCamper }) => {
 				>
 					<header tw="flex justify-between">
 						<h4 tw="font-bold text-xl">{session.cabinName}</h4>
-						<div tw="flex content-center flex-wrap">
-							{list.map((camper) => (
-								<icon
-									key={`${camper.firstName}-${camper.lastName}-icon`}
-								>
-									{
-										camperIcons[
-											Math.floor(
-												Math.random() *
-													camperIcons.length
-											)
-										]
-									}
-								</icon>
-							))}
-						</div>
-						<h4 tw="font-bold text-xl">
+						<h4 tw="font-bold text-2xl">
 							{list.length}/{session.capacity}
 						</h4>
 					</header>
