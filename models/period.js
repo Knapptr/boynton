@@ -106,7 +106,7 @@ WHERE p.id = $1
 	}
 	async getCampers() {
 		const query = `
-			SELECT 
+			SELECT DISTINCT
 			c.first_name,c.last_name,c.age,
 			cw.id,
 			cab.name,
@@ -115,7 +115,7 @@ WHERE p.id = $1
 			JOIN camper_weeks cw ON cw.camper_id = c.id
 			JOIN days d ON d.week_id = cw.week_id
 			JOIN periods p ON p.day_id = d.id
-			JOIN activities a ON a.period_id = p.id
+			LEFT JOIN activities a ON a.period_id = p.id
 			JOIN cabin_sessions cs ON cs.id = cw.cabin_session_id
 			JOIN cabins cab ON cs.cabin_name = cab.name
 			LEFT JOIN camper_activities ca ON ca.activity_id = a.id AND ca.camper_week_id = cw.id

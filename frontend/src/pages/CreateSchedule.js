@@ -2,6 +2,7 @@ import { Link, Outlet, useParams } from "react-router-dom";
 import useGetDataOnMount from "../hooks/useGetData";
 import tw, { styled } from "twin.macro";
 import { useState } from "react";
+import SelectActivities from "../components/SelectActivities";
 
 const Days = tw.ul` flex`;
 const Day = styled.li(({ isSelected }) => [
@@ -42,7 +43,7 @@ const CreateSchedulePage = () => {
 							isSelected={selectedDay === day.dayID}
 							onClick={() => {
 								setSelectedDay(day.dayID);
-								setSelectedPeriod(undefined);
+								setSelectedPeriod(day.periods[0].id);
 							}}
 						>
 							{day.dayName}
@@ -67,12 +68,8 @@ const CreateSchedulePage = () => {
 						))}
 				</Periods>
 			)}
-			{activities.length > 0 && (
-				<Activities>
-					{activities.map((a) => (
-						<Activity>{a.name}</Activity>
-					))}
-				</Activities>
+			{selectedPeriod && (
+				<SelectActivities cabinName={cabin} periodID={selectedPeriod} />
 			)}
 		</>
 	);
