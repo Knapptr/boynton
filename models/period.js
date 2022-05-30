@@ -50,24 +50,40 @@ LEFT JOIN activities a ON a.period_id = p.id
 		const parsedResults = results.map((result) =>
 			Period._parseResults(result)
 		);
-		const periods = mapManyToOne({
+		const mappedPeriods = mapManyToOne({
 			array: parsedResults,
 			identifier: "id",
 			newField: "activities",
 			fieldsToRemain: ["dayID", "number", "id"],
 			fieldsToMap: ["activityName", "activityDescription", "activityID"],
 		});
+		const periods = mappedPeriods.map((p) => new Period(p));
 
 		return periods;
 	}
 	static async get(id) {
-		const query = "SELECT * from periods WHERE id = $1";
+		const query = `
+SELECT 
+day_id,period_number,p.id, 
+a.name,a.description,a.id as activity_id
+FROM periods p 
+LEFT JOIN activities a ON a.period_id = p.id
+WHERE p.id = $1
+		`;
 		const values = [id];
-		const period = await fetchOneAndCreate({
-			query,
-			values,
-			Model: Period,
+		const results = await fetchMany(query, values);
+		const parsedResults = results.map((result) =>
+			Period._parseResults(result)
+		);
+		const mappedPeriods = mapManyToOne({
+			array: parsedResults,
+			identifier: "id",
+			newField: "activities",
+			fieldsToRemain: ["dayID", "number", "id"],
+			fieldsToMap: ["activityName", "activityDescription", "activityID"],
 		});
+		const period = new Period(mappedPeriods[0]);
+
 		return period;
 	}
 	async getActivities() {
@@ -87,6 +103,35 @@ LEFT JOIN activities a ON a.period_id = p.id
 			periodID: this.id,
 		});
 		return activity;
+	}
+	async getCampers() {
+		const query = `
+			SELECT 
+			c.first_name,c.last_name,c.age,
+			cw.id,
+			cab.name,
+			ca.activity_id
+			from campers c
+			JOIN camper_weeks cw ON cw.camper_id = c.id
+			JOIN days d ON d.week_id = cw.week_id
+			JOIN periods p ON p.day_id = d.id
+			JOIN activities a ON a.period_id = p.id
+			JOIN cabin_sessions cs ON cs.id = cw.cabin_session_id
+			JOIN cabins cab ON cs.cabin_name = cab.name
+			LEFT JOIN camper_activities ca ON ca.activity_id = a.id AND ca.camper_week_id = cw.id
+			WHERE p.id = $1 `;
+		const values = [this.id];
+		const queryResult = (await fetchMany(query, values)) || [];
+		const parsedQuery = queryResult.map((res) => {
+			return {
+				firstName: res.first_name,
+				lastName: res.last_name,
+				activityID: res.activityID || null,
+				id: res.id,
+				cabinName: res.name,
+			};
+		});
+		return parsedQuery;
 	}
 }
 module.exports = Period;
