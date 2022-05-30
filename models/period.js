@@ -106,27 +106,24 @@ WHERE p.id = $1
 	}
 	async getCampers() {
 		const query = `
-			SELECT DISTINCT
-			c.first_name,c.last_name,c.age,
-			cw.id,
-			cab.name,
-			ca.activity_id
-			from campers c
-			JOIN camper_weeks cw ON cw.camper_id = c.id
+			SELECT  c.first_name,c.last_name,ca.activity_id,cw.id,cab.name from camper_weeks cw
 			JOIN days d ON d.week_id = cw.week_id
 			JOIN periods p ON p.day_id = d.id
-			LEFT JOIN activities a ON a.period_id = p.id
-			JOIN cabin_sessions cs ON cs.id = cw.cabin_session_id
-			JOIN cabins cab ON cs.cabin_name = cab.name
-			LEFT JOIN camper_activities ca ON ca.activity_id = a.id AND ca.camper_week_id = cw.id
-			WHERE p.id = $1 `;
+			JOIN campers c ON cw.camper_id = c.id
+			LEFT JOIN camper_activities ca ON ca.period_id = p.id AND ca.camper_week_id = cw.id
+			JOIN cabin_sessions cs ON cw.cabin_session_id = cs.id
+			JOIN cabins cab ON cab.name = cs.cabin_name
+
+			WHERE p.id = $1
+
+		`;
 		const values = [this.id];
 		const queryResult = (await fetchMany(query, values)) || [];
 		const parsedQuery = queryResult.map((res) => {
 			return {
 				firstName: res.first_name,
 				lastName: res.last_name,
-				activityID: res.activityID || null,
+				activityID: res.activity_id || null,
 				id: res.id,
 				cabinName: res.name,
 			};
