@@ -1,9 +1,14 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-
+import tw from "twin.macro";
+import "styled-components/macro";
+import logo from "../cl.png";
 const storeToken = (token) => {
 	localStorage.setItem("bearerToken", token);
 };
+
+const LoginField = tw.input`rounded my-4 border-gray-200 border-2 p-4`;
+const SubmitButton = tw.button`bg-green-400 p-4 rounded-lg`;
 
 const Login = () => {
 	const [formInputs, setFormInputs] = useState({
@@ -11,7 +16,7 @@ const Login = () => {
 		password: "",
 	});
 	const location = useLocation();
-	const { cameFrom } = location.state;
+	const { cameFrom } = location.state || { cameFrom: null };
 	const navigate = useNavigate();
 	const handleUpdate = (e) => {
 		const field = e.target.name;
@@ -46,29 +51,30 @@ const Login = () => {
 		}
 		if (response.status === 200) {
 			storeToken(data.token);
-			navigate(cameFrom || "/login");
+			navigate(cameFrom || "/");
 		}
 	};
 	return (
-		<>
-			<form onSubmit={handleSubmit}>
-				<input
+		<form onSubmit={handleSubmit} tw="w-4/5 sm:w-1/2 md:w-2/5 max-w-sm">
+			<div tw="flex flex-col">
+				<img src={logo} />
+				<LoginField
 					type="text"
 					name="username"
 					id="usernameInput"
 					placeholder="username"
 					onChange={handleUpdate}
 				/>
-				<input
+				<LoginField
 					type="password"
 					onChange={handleUpdate}
 					name="password"
 					id="passwordInput"
 					placeholder="password"
 				/>
-				<button type="submit">Login</button>
-			</form>
-		</>
+				<SubmitButton type="submit">Login</SubmitButton>
+			</div>
+		</form>
 	);
 };
 
