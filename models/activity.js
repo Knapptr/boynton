@@ -101,10 +101,10 @@ WHERE act.id = $1 `;
 		});
 		return activity;
 	}
-	async addCamper(camperID) {
+	async addCamper(camperID, periodID) {
 		const query =
-			"INSERT INTO camper_activities (camper_id,activity_id) VALUES ($1,$2) RETURNING id";
-		const values = [camperID, this.id];
+			"INSERT INTO camper_activities (camper_week_id,activity_id,period_id) VALUES ($1,$2,$3) ON CONFLICT ON CONSTRAINT one_activity_per_camper DO UPDATE set activity_id = $2,period_id = $3 RETURNING id, period_id,activity_id";
+		const values = [camperID, this.id, periodID];
 		const result = await fetchOne(query, values);
 		const camperActivityID = result.id;
 		return camperActivityID;

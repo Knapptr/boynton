@@ -17,10 +17,13 @@ module.exports = {
 		res.json(activities);
 	},
 	async addCamper(req, res, next) {
-		const { camperSessionID } = req.body;
-		const activityID = req.params.activityID;
-		const activity = await Activity.get(activityID);
-		const camperActivityID = await activity.addCamper(camperSessionID);
+		const { camperWeekId, periodId } = req.body;
+		const activityId = req.params.activityID;
+		const activity = await Activity.get(activityId);
+		const camperActivityID = await activity.addCamper(
+			camperWeekId,
+			periodId
+		);
 		res.json({ camperActivityID });
 	},
 };
