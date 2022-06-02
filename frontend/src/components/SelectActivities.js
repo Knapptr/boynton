@@ -76,7 +76,7 @@ const SelectActivities = ({ periodID, cabinName }) => {
 				);
 			}}
 		>
-			<h1>Cabin: {`${cabinName.toUpperCase()}`}</h1>
+			<h1 tw="font-bold">Cabin {`${cabinName.toUpperCase()}`}</h1>
 			<h2>Select Activities</h2>
 			<div tw=" flex-col md:flex-row flex justify-center  m-2 ">
 				{activityLists.unassigned &&
