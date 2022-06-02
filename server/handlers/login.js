@@ -17,7 +17,7 @@ module.exports = {
 		}
 		//give json token
 		const token = await jwt.sign(
-			{ user: isAuthenticated.username },
+			{ userName: isAuthenticated.username },
 			process.env.JWT_SECRET
 		);
 		res.json({ token });
