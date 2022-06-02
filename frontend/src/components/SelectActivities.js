@@ -17,7 +17,28 @@ const SelectActivities = ({ periodID, cabinName }) => {
 		periodID,
 		cabinName
 	);
-	const handleListMovement = (
+	const addCamperActivityToDB = async (
+		camperWeekId,
+		activityId,
+		periodId
+	) => {
+		const camper = {
+			camperWeekId,
+			periodId,
+		};
+		const reqConfig = {
+			method: "POST",
+			headers: { "content-type": "application/json" },
+			body: JSON.stringify(camper),
+		};
+		const result = await fetch(
+			`/api/activities/${activityId}/campers`,
+			reqConfig
+		);
+		const data = await result.json();
+		console.log(data);
+	};
+	const handleListMovement = async (
 		sourceListId,
 		sourceIndex,
 		destinationListId,
@@ -30,6 +51,7 @@ const SelectActivities = ({ periodID, cabinName }) => {
 		const newSource = [...activityLists[sourceListId].campers];
 		const camper = newSource.splice(sourceIndex, 1)[0];
 		newDestination.splice(destinationIndex, 0, camper);
+		await addCamperActivityToDB(camper.id, destinationListId, periodID);
 		updateActivityAttendance(
 			sourceListId,
 			destinationListId,
