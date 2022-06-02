@@ -51,13 +51,16 @@ const SelectActivities = ({ periodID, cabinName }) => {
 		const newSource = [...activityLists[sourceListId].campers];
 		const camper = newSource.splice(sourceIndex, 1)[0];
 		newDestination.splice(destinationIndex, 0, camper);
-		await addCamperActivityToDB(camper.id, destinationListId, periodID);
 		updateActivityAttendance(
 			sourceListId,
 			destinationListId,
 			newSource,
 			newDestination
 		);
+		if (destinationListId === "unassigned") {
+			return;
+		}
+		await addCamperActivityToDB(camper.id, destinationListId, periodID);
 	};
 	return (
 		<DragDropContext
@@ -73,7 +76,8 @@ const SelectActivities = ({ periodID, cabinName }) => {
 				);
 			}}
 		>
-			<h1>Select Activities {periodID}</h1>
+			<h1>Cabin: {`${cabinName.toUpperCase()}`}</h1>
+			<h2>Select Activities</h2>
 			<div tw=" flex-col md:flex-row flex justify-center  m-2 ">
 				{activityLists.unassigned &&
 					activityLists.unassigned.campers.length > 0 && (
