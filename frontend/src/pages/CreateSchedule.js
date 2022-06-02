@@ -5,32 +5,32 @@ import "styled-components/macro";
 import { useState } from "react";
 import SelectActivities from "../components/SelectActivities";
 
-const Days = tw.ul` flex justify-center`;
-const Day = styled.li(({ isSelected }) => [
-	tw`p-2`,
-	isSelected && tw`bg-red-200`,
+const Divider = styled.hr(() => [tw`my-2 flex-grow border-stone-200`]);
+const LabeledDivider = ({ text }) => (
+	<div tw="flex justify-center items-center my-1">
+		<Divider />
+		<h3 tw="mx-3 ">{text}</h3>
+		<Divider />
+	</div>
+);
+const menuColors = {
+	red: tw`bg-red-200`,
+	blue: tw`bg-blue-200`,
+	green: tw`bg-green-200`,
+};
+const MenuSelector = styled.li(({ isSelected, color = "green" }) => [
+	tw`border p-2 rounded`,
+	isSelected && menuColors[color],
 ]);
-const Periods = tw.ul`flex justify-center`;
-const Period = styled.li(({ isSelected }) => [
-	tw` p-2`,
-	isSelected && tw`bg-green-200`,
-]);
-const CabinNav = styled.nav(({ isOpen }) => [
-	tw`hidden md:block`,
-	isOpen && tw`block`,
-]);
-const CabinLink = styled.li(({ isSelected }) => [
-	isSelected && tw`bg-purple-200`,
-]);
-
-const Activities = tw.ul`flex`;
-const Activity = tw.li``;
+const Days = tw.ul`my-1 flex gap-2 justify-center`;
+const Periods = tw.ul` gap-2 flex justify-center`;
+const CabinNav = tw.nav``;
 
 const CreateSchedulePage = () => {
-	const [selectedDay, setSelectedDay] = useState(undefined);
+	const [selectedDay, setSelectedDay] = useState("");
 	const location = useLocation();
 
-	const [selectedPeriod, setSelectedPeriod] = useState(undefined);
+	const [selectedPeriod, setSelectedPeriod] = useState("");
 	const { weekNumber, cabin } = useParams();
 	const [week, setWeek] = useGetDataOnMount({
 		url: `/api/weeks/${weekNumber}`,
@@ -50,73 +50,77 @@ const CreateSchedulePage = () => {
 			}
 		},
 	});
-	//currently sending a request that 500s on mount...fix
 	const [activities, setActivities] = useGetDataOnMount({
 		url: `/api/activities?period=${selectedPeriod}`,
 		runOn: [selectedPeriod],
 		initialState: [],
 		useToken: true,
 	});
-	const [showCabinNav, setShowCabinNav] = useState(false);
 	return (
 		<div tw="flex flex-col justify-center">
-			<button
-				onClick={() => setShowCabinNav((s) => !s)}
-				tw="block md:hidden"
-			>
-				{showCabinNav ? "Hide Cabins" : "Show Cabins"}
-			</button>
-			<CabinNav isOpen={showCabinNav}>
-				<ul tw="flex justify-center flex-wrap">
-					{cabins.map((cabinLink, index) => {
-						return (
-							<CabinLink
-								key={`cabin-link-${index}`}
-								isSelected={cabinLink.cabinName === cabin}
-								tw="mx-2 px-2 py-1 rounded"
-							>
+			<div tw="p-3 bg-stone-100">
+				<LabeledDivider text="Cabin" />
+				<CabinNav>
+					<ul tw="flex justify-start flex-wrap gap-1">
+						{cabins.map((cabinLink, index) => {
+							return (
 								<Link
 									to={`../sign-up/${cabinLink.cabinName}/${weekNumber}`}
+									key={`cabin-link-${index}`}
+									tw="w-[10%]"
 								>
-									{cabinLink.cabinName}
+									<MenuSelector
+										color="blue"
+										isSelected={
+											cabinLink.cabinName === cabin
+										}
+									>
+										{cabinLink.cabinName}
+									</MenuSelector>
 								</Link>
-							</CabinLink>
-						);
-					})}
-				</ul>
-			</CabinNav>
-			<Days>
-				{week.days &&
-					week.days.map((day, index) => (
-						<Day
-							key={`selectDay-${index}`}
-							isSelected={selectedDay === day.dayID}
-							onClick={() => {
-								setSelectedDay(day.dayID);
-								setSelectedPeriod(day.periods[0].id);
-							}}
-						>
-							{day.dayName}
-						</Day>
-					))}
-			</Days>
-			{selectedDay && (
-				<Periods>
-					{week.days
-						.find((d) => d.dayID === selectedDay)
-						.periods.map((period, index) => (
-							<Period
-								isSelected={selectedPeriod === period.id}
+							);
+						})}
+					</ul>
+				</CabinNav>
+				<LabeledDivider text="Day" />
+				<Days>
+					{week.days &&
+						week.days.map((day, index) => (
+							<MenuSelector
+								tw="w-1/5"
+								color="blue"
+								key={`selectDay-${index}`}
+								isSelected={selectedDay === day.dayID}
 								onClick={() => {
-									setSelectedPeriod(period.id);
+									setSelectedDay(day.dayID);
+									setSelectedPeriod(day.periods[0].id);
 								}}
-								key={`period-${index}`}
 							>
-								Activity Period {period.periodNumber}
-							</Period>
+								{day.dayName}
+							</MenuSelector>
 						))}
-				</Periods>
-			)}
+				</Days>
+				<LabeledDivider text="Period" />
+				{selectedDay && (
+					<Periods>
+						{week.days
+							.find((d) => d.dayID === selectedDay)
+							.periods.map((period, index) => (
+								<MenuSelector
+									color="blue"
+									tw="flex-grow"
+									isSelected={selectedPeriod === period.id}
+									onClick={() => {
+										setSelectedPeriod(period.id);
+									}}
+									key={`period-${index}`}
+								>
+									Activity Period {period.periodNumber}
+								</MenuSelector>
+							))}
+					</Periods>
+				)}
+			</div>
 			{selectedPeriod && (
 				<SelectActivities cabinName={cabin} periodID={selectedPeriod} />
 			)}

@@ -169,13 +169,13 @@ const CabinAssignment = ({ area, weekNumber }) => {
 	};
 
 	return (
-		<div tw="flex flex-col md:flex-row md:items-stretch h-screen max-w-6xl justify-center m-auto">
+		<div tw=" select-none flex flex-col md:flex-row md:items-stretch h-screen max-w-6xl justify-center m-auto">
 			<DragDropContext
 				onDragEnd={(drop) => {
 					dragCamper(drop);
 				}}
 			>
-				<div tw="max-h-72 md:max-h-full overflow-auto min-h-[200px] md:min-h-0 md:mx-4 lg:mx-8">
+				<div tw="max-h-72 md:max-h-full overscroll-none overflow-auto min-h-[200px] md:min-h-0 md:mx-4 lg:mx-8">
 					<Campers
 						list={unassignedCampers}
 						allCampers={allCampers}

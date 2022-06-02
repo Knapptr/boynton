@@ -1,7 +1,9 @@
 import { Draggable } from "@react-forked/dnd";
 import tw, { styled } from "twin.macro";
 
-const CamperWrapper = styled.div(({ grow }) => [grow && tw`flex-grow`]);
+const CamperWrapper = styled.div(({ grow }) => [
+	grow && tw`flex-grow select-none`,
+]);
 
 const CamperItem = styled.div(({ isDragging }) => [
 	tw`m-0.5 p-1 bg-green-200 `,

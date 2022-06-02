@@ -9,7 +9,7 @@ const camperIcons = ["😎", "🤓", "😁", "🙄", "😆", "😏"];
 const RemoveButton = tw.button`rounded bg-red-500 text-white p-1 m-0.5 hover:bg-red-700`;
 
 const CabinWrapper = styled.div(({ isOpen, disabled, isOver }) => [
-	tw`p-2 flex flex-col my-2 w-full flex-grow bg-sky-600 border border-sky-700 md:flex-grow-0 md:w-1/4 `,
+	tw`select-none p-2 flex flex-col my-2 w-full flex-grow bg-sky-600 border border-sky-700 md:flex-grow-0 md:w-1/4 `,
 	disabled && tw`bg-red-300`,
 	isOver && tw`bg-sky-800 border-sky-900`,
 ]);

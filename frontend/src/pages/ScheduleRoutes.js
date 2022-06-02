@@ -1,6 +1,5 @@
 import { Routes, Route, Outlet } from "react-router-dom";
 import CreateSchedulePage from "./CreateSchedule";
-import SelectWeek from "./SelectWeek";
 
 const ScheduleRoutes = () => {
 	return (

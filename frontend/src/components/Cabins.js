@@ -6,7 +6,7 @@ import "styled-components/macro";
 import { StickyHeader } from "./styled";
 
 const CabinsWrapper = styled.div(() => [
-	tw`flex flex-col md:w-full  items-center overflow-auto `,
+	tw`overscroll-none flex flex-col md:w-full  items-center overflow-auto `,
 ]);
 
 const CabinsList = styled.div(() => [

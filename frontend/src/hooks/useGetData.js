@@ -25,7 +25,7 @@ const useGetDataOnMount = ({
 			? await fetchWithToken(url)
 			: await fetch(url);
 		if (response.status !== 200) {
-			navigate("/login");
+			// navigate("/login");
 		}
 		let data = await response.json();
 		if (optionalSortFunction) {
