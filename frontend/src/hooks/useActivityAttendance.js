@@ -3,6 +3,22 @@ import { useState, useEffect } from "react";
 const useActivityAttendance = (period, cabin) => {
 	const [lists, setLists] = useState({});
 
+	const update = (
+		sourceId,
+		destinationId,
+		newSourceList,
+		newDestinationList
+	) => {
+		setLists({
+			...lists,
+			[sourceId]: { ...lists[sourceId], campers: newSourceList },
+			[destinationId]: {
+				...lists[destinationId],
+				campers: newDestinationList,
+			},
+		});
+	};
+
 	const getCampers = async (periodID, cabinName) => {
 		const camperUrl = `/api/periods/${periodID}/campers?cabin=${cabinName}`;
 		const activityUrl = `/api/activities?period=${periodID}`;
@@ -35,7 +51,7 @@ const useActivityAttendance = (period, cabin) => {
 		getCampers(period, cabin);
 	}, [period, cabin]);
 
-	return { activityLists: lists };
+	return { activityLists: lists, updateActivityAttendance: update };
 };
 
 export default useActivityAttendance;
