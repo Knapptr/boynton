@@ -1,4 +1,4 @@
-import { Link, Outlet, useParams } from "react-router-dom";
+import { Link, Outlet, useLocation, useParams } from "react-router-dom";
 import useGetDataOnMount from "../hooks/useGetData";
 import tw, { styled } from "twin.macro";
 import "styled-components/macro";
@@ -28,15 +28,19 @@ const Activity = tw.li``;
 
 const CreateSchedulePage = () => {
 	const [selectedDay, setSelectedDay] = useState(undefined);
+	const location = useLocation();
+
 	const [selectedPeriod, setSelectedPeriod] = useState(undefined);
 	const { weekNumber, cabin } = useParams();
 	const [week, setWeek] = useGetDataOnMount({
 		url: `/api/weeks/${weekNumber}`,
 		runOn: [weekNumber, cabin],
 		initialState: {},
+		useToken: true,
 	});
 	const [cabins, setCabins] = useGetDataOnMount({
 		url: `/api/cabin-sessions?week=${weekNumber}`,
+		useToken: true,
 		initialState: [],
 		optionalSortFunction: (cab) => {
 			if (cab.cabinArea === "GA") {
@@ -51,6 +55,7 @@ const CreateSchedulePage = () => {
 		url: `/api/activities?period=${selectedPeriod}`,
 		runOn: [selectedPeriod],
 		initialState: [],
+		useToken: true,
 	});
 	const [showCabinNav, setShowCabinNav] = useState(false);
 	return (

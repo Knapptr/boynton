@@ -6,6 +6,7 @@ import { Route } from "react-router-dom";
 import tw from "twin.macro";
 import "styled-components/macro";
 import useCabinSessions from "../hooks/useCabinSessions";
+import Protected from "../components/Protected";
 
 const Columns = tw.div`flex flex-col`;
 export const Column = tw.div`w-1/5`;
@@ -20,7 +21,11 @@ const CabinAssignmentRoutes = () => {
 				<Route
 					key={`cabinRoute-${area}${week}]`}
 					path={`assignment/${area}/${week}`}
-					element={<CabinAssignment area={area} weekNumber={week} />}
+					element={
+						<Protected>
+							<CabinAssignment area={area} weekNumber={week} />
+						</Protected>
+					}
 				/>
 			);
 		}
@@ -33,9 +38,11 @@ const CabinAssignment = ({ area, weekNumber }) => {
 	const [allCampers] = useGetDataOnMount({
 		url: `/api/camper-weeks?week=${weekNumber}&area=${area}`,
 		initialState: [],
+		useToken: true,
 	});
 	const [unassignedCampers, setCampers] = useGetDataOnMount({
 		url: `/api/camper-weeks?week=${weekNumber}&area=${area}&cabin=unassigned`,
+		useToken: true,
 		initialState: [],
 		optionalSortFunction: (camper1, camper2) => camper1.age - camper2.age,
 	});

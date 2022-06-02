@@ -1,5 +1,6 @@
 import useActivityAttendance from "../hooks/useActivityAttendance";
 import { DragDropContext, Droppable, Draggable } from "@react-forked/dnd";
+import fetchWithToken from "../fetchWithToken";
 import tw, { styled } from "twin.macro";
 import "styled-components/macro";
 
@@ -31,7 +32,7 @@ const SelectActivities = ({ periodID, cabinName }) => {
 			headers: { "content-type": "application/json" },
 			body: JSON.stringify(camper),
 		};
-		const result = await fetch(
+		const result = await fetchWithToken(
 			`/api/activities/${activityId}/campers`,
 			reqConfig
 		);

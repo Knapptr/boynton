@@ -5,7 +5,7 @@ module.exports = {
 	async login(req, res) {
 		const { username, password } = req.body;
 		if (!username || !password) {
-			res.json(error("No username or password"));
+			res.status(400).json(error("No username or password"));
 			return;
 		}
 		const isAuthenticated = await authenticate(username, password);

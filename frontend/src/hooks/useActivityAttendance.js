@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import fetchWithToken from "../fetchWithToken";
 
 const useActivityAttendance = (period, cabin) => {
 	const [lists, setLists] = useState({});
@@ -22,8 +23,8 @@ const useActivityAttendance = (period, cabin) => {
 	const getCampers = async (periodID, cabinName) => {
 		const camperUrl = `/api/periods/${periodID}/campers?cabin=${cabinName}`;
 		const activityUrl = `/api/activities?period=${periodID}`;
-		const camperResult = await fetch(camperUrl);
-		const activityResult = await fetch(activityUrl);
+		const camperResult = await fetchWithToken(camperUrl);
+		const activityResult = await fetchWithToken(activityUrl);
 		const activities = await activityResult.json();
 		const campers = await camperResult.json();
 

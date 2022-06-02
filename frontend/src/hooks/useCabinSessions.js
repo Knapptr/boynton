@@ -1,13 +1,18 @@
 import { useState, useEffect } from "react";
+import fetchWithToken from "../fetchWithToken";
 
 const getAllSessionsForWeek = async (week, area) => {
-	const data = await fetch(`/api/cabin-sessions?week=${week}&area=${area}`);
+	const data = await fetchWithToken(
+		`/api/cabin-sessions?week=${week}&area=${area}`
+	);
 	const cabinSessions = await data.json();
 	return cabinSessions;
 };
 
 const getCampersForCabin = async (cabinSessionID) => {
-	const data = await fetch(`/api/cabin-sessions/${cabinSessionID}/campers`);
+	const data = await fetchWithToken(
+		`/api/cabin-sessions/${cabinSessionID}/campers`
+	);
 	const campers = await data.json();
 	return campers || [];
 };
