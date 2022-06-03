@@ -13,7 +13,7 @@ import toTitleCase from "../toTitleCase";
 const Periods = tw.ul` gap-2 flex justify-center`;
 
 const Controls = styled.nav(({ showControls }) => [
-	tw`hidden  md:block`,
+	tw`hidden`,
 	showControls && tw`block`,
 ]);
 
@@ -133,7 +133,7 @@ const CreateSchedulePage = () => {
 						onClick={() => {
 							setShowControls((s) => !s);
 						}}
-						tw="md:hidden font-thin border rounded py-2 px-4 mt-2"
+						tw=" font-thin border rounded py-2 px-4 mt-2"
 					>
 						{showControls ? "Hide" : "Show"} Controls
 					</button>
