@@ -1,5 +1,5 @@
 const pool = require("../../../db/index");
-const sendOptions = async ({ ack, payload }) => {
+const sendCampers = async ({ ack, payload }) => {
 	const value = payload.value;
 	const values = [`^${value}`];
 	const camperResults = await pool.query(
@@ -23,4 +23,4 @@ const sendOptions = async ({ ack, payload }) => {
 	await ack({ options });
 };
 
-module.exports = sendOptions;
+module.exports = { sendCampers };

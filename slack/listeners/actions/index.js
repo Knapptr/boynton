@@ -1,13 +1,9 @@
 const giveAwardFromHome = require("./giveAward");
-const sendOptions = require("./options");
-const view = require("../../views/modals/createAwards");
+const { sendCampers } = require("./options");
 
 const registerActions = (app) => {
-	app.options("camper_options", sendOptions);
+	app.options("camper_options", sendCampers);
 	app.action("giveAward", giveAwardFromHome);
-	app.action("flEval", async ({ ack }) => {
-		await ack();
-	});
 };
 
 module.exports = registerActions;

@@ -1,5 +1,5 @@
 const flEvalURL = require("../../config.json").flEvalURL;
-const scheduleBlock = require("./schedule");
+const ROOTURL = process.env.ROOTURL;
 const homeView = {
 	type: "home",
 
@@ -24,13 +24,19 @@ const homeView = {
 						text: "Eval FL",
 						emoji: true,
 					},
-					action_id: "flEval",
 					url: flEvalURL,
+				},
+				{
+					type: "button",
+					text: {
+						type: "plain_text",
+						text: "Activity Sign Up",
+						emoji: true,
+					},
+					url: `${ROOTURL}/schedule/sign-up`,
 				},
 			],
 		},
-
-		scheduleBlock,
 	],
 };
 
