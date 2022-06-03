@@ -15,7 +15,7 @@ WHERE d.week_id = $1 AND d.name=$2 AND p.period_number = $3
 };
 
 const insertActivity = async (activityName, activityDescription, periodId) => {
-	const query = `INSERT INTO activities (name,description,period_id) VALUES ($1,$2,$3)`;
+	const query = `INSERT INTO activities (name,description,period_id) VALUES ($1,$2,$3) ON CONFLICT ON CONSTRAINT no_duplicates DO UPDATE set name=$1, description=$2`;
 	const values = [activityName, activityDescription, periodId];
 	const result = await pool.query(query, values);
 	return result.rows;
