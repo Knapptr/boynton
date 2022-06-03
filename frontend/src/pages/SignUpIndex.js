@@ -38,28 +38,36 @@ const SignUpIndex = () => {
 				<h1>Select Week</h1>
 			</header>
 			{selected.cabin && selected.week && (
-				<PopOut shouldDisplay={true}>
+				<PopOut
+					shouldDisplay={true}
+					onClick={() => {
+						setSelected({
+							cabin: undefined,
+							week: undefined,
+						});
+					}}
+				>
 					<div tw=" flex flex-col justify-center border bg-stone-300 max-w-md shadow rounded-lg px-4 py-6 w-10/12">
+						<button
+							tw="self-end mr-2"
+							onClick={() => {
+								setSelected({
+									cabin: undefined,
+									week: undefined,
+								});
+							}}
+						>
+							X
+						</button>
 						<header tw="text-xl">
 							<h1 tw="text-base">Sign-Up</h1>
 							<h2>Cabin {toTitleCase(selected.cabin)}</h2>
 							<p tw="text-base font-light">for</p>{" "}
 							<h2>Week {selected.week}?</h2>
 						</header>
-						<div tw="flex justify-between w-10/12 mx-auto mt-3">
-							<button
-								tw="bg-red-300 rounded border border-stone-800 py-1 px-3"
-								onClick={() => {
-									setSelected({
-										cabin: undefined,
-										week: undefined,
-									});
-								}}
-							>
-								No.
-							</button>
+						<div tw="flex justify-center w-10/12 mx-auto mt-3">
 							<Link
-								tw="bg-green-300 rounded border border-stone-800 py-1 px-2"
+								tw="bg-green-300 rounded border border-stone-800 py-1 px-6"
 								to={`${selected.cabin}/${selected.week}`}
 							>
 								Go!
