@@ -1,8 +1,7 @@
 const fs = require("fs/promises");
-const { getWeek } = require("../../../sheets");
 const boyntonAward = require("./boyntonAward");
-const authAndUpload = require("../../../uploadToDrive");
-const awards = require("../../../Awarder")(getWeek());
+const authAndUpload = require("../../../features/uploadToDrive");
+const awards = require("../../../features/Awards/Awarder")();
 
 const registerShortcuts = (app) => {
 	app.shortcut("boyntonAward", boyntonAward);

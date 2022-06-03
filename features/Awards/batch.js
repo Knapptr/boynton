@@ -1,4 +1,4 @@
-const { templatePaths, programAreas } = require("./config.json");
+const { templatePaths, programAreas } = require("../../config.json");
 const { createDocsPDF, createDocsPPT } = require("./createDocs");
 
 const createAwardBatch = async (awards, format) => {

@@ -1,3 +1,0 @@
-const error = (message,errors)=>{
-
-}

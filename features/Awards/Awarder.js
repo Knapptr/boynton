@@ -71,16 +71,3 @@ const Awarder = (awardWeek = getWeek()) => {
 };
 
 module.exports = Awarder;
-// awards = Awarder(1);
-
-// awards.loadAwards().then(async () => {
-// 	awards.add("arts", [{ for: "Yarn Bombing", first: "Ian", last: "Burke" }]);
-// 	console.log(awards.unsavedAwards);
-// 	console.log(awards.all);
-// 	console.log(awards.week);
-// 	// await awards.save();
-// 	// await awards.loadAwards();
-// 	// console.log(awards.list);
-// 	// console.log(awards.unsavedAwards);
-// 	awards.renderAwards("pdf");
-// });

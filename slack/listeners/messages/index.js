@@ -1,5 +1,3 @@
-const sayWhat = require("./sayWhat");
-
 const registerMessages = (app) => {
 	const bQuotes = new RegExp(/b"[^"]*"/, "ig");
 	app.message(bQuotes, async ({ message, say }) => {

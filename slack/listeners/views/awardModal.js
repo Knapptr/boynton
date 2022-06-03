@@ -1,5 +1,5 @@
-const channelToPostCongratulations = "C03E82QGM53";
-const awards = require("../../../Awarder")(1);
+const channelToPostCongratulations = process.env.AWARDS_CHANNEL_ID;
+const awards = require("../../../features/Awards/Awarder")();
 
 const namesPrint = (namesList) => {
 	return namesList

@@ -1,7 +1,6 @@
 const { GoogleSpreadsheet } = require("google-spreadsheet");
-const { formatmmddyyyy, getWeek, getYear } = require("./utils/getDates");
-const { weeks } = require("./config.json");
-const sheetID = "16uE5u4bsjz798eLWDVoh0n8JHjSsmecnZneFCcH8F5E";
+const { formatmmddyyyy, getWeek, getYear } = require("../../utils/getDates");
+const sheetID = process.env.AWARD_SHEET_ID;
 
 const loginCredentials = {
 	client_email: process.env.SERVICE_ACCOUNT_EMAIL,
