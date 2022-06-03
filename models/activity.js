@@ -44,19 +44,21 @@ LEFT JOIN campers c ON cw.camper_id = c.id
 
 		`;
 		const results = await fetchMany(query);
-		const parsedResults = results.map((result) =>
-			Activity._parseResults(result)
-		);
-		const mappedResults = mapManyToOne({
-			array: parsedResults,
-			identifier: "id",
-			newField: "campers",
-			fieldsToMap: ["sessionID", "camperID", "firstName", "lastName"],
-			fieldsToRemain: ["name", "id", "periodID", "description"],
-		});
-		const activities = mappedResults.map((act) => new Activity(act));
-
-		return activities;
+		if (results) {
+			const parsedResults = results.map((result) =>
+				Activity._parseResults(result)
+			);
+			const mappedResults = mapManyToOne({
+				array: parsedResults,
+				identifier: "id",
+				newField: "campers",
+				fieldsToMap: ["sessionID", "camperID", "firstName", "lastName"],
+				fieldsToRemain: ["name", "id", "periodID", "description"],
+			});
+			const activities = mappedResults.map((act) => new Activity(act));
+			return activities;
+		}
+		return [];
 	}
 	static async get(id) {
 		const query = `
@@ -76,19 +78,22 @@ LEFT JOIN campers c ON cw.camper_id = c.id
 WHERE act.id = $1 `;
 		const values = [id];
 		const results = await fetchMany(query, values);
-		const parsedResults = results.map((result) =>
-			Activity._parseResults(result)
-		);
-		const mappedResults = mapManyToOne({
-			array: parsedResults,
-			identifier: "id",
-			newField: "campers",
-			fieldsToMap: ["sessionID", "camperID", "firstName", "lastName"],
-			fieldsToRemain: ["name", "id", "periodID", "description"],
-		});
-		const activities = mappedResults.map((act) => new Activity(act));
+		if (results) {
+			const parsedResults = results.map((result) =>
+				Activity._parseResults(result)
+			);
+			const mappedResults = mapManyToOne({
+				array: parsedResults,
+				identifier: "id",
+				newField: "campers",
+				fieldsToMap: ["sessionID", "camperID", "firstName", "lastName"],
+				fieldsToRemain: ["name", "id", "periodID", "description"],
+			});
+			const activities = mappedResults.map((act) => new Activity(act));
 
-		return activities[0];
+			return activities[0];
+		}
+		return [];
 	}
 	static async create({ name, description, periodID }) {
 		const query =
