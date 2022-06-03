@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import fetchWithToken from "../fetchWithToken";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const useGetDataOnMount = ({
 	url,
@@ -13,6 +13,7 @@ const useGetDataOnMount = ({
 }) => {
 	const [data, setData] = useState(initialState);
 	const navigate = useNavigate();
+	const location = useLocation();
 	const fetchAndSet = async ({
 		url,
 		beforeSet,
@@ -24,8 +25,9 @@ const useGetDataOnMount = ({
 		const response = useToken
 			? await fetchWithToken(url)
 			: await fetch(url);
-		if (response.status !== 200) {
-			// navigate("/login");
+		if (response.status === 401) {
+			localStorage.removeItem("bearerToken");
+			navigate("/login", { state: { cameFrom: location.pathname } });
 		}
 		let data = await response.json();
 		if (optionalSortFunction) {

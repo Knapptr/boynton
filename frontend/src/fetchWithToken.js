@@ -4,6 +4,6 @@ export default async (url, options = {}) => {
 		...options,
 		headers: { ...options.headers, authorization: `Bearer ${token}` },
 	};
-	const data = await fetch(url, optionsWithToken);
-	return data;
+	const response = await fetch(url, optionsWithToken);
+	return response;
 };

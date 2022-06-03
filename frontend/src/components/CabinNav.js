@@ -1,32 +1,30 @@
 import { MenuSelector } from "./styled";
 import { Link } from "react-router-dom";
+import { useState } from "react";
 import tw, { styled } from "twin.macro";
 import "styled-components/macro";
+import toTitleCase from "../toTitleCase";
 
 const CabinNav = ({ cabins, currentCabin, weekNumber }) => {
 	return (
-		<nav>
-			<ul tw="flex justify-start flex-wrap gap-1">
-				{cabins.map((cabinLink, index) => {
-					return (
-						<Link
-							to={`../sign-up/${cabinLink.cabinName}/${weekNumber}`}
-							key={`cabin-link-${index}`}
-							tw="w-[10%]"
+		<ul tw="flex justify-center md:justify-start flex-wrap gap-1">
+			{cabins.map((cabinLink, index) => {
+				return (
+					<Link
+						to={`../sign-up/${cabinLink.cabinName}/${weekNumber}`}
+						key={`cabin-link-${index}`}
+						tw="w-1/4 md:w-[10%]"
+					>
+						<MenuSelector
+							color="blue"
+							isSelected={cabinLink.cabinName === currentCabin}
 						>
-							<MenuSelector
-								color="blue"
-								isSelected={
-									cabinLink.cabinName === currentCabin
-								}
-							>
-								{cabinLink.cabinName}
-							</MenuSelector>
-						</Link>
-					);
-				})}
-			</ul>
-		</nav>
+							{toTitleCase(cabinLink.cabinName)}
+						</MenuSelector>
+					</Link>
+				);
+			})}
+		</ul>
 	);
 };
 

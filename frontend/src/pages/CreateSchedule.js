@@ -8,15 +8,21 @@ import CabinNav from "../components/CabinNav";
 import { LabeledDivider, MenuSelector } from "../components/styled";
 import DayNav from "../components/DayNav";
 import PeriodNav from "../components/PeriodNav";
+import toTitleCase from "../toTitleCase";
 
 const Periods = tw.ul` gap-2 flex justify-center`;
+
+const Controls = styled.nav(({ showControls }) => [
+	tw`hidden  md:block`,
+	showControls && tw`block`,
+]);
 
 const CreateSchedulePage = () => {
 	const [selectedDay, setSelectedDay] = useState(0);
 	const location = useLocation();
-
 	const [selectedPeriod, setSelectedPeriod] = useState(0);
 	const { weekNumber, cabin } = useParams();
+	const [showControls, setShowControls] = useState(false);
 	const [week, setWeek] = useGetDataOnMount({
 		url: `/api/weeks/${weekNumber}`,
 		runOn: [weekNumber, cabin],
@@ -74,42 +80,64 @@ const CreateSchedulePage = () => {
 	};
 
 	return (
-		<div tw="flex flex-col justify-center">
-			{isTheLastPeriod() ? (
-				<button onClick={(e) => e.preventDefault()}>The End!</button>
-			) : (
-				<button onClick={selectNext}>NEX</button>
-			)}
-			<div tw="p-3 bg-stone-100">
-				<LabeledDivider text="Cabin" />
-				<CabinNav
-					currentCabin={cabin}
-					weekNumber={weekNumber}
-					cabins={cabins}
-				/>
-				<LabeledDivider text="Day" />
-				<DayNav
-					selectDay={setSelectedDay}
-					selectPeriod={setSelectedPeriod}
-					selectedPeriod={selectedPeriod}
-					days={week.days}
-					selectedDay={selectedDay}
-				/>
-				<LabeledDivider text="Period" />
-				{weekLoaded && (
-					<PeriodNav
-						days={week.days}
-						selectedDay={selectedDay}
-						selectPeriod={setSelectedPeriod}
-						selectedPeriod={selectedPeriod}
-					/>
-				)}
-			</div>
+		<div tw="flex flex-col justify-center min-h-screen">
+			<header tw="p-4 m-5">
+				<h5 tw="italic">Week {weekNumber}</h5>
+				<h1 tw="font-bold text-3xl">Cabin {`${toTitleCase(cabin)}`}</h1>
+			</header>
 			{weekLoaded && (
-				<SelectActivities
-					cabinName={cabin}
-					periodID={week.days[selectedDay].periods[selectedPeriod].id}
-				/>
+				<div tw="flex-grow ">
+					<SelectActivities
+						selectNext={selectNext}
+						isTheLastPeriod={isTheLastPeriod}
+						dayName={week.days[selectedDay].dayName}
+						periodName={
+							week.days[selectedDay].periods[selectedPeriod]
+								.periodNumber
+						}
+						cabinName={cabin}
+						periodID={
+							week.days[selectedDay].periods[selectedPeriod].id
+						}
+					/>
+				</div>
+			)}
+			{weekLoaded && (
+				<div tw="p-3 bg-stone-100 sticky bottom-0">
+					<Controls showControls={showControls}>
+						<LabeledDivider text="Period" />
+						{weekLoaded && (
+							<PeriodNav
+								days={week.days}
+								selectedDay={selectedDay}
+								selectPeriod={setSelectedPeriod}
+								selectedPeriod={selectedPeriod}
+							/>
+						)}
+						<LabeledDivider text="Day" />
+						<DayNav
+							selectDay={setSelectedDay}
+							selectPeriod={setSelectedPeriod}
+							selectedPeriod={selectedPeriod}
+							days={week.days}
+							selectedDay={selectedDay}
+						/>
+						<LabeledDivider text="Cabin" />
+						<CabinNav
+							currentCabin={cabin}
+							weekNumber={weekNumber}
+							cabins={cabins}
+						/>
+					</Controls>
+					<button
+						onClick={() => {
+							setShowControls((s) => !s);
+						}}
+						tw="md:hidden font-thin border rounded py-2 px-4 mt-2"
+					>
+						{showControls ? "Hide" : "Show"} Controls
+					</button>
+				</div>
 			)}
 		</div>
 	);

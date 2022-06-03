@@ -3,6 +3,20 @@ import { DragDropContext, Droppable, Draggable } from "@react-forked/dnd";
 import fetchWithToken from "../fetchWithToken";
 import tw, { styled } from "twin.macro";
 import "styled-components/macro";
+import toTitleCase from "../toTitleCase";
+
+const dayAbbrev = {
+	MON: "Monday",
+	TUE: "Tuesday",
+	WED: "Wednesday",
+	THU: "Thursday",
+	FRI: "Friday",
+};
+
+const NextButton = styled.button(({ allDone }) => [
+	tw`self-end py-2 px-4 bg-blue-400 rounded border-2`,
+	allDone && tw`bg-green-500`,
+]);
 
 const CamperItem = styled.li(({ isDragging }) => [
 	isDragging && tw`bg-green-400`,
@@ -13,7 +27,14 @@ const ActivityList = styled.ul(({ blue, isDraggingOver }) => [
 	isDraggingOver && tw`bg-purple-600`,
 	isDraggingOver && blue && tw`bg-blue-500`,
 ]);
-const SelectActivities = ({ periodID, cabinName }) => {
+const SelectActivities = ({
+	periodID,
+	cabinName,
+	dayName,
+	periodName,
+	isTheLastPeriod,
+	selectNext,
+}) => {
 	const {
 		loading: activitiesLoading,
 		activityLists,
@@ -77,14 +98,25 @@ const SelectActivities = ({ periodID, cabinName }) => {
 				);
 			}}
 		>
-			<h1 tw="font-bold">Cabin {`${cabinName.toUpperCase()}`}</h1>
-
 			{activitiesLoading ? (
-				<h2 tw="animate-bounce">"Loading"</h2>
+				<h2 tw="animate-bounce">Loading</h2>
 			) : (
 				<>
-					<h2>Select Activities</h2>
-					<div tw=" flex-col md:flex-row flex justify-center  m-2 ">
+					<div tw="mx-auto flex w-10/12 justify-between">
+						<div tw="flex flex-col justify-center">
+							<h1 tw="italic">{dayAbbrev[dayName]}</h1>
+							<h1>Activity Period {periodName}</h1>
+						</div>
+						<NextButton
+							allDone={isTheLastPeriod()}
+							onClick={() => {
+								!isTheLastPeriod() && selectNext();
+							}}
+						>
+							{!isTheLastPeriod() ? "Next" : "Done!"}
+						</NextButton>
+					</div>
+					<div tw=" flex-col md:flex-row flex justify-center ">
 						{activityLists.unassigned &&
 							activityLists.unassigned.campers.length > 0 && (
 								<div tw="w-full my-2 md:mx-2">
@@ -158,9 +190,10 @@ const SelectActivities = ({ periodID, cabinName }) => {
 											>
 												<header>
 													<h2 tw="font-bold">
-														{activityLists[
-															aid
-														].name.toUpperCase()}
+														{toTitleCase(
+															activityLists[aid]
+																.name
+														)}
 													</h2>
 												</header>
 												{activityLists[aid].campers.map(
@@ -184,10 +217,12 @@ const SelectActivities = ({ periodID, cabinName }) => {
 																		provided.innerRef
 																	}
 																>
-																	{
+																	{toTitleCase(
 																		c.firstName
-																	}{" "}
-																	{c.lastName}
+																	)}{" "}
+																	{toTitleCase(
+																		c.lastName
+																	)}
 																</CamperItem>
 															)}
 														</Draggable>
