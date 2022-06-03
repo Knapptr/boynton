@@ -24,3 +24,8 @@ export const MenuSelector = styled.li(({ isSelected, color = "green" }) => [
 	tw`border p-2 rounded bg-stone-200`,
 	isSelected && menuColors[color],
 ]);
+
+export const PopOut = styled.div(({ shouldDisplay }) => [
+	tw`hidden h-full flex-col justify-center items-center fixed top-0 left-0 right-0 z-50 bg-opacity-60 bg-gray-400 `,
+	shouldDisplay && tw`flex`,
+]);

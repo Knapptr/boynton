@@ -1,12 +1,7 @@
 require("dotenv").config();
-const modal = require("./slack/views/modals/createAward");
 const registerListeners = require("./slack/listeners/index");
-const homeView = require("./slack/views/home");
 const { App, ExpressReceiver } = require("@slack/bolt");
 const Awarder = require("./features/Awards/Awarder");
-const express = require("express");
-const awards = Awarder(1);
-const pool = require("./db/index");
 const receiver = require("./server/index");
 
 const app = new App({
