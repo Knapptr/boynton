@@ -3,6 +3,7 @@ import fetchWithToken from "../fetchWithToken";
 
 const useActivityAttendance = (period, cabin) => {
 	const [lists, setLists] = useState({});
+	const [loading, setLoading] = useState(true);
 
 	const update = (
 		sourceId,
@@ -21,6 +22,7 @@ const useActivityAttendance = (period, cabin) => {
 	};
 
 	const getCampers = async (periodID, cabinName) => {
+		setLoading(true);
 		const camperUrl = `/api/periods/${periodID}/campers?cabin=${cabinName}`;
 		const activityUrl = `/api/activities?period=${periodID}`;
 		const camperResult = await fetchWithToken(camperUrl);
@@ -38,7 +40,6 @@ const useActivityAttendance = (period, cabin) => {
 			};
 		});
 		campers.forEach((camper) => {
-			console.log({ camper });
 			if (camper.activityID === null) {
 				listing.unassigned.campers.push(camper);
 			} else {
@@ -46,13 +47,14 @@ const useActivityAttendance = (period, cabin) => {
 			}
 		});
 		setLists(listing);
+		setLoading(false);
 	};
 
 	useEffect(() => {
 		getCampers(period, cabin);
 	}, [period, cabin]);
 
-	return { activityLists: lists, updateActivityAttendance: update };
+	return { activityLists: lists, updateActivityAttendance: update, loading };
 };
 
 export default useActivityAttendance;

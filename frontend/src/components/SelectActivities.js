@@ -14,10 +14,11 @@ const ActivityList = styled.ul(({ blue, isDraggingOver }) => [
 	isDraggingOver && blue && tw`bg-blue-500`,
 ]);
 const SelectActivities = ({ periodID, cabinName }) => {
-	const { activityLists, updateActivityAttendance } = useActivityAttendance(
-		periodID,
-		cabinName
-	);
+	const {
+		loading: activitiesLoading,
+		activityLists,
+		updateActivityAttendance,
+	} = useActivityAttendance(periodID, cabinName);
 	const addCamperActivityToDB = async (
 		camperWeekId,
 		activityId,
@@ -37,7 +38,6 @@ const SelectActivities = ({ periodID, cabinName }) => {
 			reqConfig
 		);
 		const data = await result.json();
-		console.log(data);
 	};
 	const handleListMovement = async (
 		sourceListId,
@@ -78,110 +78,130 @@ const SelectActivities = ({ periodID, cabinName }) => {
 			}}
 		>
 			<h1 tw="font-bold">Cabin {`${cabinName.toUpperCase()}`}</h1>
-			<h2>Select Activities</h2>
-			<div tw=" flex-col md:flex-row flex justify-center  m-2 ">
-				{activityLists.unassigned &&
-					activityLists.unassigned.campers.length > 0 && (
-						<div tw="w-full my-2 md:mx-2">
-							<Droppable droppableId="unassigned">
-								{(provided, snapshot) => (
-									<ActivityList
-										blue
-										isDraggingOver={snapshot.isDraggingOver}
-										ref={provided.innerRef}
-										{...provided.droppableProps}
-									>
-										<header tw="w-full font-bold ">
-											<h2>Unassigned</h2>
-										</header>
-										{activityLists.unassigned &&
-											activityLists.unassigned.campers.map(
-												(c, index) => (
-													<Draggable
-														index={index}
-														draggableId={`${c.id}`}
-														key={`unassigned-draggable-${c.id}`}
-													>
-														{(
-															provided,
-															snapshot
-														) => (
-															<CamperItem
-																{...provided.dragHandleProps}
-																{...provided.draggableProps}
-																ref={
-																	provided.innerRef
-																}
-																isDragging={
-																	snapshot.isDragging
-																}
+
+			{activitiesLoading ? (
+				<h2 tw="animate-bounce">"Loading"</h2>
+			) : (
+				<>
+					<h2>Select Activities</h2>
+					<div tw=" flex-col md:flex-row flex justify-center  m-2 ">
+						{activityLists.unassigned &&
+							activityLists.unassigned.campers.length > 0 && (
+								<div tw="w-full my-2 md:mx-2">
+									<Droppable droppableId="unassigned">
+										{(provided, snapshot) => (
+											<ActivityList
+												blue
+												isDraggingOver={
+													snapshot.isDraggingOver
+												}
+												ref={provided.innerRef}
+												{...provided.droppableProps}
+											>
+												<header tw="w-full font-bold ">
+													<h2>Unassigned</h2>
+												</header>
+												{activityLists.unassigned &&
+													activityLists.unassigned.campers.map(
+														(c, index) => (
+															<Draggable
+																index={index}
+																draggableId={`${c.id}`}
+																key={`unassigned-draggable-${c.id}`}
 															>
-																{c.firstName}{" "}
-																{c.lastName}
-															</CamperItem>
-														)}
-													</Draggable>
-												)
-											)}
-										{provided.placeholder}
-									</ActivityList>
-								)}
-							</Droppable>
-						</div>
-					)}
-				<div tw="gap-2 flex flex-row md:flex-col w-full my-2 md:mx-2 flex-wrap ">
-					{activityLists.activityIds &&
-						activityLists.activityIds.map((aid, index) => (
-							<Droppable
-								key={`activity-container=${index}`}
-								droppableId={`${aid}`}
-							>
-								{(provided, snapshot) => (
-									<ActivityList
-										tw="flex-grow"
-										isDraggingOver={snapshot.isDraggingOver}
-										ref={provided.innerRef}
-										{...provided.droppableProps}
-									>
-										<header>
-											<h2 tw="font-bold">
-												{activityLists[
-													aid
-												].name.toUpperCase()}
-											</h2>
-										</header>
-										{activityLists[aid].campers.map(
-											(c, index) => (
-												<Draggable
-													draggableId={`${c.id}`}
-													index={index}
-													key={`draggable-camper-${c.id}`}
-												>
-													{(provided, snapshot) => (
-														<CamperItem
-															isDragging={
-																snapshot.isDragging
-															}
-															{...provided.dragHandleProps}
-															{...provided.draggableProps}
-															ref={
-																provided.innerRef
-															}
-														>
-															{c.firstName}{" "}
-															{c.lastName}
-														</CamperItem>
+																{(
+																	provided,
+																	snapshot
+																) => (
+																	<CamperItem
+																		{...provided.dragHandleProps}
+																		{...provided.draggableProps}
+																		ref={
+																			provided.innerRef
+																		}
+																		isDragging={
+																			snapshot.isDragging
+																		}
+																	>
+																		{
+																			c.firstName
+																		}{" "}
+																		{
+																			c.lastName
+																		}
+																	</CamperItem>
+																)}
+															</Draggable>
+														)
 													)}
-												</Draggable>
-											)
+												{provided.placeholder}
+											</ActivityList>
 										)}
-										{/* {provided.placeholder} */}
-									</ActivityList>
-								)}
-							</Droppable>
-						))}
-				</div>
-			</div>
+									</Droppable>
+								</div>
+							)}
+						<div tw="gap-2 flex flex-row md:flex-col w-full my-2 md:mx-2 flex-wrap ">
+							{activityLists.activityIds &&
+								activityLists.activityIds.map((aid, index) => (
+									<Droppable
+										key={`activity-container=${index}`}
+										droppableId={`${aid}`}
+									>
+										{(provided, snapshot) => (
+											<ActivityList
+												tw="flex-grow"
+												isDraggingOver={
+													snapshot.isDraggingOver
+												}
+												ref={provided.innerRef}
+												{...provided.droppableProps}
+											>
+												<header>
+													<h2 tw="font-bold">
+														{activityLists[
+															aid
+														].name.toUpperCase()}
+													</h2>
+												</header>
+												{activityLists[aid].campers.map(
+													(c, index) => (
+														<Draggable
+															draggableId={`${c.id}`}
+															index={index}
+															key={`draggable-camper-${c.id}`}
+														>
+															{(
+																provided,
+																snapshot
+															) => (
+																<CamperItem
+																	isDragging={
+																		snapshot.isDragging
+																	}
+																	{...provided.dragHandleProps}
+																	{...provided.draggableProps}
+																	ref={
+																		provided.innerRef
+																	}
+																>
+																	{
+																		c.firstName
+																	}{" "}
+																	{c.lastName}
+																</CamperItem>
+															)}
+														</Draggable>
+													)
+												)}
+												{/* {provided.placeholder} */}
+											</ActivityList>
+										)}
+									</Droppable>
+								))}
+						</div>
+					</div>
+				</>
+			)}
 		</DragDropContext>
 	);
 };
