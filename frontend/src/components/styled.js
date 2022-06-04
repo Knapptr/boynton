@@ -1,11 +1,18 @@
 import tw, { styled } from "twin.macro";
 import "styled-components/macro";
-export const StickyHeader = styled.header(() => [
-	tw`sticky items-center top-0 flex justify-between flex-grow md:flex-grow-0 rounded p-2 text-white align-baseline bg-sky-500`,
+export const AssignmentHeader = styled.header(() => [
+	tw`sticky top-0 items-center flex justify-between flex-grow md:flex-grow-0 rounded p-2 text-white align-baseline bg-sky-500`,
 ]);
 
-export const BoyntonHeader = styled.h1(() => [
-	tw`text-green-600 p-4 text-5xl font-bold`,
+const NavBarLinkColors = {
+	blue: tw`bg-blue-300`,
+	green: tw`bg-green-300`,
+	red: tw`bg-red-300`,
+	purple: tw`bg-purple-300`,
+};
+export const NavBarLink = styled.li(({ color }) => [
+	tw` rounded border bg-stone-200 p-2`,
+	color && NavBarLinkColors[color],
 ]);
 export const Divider = styled.hr(() => [tw`my-2 flex-grow border-stone-200`]);
 export const LabeledDivider = ({ text }) => (

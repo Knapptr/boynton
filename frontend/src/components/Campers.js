@@ -1,20 +1,20 @@
 import Camper from "./Camper";
 import { Droppable } from "@react-forked/dnd";
 import tw, { styled } from "twin.macro";
-import { StickyHeader } from "./styled";
+import { AssignmentHeader } from "./styled";
 
 const CamperList = styled.div(() => [
-	tw`flex flex-wrap md:flex-col  w-full  justify-center `,
+	tw`flex w-full  justify-center flex-wrap gap-1 `,
 ]);
 const Campers = ({ list, allCampers }) => {
 	return (
-		<Droppable droppableId={"campers_DROP"}>
+		<Droppable droppableId={"unassigned"}>
 			{(provided) => (
 				<>
-					<StickyHeader>
+					<AssignmentHeader tw="sticky">
 						<h1>{list.length} Unassigned Campers</h1>
 						<h1>{allCampers.length} Total Campers</h1>
-					</StickyHeader>
+					</AssignmentHeader>
 					<CamperList
 						{...provided.droppableProps}
 						ref={provided.innerRef}

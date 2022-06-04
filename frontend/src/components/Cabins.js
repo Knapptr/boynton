@@ -3,15 +3,12 @@ import useGetDataOnMount from "../hooks/useGetData";
 import Cabin from "./Cabin";
 import tw, { styled } from "twin.macro";
 import "styled-components/macro";
-import { StickyHeader } from "./styled";
+import { AssignmentHeader } from "./styled";
 
-const CabinsWrapper = styled.div(() => [
-	tw`overscroll-none flex flex-col md:w-full  items-center overflow-auto `,
+const CabinsExpander = styled.div(({ expand }) => [
+	expand && tw`absolute top-0 h-full`,
 ]);
-
-const CabinsList = styled.div(() => [
-	tw`w-full bg-sky-300 flex flex-grow  flex-col md:flex-row   md:flex-wrap  `,
-]);
+const CabinsList = styled.div(() => [tw`w-full bg-sky-300 flex flex-wrap`]);
 
 const Button = styled.button(() => [tw`bg-green-600 rounded text-white p-2`]);
 const Cabins = ({ unassignAll, cabinSessions, lists, unassignCamper }) => {
@@ -53,35 +50,37 @@ const Cabins = ({ unassignAll, cabinSessions, lists, unassignCamper }) => {
 		});
 	};
 	return (
-		<CabinsWrapper>
-			<StickyHeader tw="w-full">
-				<h2 tw="font-bold text-lg">Cabins</h2>
-				<Button onClick={toggleAllOpen}>
-					{allOpen ? "Hide all lists" : "View all lists"}
-				</Button>
-				<div>
-					<label htmlFor="hideFullToggle">Hide Full</label>
-					<input
-						tw="m-1"
-						id="hideFullToggle"
-						type="checkbox"
-						value={hideFull}
-						onChange={() => {
-							setHideFull((f) => !f);
-						}}
-					/>
-				</div>
-			</StickyHeader>
-			<CabinsList>{cabinSessions && displayCabins()}</CabinsList>
-			{!areEmpty() && (
-				<button
-					tw="bg-red-600 p-2 w-full font-bold text-white"
-					onClick={unassignAll}
-				>
-					Unassign All
-				</button>
-			)}
-		</CabinsWrapper>
+		<>
+			<CabinsExpander expand={allOpen} tw="w-full">
+				<AssignmentHeader tw="w-full">
+					<h2 tw="font-bold text-lg">Cabins</h2>
+					<Button onClick={toggleAllOpen}>
+						{allOpen ? "Show Unassigned" : "Show Cabins Only"}
+					</Button>
+					<div>
+						<label htmlFor="hideFullToggle">Hide Full</label>
+						<input
+							tw="m-1"
+							id="hideFullToggle"
+							type="checkbox"
+							value={hideFull}
+							onChange={() => {
+								setHideFull((f) => !f);
+							}}
+						/>
+					</div>
+				</AssignmentHeader>
+				<CabinsList>{cabinSessions && displayCabins()}</CabinsList>
+				{!areEmpty() && (
+					<button
+						tw="bg-red-600 p-2 w-full font-bold text-white"
+						onClick={unassignAll}
+					>
+						Unassign All
+					</button>
+				)}
+			</CabinsExpander>
+		</>
 	);
 };
 
