@@ -8,7 +8,7 @@ const CamperItem = styled.div(({ isDragging }) => [
 
 const Camper = ({ grow, firstName, lastName, age, id, index }) => {
 	return (
-		<Draggable key={id} draggableId={`${id}`} index={index}>
+        <Draggable key={id} draggableId={`${id}`} index={index}>
 			{(provided, snapshot) => {
 				return (
 					<CamperItem

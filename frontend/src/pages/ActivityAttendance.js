@@ -8,11 +8,17 @@ const AttendantWrapper = styled.li(({ isChecked }) => [
     tw`bg-red-100 font-bold`,
     isChecked && tw`line-through bg-green-100`,
 ]);
-const CamperAttendant = ({ camper, isChecked }) => {
-    const [selfIsChecked, setIsChecked] = useState(isChecked);
+const CamperAttendant = ({ camper, activity, }) => {
+    const [selfIsChecked, setIsChecked] = useState(camper.isPresent);
     return (
         <AttendantWrapper
-            onClick={() => {
+            onClick={async() => {
+                const options = {
+                    method: "PUT",
+                    headers: {"content-type":"application/json",authorization: `Bearer ${localStorage.getItem('bearerToken')}`},
+                    body: JSON.stringify( {isPresent: !selfIsChecked} )
+                }
+                await fetch(`/api/activities/${activity.id}/campers/${camper.camperActivityId}`,options)
                 setIsChecked((c) => !c);
             }}
             isChecked={selfIsChecked}
@@ -48,6 +54,7 @@ const Activity = ({ activityId, editable }) => {
                                 .map((camper) => (
                                     <CamperAttendant
                                         camper={camper}
+                                        activity={activity}
                                     ></CamperAttendant>
                                 ))
                         )}
