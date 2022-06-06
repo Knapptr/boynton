@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useContext ,useState, useEffect } from "react";
+import UserContext from '../components/UserContext';
 import fetchWithToken from "../fetchWithToken";
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -12,6 +13,7 @@ const useGetDataOnMount = ({
 	useToken = false,
 }) => {
 	const [data, setData] = useState(initialState);
+    const auth = useContext(UserContext);
 	const navigate = useNavigate();
 	const location = useLocation();
 	const fetchAndSet = async ({
@@ -23,10 +25,10 @@ const useGetDataOnMount = ({
 		useToken = false,
 	}) => {
 		const response = useToken
-			? await fetchWithToken(url)
+			? await fetchWithToken(url,{},auth)
 			: await fetch(url);
 		if (response.status === 401) {
-			localStorage.removeItem("bearerToken");
+            auth.logOut()
 			navigate("/login", { state: { cameFrom: location.pathname } });
 		}
 		let data = await response.json();

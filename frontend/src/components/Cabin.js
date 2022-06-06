@@ -62,13 +62,12 @@ const Cabin = ({ session, list, allOpenState, unassignCamper }) => {
 							isOpen={isOpen}
 							hasCampers={list.length > 0}
 						>
-							{/* {isOpen && provided.placeholder} */}
 							{isOpen &&
 								list.map((camper, index) => {
 									return (
 										<div
 											key={`remove-${camper.id}`}
-											tw="flex align-middle bg-green-300"
+											tw="flex  bg-green-300"
 										>
 											<RemoveButton
 												onClick={() => {
@@ -82,7 +81,7 @@ const Cabin = ({ session, list, allOpenState, unassignCamper }) => {
 												X
 											</RemoveButton>
 											<Camper
-												grow
+                                                full
 												key={`camper-${camper.id}`}
 												{...camper}
 												index={index}

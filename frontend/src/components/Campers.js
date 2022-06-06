@@ -4,7 +4,7 @@ import tw, { styled } from "twin.macro";
 import { AssignmentHeader } from "./styled";
 
 const CamperList = styled.div(() => [
-	tw`flex w-full  justify-center flex-wrap gap-1 `,
+    tw`flex w-full  flex-wrap gap-1 md:gap-2 `,
 ]);
 const Campers = ({ list, allCampers }) => {
 	return (

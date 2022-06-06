@@ -1,4 +1,5 @@
 import "./App.css";
+import {useContext} from "react";
 import { Link, Route, Routes, BrowserRouter } from "react-router-dom";
 import CabinAssignmentRoutes from "./pages/CabinAssignment";
 import NotFound from "./pages/NotFound";
@@ -7,9 +8,13 @@ import LoginPage from "./pages/login";
 import NavWrapper from "./components/NavWrapper";
 import Protected from "./components/Protected";
 import Dashboard from "./pages/dashboard";
+import UserContext,{useUserData} from './components/UserContext';
+
 function App() {
+    const userState = useUserData();
     return (
-        <BrowserRouter>
+        <UserContext.Provider value={userState}>
+            <BrowserRouter>
             <div className="App">
                 <Routes>
                     <Route path="/login" element={<LoginPage />} />
@@ -37,6 +42,7 @@ function App() {
                 </Routes>
             </div>
         </BrowserRouter>
+        </UserContext.Provider>
     );
 }
 

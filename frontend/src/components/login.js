@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState,useContext } from "react";
+import UserContext from "./UserContext";
 import { useLocation, useNavigate } from "react-router-dom";
 import tw from "twin.macro";
 import "styled-components/macro";
@@ -11,6 +12,7 @@ const LoginField = tw.input`rounded my-4 border-gray-200 border-2 p-4`;
 const SubmitButton = tw.button`bg-green-400 p-4 rounded-lg`;
 
 const Login = () => {
+    const auth = useContext(UserContext);
 	const [formInputs, setFormInputs] = useState({
 		username: "",
 		password: "",
@@ -50,14 +52,15 @@ const Login = () => {
 			console.log({ data });
 		}
 		if (response.status === 200) {
-			storeToken(data.token);
+            auth.logIn(data.token,{})
+			// storeToken(data.token);
 			navigate(cameFrom || "/");
 		}
 	};
 	return (
 		<form onSubmit={handleSubmit} tw="w-4/5 sm:w-1/2 md:w-2/5 max-w-sm">
 			<div tw="flex flex-col">
-				<img src={logo} />
+				<img src={logo} alt="" />
 				<LoginField
 					type="text"
 					name="username"

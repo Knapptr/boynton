@@ -5,19 +5,12 @@ import tw, { styled } from "twin.macro";
 import "styled-components/macro";
 import { AssignmentHeader } from "./styled";
 
-const CabinsExpander = styled.div(({ expand }) => [
-	expand && tw`absolute top-0 h-full`,
-]);
 const CabinsList = styled.div(() => [tw`w-full bg-sky-300 flex flex-wrap`]);
 
 const Button = styled.button(() => [tw`bg-green-600 rounded text-white p-2`]);
-const Cabins = ({ unassignAll, cabinSessions, lists, unassignCamper }) => {
+const Cabins = ({showAllLists, unassignAll, cabinSessions, lists, unassignCamper }) => {
 	// console.log({ cabinSessions, lists });
 	const [hideFull, setHideFull] = useState(false);
-	const [allOpen, setAllOpen] = useState(false);
-	const toggleAllOpen = () => {
-		setAllOpen((o) => !o);
-	};
 	const areEmpty = () => {
 		console.log({ cabinSessions, lists });
 		if (Object.keys(lists).length === 0 || cabinSessions.length === 0) {
@@ -40,7 +33,7 @@ const Cabins = ({ unassignAll, cabinSessions, lists, unassignCamper }) => {
 				<Cabin
 					key={`cabin-${cabinSession.cabinName}`}
 					unassignCamper={unassignCamper}
-					allOpenState={allOpen}
+					allOpenState={showAllLists}
 					session={cabinSession}
 					list={lists[cabinSession.cabinName].sort(
 						(camper1, camper2) => camper1.age > camper2.age
@@ -51,12 +44,8 @@ const Cabins = ({ unassignAll, cabinSessions, lists, unassignCamper }) => {
 	};
 	return (
 		<>
-			<CabinsExpander expand={allOpen} tw="w-full">
 				<AssignmentHeader tw="w-full">
 					<h2 tw="font-bold text-lg">Cabins</h2>
-					<Button onClick={toggleAllOpen}>
-						{allOpen ? "Show Unassigned" : "Show Cabins Only"}
-					</Button>
 					<div>
 						<label htmlFor="hideFullToggle">Hide Full</label>
 						<input
@@ -79,7 +68,6 @@ const Cabins = ({ unassignAll, cabinSessions, lists, unassignCamper }) => {
 						Unassign All
 					</button>
 				)}
-			</CabinsExpander>
 		</>
 	);
 };
