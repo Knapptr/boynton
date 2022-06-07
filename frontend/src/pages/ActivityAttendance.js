@@ -3,6 +3,7 @@ import { useState } from "react";
 import useGetDataOnMount from "../hooks/useGetData";
 import tw, { styled } from "twin.macro";
 import "styled-components/macro";
+import {MenuSelector} from "../components/styled";
 
 const AttendantWrapper = styled.li(({ isChecked }) => [
     tw`bg-red-100 font-bold`,
@@ -76,29 +77,31 @@ const ActivitySelector = () => {
     });
     return (
         <>
-            {activities &&
-                activities.map((activity, index) => (
-                    <li key={`activity-${index}`}>
-                        <button
-                            onClick={() => {
-                                setSelected(index);
-                                setDisplayAll(false);
-                            }}
-                        >
-                            {activity.name}
-                        </button>
-                    </li>
-                ))}
-            <li>
-                <button
-                    onClick={() => {
-                        setDisplayAll(true);
-                        setSelected("none");
-                    }}
-                >
-                    All
-                </button>
-            </li>
+          <ul tw="flex gap-1 flex-wrap justify-center">
+    {activities &&
+        activities.map((activity, index) => (
+            <MenuSelector key={`activity-${index}`}>
+            <button
+      onClick={() => {
+        setSelected(index);
+        setDisplayAll(false);
+              }}
+            >
+              {activity.name}
+            </button>
+          </MenuSelector>
+          ))}
+              <MenuSelector color="blue" >
+              <button
+  onClick={() => {
+    setDisplayAll(true);
+    setSelected("none");
+                }}
+              >
+                All
+              </button>
+              </MenuSelector>
+            </ul>
             <div>
                 {displayAll
                     ? activities.map((activity, index) => (

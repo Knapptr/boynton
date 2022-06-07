@@ -12,7 +12,6 @@ const Cabins = ({showAllLists, unassignAll, cabinSessions, lists, unassignCamper
 	// console.log({ cabinSessions, lists });
 	const [hideFull, setHideFull] = useState(false);
 	const areEmpty = () => {
-		console.log({ cabinSessions, lists });
 		if (Object.keys(lists).length === 0 || cabinSessions.length === 0) {
 			return true;
 		}
@@ -23,7 +22,6 @@ const Cabins = ({showAllLists, unassignAll, cabinSessions, lists, unassignCamper
 	const displayCabins = () => {
 		let list = cabinSessions;
 		if (hideFull) {
-			console.log({ cabinSessions, lists });
 			list = cabinSessions.filter(
 				(cabin) => cabin.capacity > lists[cabin.cabinName].length
 			);

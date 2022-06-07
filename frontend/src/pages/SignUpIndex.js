@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect,useContext } from "react";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import useGetDataOnMount from "../hooks/useGetData";
 import tw, { styled } from "twin.macro";
@@ -6,8 +6,10 @@ import toTitleCase from "../toTitleCase";
 import "styled-components/macro";
 import { PopOut, MenuSelector } from "../components/styled";
 import cl from "../cl.png";
+import UserContext from "../components/UserContext";
 
 const SignUpIndex = () => {
+    const auth = useContext(UserContext)
 	const navigate = useNavigate();
 	const [cabins] = useGetDataOnMount({
 		url: "/api/cabins",

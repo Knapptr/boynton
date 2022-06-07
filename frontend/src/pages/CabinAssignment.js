@@ -9,9 +9,10 @@ import tw from "twin.macro";
 import "styled-components/macro";
 import useCabinSessions from "../hooks/useCabinSessions";
 import Protected from "../components/Protected";
+import CabinAssignmentIndex from './cabinAssignmentIndex';
 
-const Columns = tw.div`flex flex-col`;
-export const Column = tw.div`w-1/5`;
+const CabinsOnlyButton = tw.button`bg-green-400 rounded p-3 text-white font-bold`
+const AssignmentHeader =tw.header`flex justify-around items-center bg-violet-500 gap-4 rounded-t text-white`;
 const areas = ["ba", "ga"];
 const weeks = ["1", "2", "3", "4", "5", "6"];
 
@@ -32,13 +33,14 @@ const CabinAssignmentRoutes = () => {
       );
     }
   }
-  return routes;
+    return <>
+        <Route path="assignment" element={<Protected><CabinAssignmentIndex/></Protected>}/>
+        { routes }</>
 };
 
 const CabinAssignment = ({ area, weekNumber }) => {
 
     const auth  = useContext(UserContext)
-    console.log({auth});
     const token = auth.userData.token
 
   const [cabinsOnly, setCabinsOnly] = useState(false);
@@ -78,7 +80,6 @@ const CabinAssignment = ({ area, weekNumber }) => {
     let campers = [...unassignedCampers];
     let newlyUnassignedCampers = [];
     let updatedCabinList = { ...cabinList };
-    console.log({ cabinSessions });
     for (let cabin of cabinSessions) {
       newlyUnassignedCampers = [
         ...newlyUnassignedCampers,
@@ -107,7 +108,6 @@ const CabinAssignment = ({ area, weekNumber }) => {
       `/api/campers/${camperSession.camperID}/${camperSession.id}/cabin`,
       requestConfig
     );
-    console.log(results);
   };
 
   const dragOptions = {
@@ -188,16 +188,18 @@ const CabinAssignment = ({ area, weekNumber }) => {
   const showAll = () => {
     return (
       <>
-        <div>
-          <button
+        <AssignmentHeader ><h1 tw="inline">Cabin assignment <p tw="font-bold italic md:inline">{area.toUpperCase()}-Week {weekNumber}</p></h1>
+          <CabinsOnlyButton
             onClick={() => {
               toggleCabinsOnly();
             }}
           >
             Show Cabins Only
-          </button>
+          </CabinsOnlyButton>
+        </AssignmentHeader>
+        <div>
         </div>
-        <div tw="max-h-[45vh] overflow-auto relative overscroll-none">
+        <div tw="max-h-[45vh] overflow-auto relative ">
           <Campers
             list={unassignedCampers}
             allCampers={allCampers}
@@ -206,7 +208,7 @@ const CabinAssignment = ({ area, weekNumber }) => {
           />
         </div>
 
-        <div tw=" overscroll-none flex flex-wrap overflow-auto max-h-[45vh]">
+        <div tw=" flex flex-wrap overflow-auto max-h-[45vh]">
           <Cabins
             unassignCamper={unassignCamper}
             cabinSessions={cabinSessions}
@@ -222,11 +224,17 @@ const CabinAssignment = ({ area, weekNumber }) => {
   const showOnlyCabins = () => {
     return (
       <div>
+        <AssignmentHeader ><h1 tw="inline">Cabin assignment <p tw="font-bold italic inline">{area.toUpperCase()}-Week {weekNumber}</p></h1>
           {!allAssigned() &&
-          <div>
-          <button onClick={() => toggleCabinsOnly()}>Show Unassigned</button>
-          </div>
-          }
+          <CabinsOnlyButton
+            onClick={() => {
+              toggleCabinsOnly();
+            }}
+          >
+            Show Unassigned Campers
+          </CabinsOnlyButton>
+        }
+        </AssignmentHeader>
         <div tw=" overscroll-none flex flex-wrap overflow-auto ">
           <Cabins
             unassignCamper={unassignCamper}
