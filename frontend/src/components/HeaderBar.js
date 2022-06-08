@@ -10,19 +10,19 @@ const HeaderBar = () => {
   const user = useContext(UserContext);
   return (
     <>
-      <div tw="flex items-center justify-end p-2 bg-white">
-        <p tw="mr-8">Hello, {toTitleCase(user.userData.user.userName)}</p>
+      <div tw="flex items-end justify-end p-2 bg-white shadow-inner shadow my-1">
+        <Link tw="w-1/6 md:w-1/12 " to="/">
+          <img tw="" src={logo} alt="Camp Leslie" />
+        </Link>
         <button
-          tw="mr-auto bg-red-300 p-3 rounded"
+          tw="ml-auto p-1 rounded font-thin underline"
           onClick={() => {
             user.logOut();
           }}
         >
           Logout
         </button>
-        <Link tw="w-1/6 md:w-1/12  mr-3" to="/">
-          <img tw="" src={logo} alt="Camp Leslie" />
-        </Link>
+        <span tw="mr-4 ml-2 rounded-full bg-green-800 px-4 py-3 text-white font-bold">{user.userData.user.userName[0].toUpperCase()}</span>
       </div>
     </>
   );
