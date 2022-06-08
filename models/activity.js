@@ -104,6 +104,7 @@ WHERE act.id = $1 `;
             });
             const activities = mappedResults.map((act) => new Activity(act));
 
+          console.log(activities[0].campers);
             return activities[0];
         }
         return [];

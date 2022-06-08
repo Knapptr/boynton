@@ -7,7 +7,7 @@ import {useContext} from 'react';
 import UserContext from "../components/UserContext";
 
 const Dashboard = () => {
-  const { userData } = useContext(UserContext)
+  const { logOut,userData } = useContext(UserContext)
   const {user} = userData;
 	return (
 		<>
@@ -32,6 +32,9 @@ const Dashboard = () => {
             <Link to="cabins/assignment">Cabin Assignment</Link>
             </NavBarLink>
         }
+          <NavBarLink tw="mt-8" onClick={()=>{logOut()}}>
+            <button >Log Out</button>
+            </NavBarLink>
 				</ul>
 			</nav>
 		</>

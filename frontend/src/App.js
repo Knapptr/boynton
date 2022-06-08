@@ -26,7 +26,7 @@ function App() {
                 </Protected>
               }
             ></Route>
-            <Route path="/*" element={<NavWrapper />}>
+            <Route path="/*" element={<Protected><NavWrapper /></Protected>}>
               <Route path="cabins/*">{CabinAssignmentRoutes()}</Route>
               <Route
                 path="schedule/*"

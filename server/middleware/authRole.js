@@ -8,7 +8,7 @@ const authRole = {
     return;
   },
   unitHeadOnly(req,res,next){
-    if(req.user.role !== "admin" || req.user.role !== "unitHead"){
+    if(req.user.role !== "admin" && req.user.role !== "unitHead"){
       res.sendStatus(401)
       return;
     }

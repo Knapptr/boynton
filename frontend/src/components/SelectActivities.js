@@ -1,9 +1,11 @@
 import useActivityAttendance from "../hooks/useActivityAttendance";
+import {useContext} from 'react'
 import { DragDropContext, Droppable, Draggable } from "@react-forked/dnd";
 import fetchWithToken from "../fetchWithToken";
 import tw, { styled } from "twin.macro";
 import "styled-components/macro";
 import toTitleCase from "../toTitleCase";
+import UserContext from "./UserContext";
 
 const dayAbbrev = {
   MON: "Monday",
@@ -41,6 +43,7 @@ const SelectActivities = ({
     activityLists,
     updateActivityAttendance,
   } = useActivityAttendance(periodID, cabinName);
+  const auth = useContext(UserContext)
   const addCamperActivityToDB = async (camperWeekId, activityId, periodId) => {
     const camper = {
       camperWeekId,
@@ -53,7 +56,8 @@ const SelectActivities = ({
     };
     const result = await fetchWithToken(
       `/api/activities/${activityId}/campers`,
-      reqConfig
+      reqConfig,
+      auth
     );
     const data = await result.json();
   };
