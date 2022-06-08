@@ -1,7 +1,7 @@
 const fs = require("fs/promises");
 const pizZip = require("pizzip");
 const Templater = require("docxtemplater");
-const pdfFillForm = require("pdf-fill-form");
+// const pdfFillForm = require("pdf-fill-form");
 const { getWeek, getYear } = require("./sheets");
 
 const generateFileName = (programArea, awardData) => {
@@ -44,21 +44,21 @@ const createDocsPPT = async (awardType, awards, templateList) => {
 	}
 };
 
-const createDocsPDF = async (awardType, awards, templateList) => {
-	const filePath = templateList.pdf[awardType];
-	// throw error if no template provided
-	if (!filePath) {
-		throw new Error("no template provided");
-	}
-	awards.forEach(async (award) => {
-		// get awardData
-		const awardData = generateAwardFields(award);
-		const pdf = pdfFillForm.writeSync(filePath, awardData, { save: "pdf" });
-		await fs.writeFile(
-			`./output/${generateFileName(awardType, award)}.pdf`,
-			pdf
-		);
-	});
-};
+// const createDocsPDF = async (awardType, awards, templateList) => {
+// 	const filePath = templateList.pdf[awardType];
+// 	// throw error if no template provided
+// 	if (!filePath) {
+// 		throw new Error("no template provided");
+// 	}
+// 	awards.forEach(async (award) => {
+// 		// get awardData
+// 		const awardData = generateAwardFields(award);
+// 		const pdf = pdfFillForm.writeSync(filePath, awardData, { save: "pdf" });
+// 		await fs.writeFile(
+// 			`./output/${generateFileName(awardType, award)}.pdf`,
+// 			pdf
+// 		);
+// 	});
+// };
 
-module.exports = { createDocsPPT, createDocsPDF };
+module.exports = { /*createDocsPDF,*/ createDocsPPT };

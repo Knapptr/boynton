@@ -1,5 +1,6 @@
 const { templatePaths, programAreas } = require("../../config.json");
-const { createDocsPDF, createDocsPPT } = require("./createDocs");
+// const { createDocsPDF } = require("./createDocs");
+const { createDocsPPT } = require("./createDocs");
 
 const createAwardBatch = async (awards, format) => {
 	const programAreas = Object.keys(awards);
@@ -8,7 +9,7 @@ const createAwardBatch = async (awards, format) => {
 		throw new Error('format must be "pdf" or "pptx"');
 	}
 	const createDocsFormat = {
-		pdf: createDocsPDF,
+		// pdf: createDocsPDF,
 		pptx: createDocsPPT,
 	}[format];
 	for (programArea of programAreas) {
