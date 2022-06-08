@@ -52,7 +52,7 @@ const Login = () => {
 			console.log({ data });
 		}
 		if (response.status === 200) {
-            auth.logIn(data.token,{})
+      auth.logIn(data.token,data.user)
 			// storeToken(data.token);
 			navigate(cameFrom || "/");
 		}

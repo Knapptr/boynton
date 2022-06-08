@@ -1,5 +1,6 @@
 const authenticate = require("../../utils/authenticate");
 const error = require("../../utils/jsonError");
+const User = require('../../models/User');
 const jwt = require("jsonwebtoken");
 module.exports = {
 	async login(req, res) {
@@ -17,9 +18,24 @@ module.exports = {
 		}
 		//give json token
 		const token = await jwt.sign(
-			{ userName: isAuthenticated.username },
+      { userName: isAuthenticated.username,role:isAuthenticated.role },
 			process.env.JWT_SECRET
 		);
-		res.json({ token });
+    const userInfo = {userName: isAuthenticated.username,role:isAuthenticated.role}
+    res.json({ token,user:userInfo });
 	},
+  async create(req,res){
+    const {username,password,role} = req.body;
+    if(!username || !password){
+      res.status(400).json(error("No username or password"))
+      return
+    }
+    try{
+      const user =  await User.create(username,password,role);
+      res.json({username: user.username});
+    }catch (e){
+      console.log(e);
+      res.sendStatus(500)
+    }
+  }
 };

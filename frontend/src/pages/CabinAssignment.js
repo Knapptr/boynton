@@ -10,6 +10,7 @@ import "styled-components/macro";
 import useCabinSessions from "../hooks/useCabinSessions";
 import Protected from "../components/Protected";
 import CabinAssignmentIndex from './cabinAssignmentIndex';
+import UnitHeadAccess from "../components/ProtectedUnitHead";
 
 const CabinsOnlyButton = tw.button`bg-green-400 rounded p-3 text-white font-bold`
 const AssignmentHeader =tw.header`flex justify-around items-center bg-violet-500 gap-4 rounded-t text-white`;
@@ -25,16 +26,16 @@ const CabinAssignmentRoutes = () => {
           key={`cabinRoute-${area}${week}]`}
           path={`assignment/${area}/${week}`}
           element={
-            <Protected>
+            <UnitHeadAccess>
               <CabinAssignment area={area} weekNumber={week} />
-            </Protected>
+            </UnitHeadAccess>
           }
         />
       );
     }
   }
     return <>
-        <Route path="assignment" element={<Protected><CabinAssignmentIndex/></Protected>}/>
+        <Route path="assignment" element={<UnitHeadAccess><CabinAssignmentIndex/></UnitHeadAccess>}/>
         { routes }</>
 };
 

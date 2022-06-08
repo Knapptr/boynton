@@ -3,8 +3,12 @@ import "styled-components/macro";
 import cl from "../cl.png";
 import { NavBarLink } from "../components/styled";
 import { Link } from "react-router-dom";
+import {useContext} from 'react';
+import UserContext from "../components/UserContext";
 
 const Dashboard = () => {
+  const { userData } = useContext(UserContext)
+  const {user} = userData;
 	return (
 		<>
 			<img
@@ -23,9 +27,11 @@ const Dashboard = () => {
 					<NavBarLink color="red">
 						<Link to="cabins/list">Cabin Lists</Link>
 					</NavBarLink>
-					<NavBarLink color="purple">
-						<Link to="cabins/assignment">Cabin Assignment</Link>
-					</NavBarLink>
+          {( user.role === "admin" || user.role === "unitHead" ) &&
+            <NavBarLink color="purple">
+            <Link to="cabins/assignment">Cabin Assignment</Link>
+            </NavBarLink>
+        }
 				</ul>
 			</nav>
 		</>
