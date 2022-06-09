@@ -1,3 +1,5 @@
+const Awards = require('../../../features/Awards/Awarder')
+const authAndUpload = require('../../../features/uploadToDrive')
 const printAward = async ({ ack, client, body }) => {
 	await ack();
 	try {
@@ -6,6 +8,7 @@ const printAward = async ({ ack, client, body }) => {
 			users: body.user.id,
 		});
 		const channelID = openConversation.channel.id;
+    const awards = Awards();
 		await awards.loadAwards();
 		const savedAs = await awards.renderAwards("pptx");
 		const data = await authAndUpload(
