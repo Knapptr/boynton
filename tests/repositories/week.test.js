@@ -145,4 +145,41 @@ describe("create", () => {
       expect(res.days[0].periods.length).toEqual(2);
     });
   });
+ //This test AND code need to be refactored Yikes.
+  //TODO this is FRAGILE and WILL BREAK
+  it("creates a week without days", () => {
+    const createData = {
+      title: "A new Week",
+      number: 7,
+    
+    };
+    const expectedResponse = {
+      title: "A new Week",
+      number: 7,
+      days: [ ],
+    };
+
+    //create weeks
+    //create days
+    //TODO this is FRAGILE and WILL BREAK
+    fetchOne.mockResolvedValueOnce({ title: "A new Week", number: 7 });
+    //create days
+    //TODO this is FRAGILE and WILL BREAK
+    // fetchOne.mockResolvedValueOnce({ name: "MON", id: 1 });
+    // fetchOne.mockResolvedValueOnce({ name: "TUE", id: 2 });
+    // fetchOne.mockImplementation((query, values) =>
+    //   Promise.resolve({
+    //     number: values[1],
+    //     id: Math.floor(Math.random() * 100),
+    //     day_id: values[0],
+    //   })
+    // );
+    expect.assertions(3);
+    return weekRepository.create(createData).then((res) => {
+      expect(res.title).toEqual("A new Week");
+      expect(res.number).toEqual(7);
+      expect(res.days.length).toEqual(0);
+    });
+  });
+
 });

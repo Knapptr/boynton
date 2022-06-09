@@ -6,6 +6,8 @@ const weekRepository = {
       currentWeek.title = currentWeek.title || cv.title;
       currentWeek.number = currentWeek.number || cv.number;
       currentWeek.days = currentWeek.days || [];
+      if(cv.day_id){
+
       const dayInWeek = currentWeek.days.find((d) => d.id === cv.day_id) || {
         id: cv.day_id,
         name: cv.day_name,
@@ -14,6 +16,7 @@ const weekRepository = {
       dayInWeek.periods.push({ number: cv.period_number, id: cv.period_id });
       if (!currentWeek.days.find((d) => d.id === cv.day_id)) {
         currentWeek.days.push(dayInWeek);
+      }
       }
       if (acc.find((w) => w.id === cv.id)) {
         return acc;
@@ -79,9 +82,8 @@ const weekRepository = {
       const dayResponse = await fetchOne(dayQuery,dayValues);
       return {id: dayResponse.id,name:dayResponse.name,numberOfPeriods:requestDay.numberOfPeriods};
     })
-    const insertedDays = await Promise.all(dayInserts);
+    const insertedDays = await Promise.all(dayInserts) 
     const periodInserts = insertedDays.map(insertedDay=>{
-      console.log({insertedDay});
       return Promise.all(
         Array.from(Array(insertedDay.numberOfPeriods),(v,i)=>{
           const periodQuery = "INSERT INTO periods (day_id,period_number) VALUES ($1,$2) RETURNING *"
@@ -92,10 +94,13 @@ const weekRepository = {
     }) 
     const insertedPeriods = await Promise.all(periodInserts)
     const flattenedPeriodInserts =  insertedPeriods.reduce((acc,cv)=>[...acc,...cv],[] );
-    const results = flattenedPeriodInserts.map(insertedPeriod=>{
+    let results = flattenedPeriodInserts.map(insertedPeriod=>{
       const day = insertedDays.find(d=>d.id === insertedPeriod.day_id);
       return {title,number,day_id:day.id,day_name:day.name,period_id:insertedPeriod.id,period_number:insertedPeriod.number};
-    })
+    }) 
+    if ( results.length ===0 ){
+      results = [{title,number,days}]
+    }
     const week = this._mapResponse(results);
     return week[0]
   },
