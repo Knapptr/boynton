@@ -1,5 +1,6 @@
 const pool = require("../db/index");
 const mapManyToOne = require("../utils/remap");
+const defaultWeekRepository = require("../repositories/week");
 const { scheduleDays, weeks } = require("../config.json");
 const {
 	fetchOneAndCreate,
@@ -153,13 +154,9 @@ class Week {
 			}
 		}
 	}
-	static async create({ title, number }) {
-		const query =
-			"INSERT INTO weeks (title,number) VALUES ($1,$2) RETURNING *";
-		const values = [title, number];
-		const results = await pool.query(query, values);
-		const week = results.rows[0];
-		return new Week(Week._parseResults(week));
+	static async create({ title, number,days=[] },weekRepository = defaultWeekRepository) {
+    const weekResponse = await weekRepository.create({title,number,days})
+		return new Week(weekResponse);
 	}
 }
 module.exports = Week;
