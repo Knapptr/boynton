@@ -103,39 +103,39 @@ class Week {
 			dayID: dbr.day_id,
 		};
 	}
-	static async DestructivelyInitFromConfig() {
-		//will clear all weeks,periods and cabin sessions! DO NOT USE THIS IN THE MIDDLE OF A SUMMER
-		const clearWeeks = "DELETE from weeks;";
-		await pool.query(clearWeeks);
-		// create weeks
-		const weekNumbers = Object.keys(weeks);
-		const createdWeeks = [];
-		for (let weekNumber of weekNumbers) {
-			const week = await Week.create({
-				title: weeks[weekNumber].title,
-				number: weekNumber,
-			});
-			createdWeeks.push(week);
-		}
-		for (let week of createdWeeks) {
-			await week.createDays();
-		}
-	}
-	async getCampers(init = false) {
-		console.log({ init });
-		const query =
-			"SELECT * from camper_weeks JOIN campers on camper_id = campers.id WHERE week_id = $1";
-		const values = [this.number];
-		const campers = await fetchManyAndCreate({
-			query,
-			values,
-			Model: Camper,
-		});
-		if (init) {
-			await Promise.all(campers.map((camper) => camper.init()));
-		}
-		return campers;
-	}
+	//static async DestructivelyInitFromConfig() {
+	//	//will clear all weeks,periods and cabin sessions! DO NOT USE THIS IN THE MIDDLE OF A SUMMER
+	//	const clearWeeks = "DELETE from weeks;";
+	//	await pool.query(clearWeeks);
+	//	// create weeks
+	//	const weekNumbers = Object.keys(weeks);
+	//	const createdWeeks = [];
+	//	for (let weekNumber of weekNumbers) {
+	//		const week = await Week.create({
+	//			title: weeks[weekNumber].title,
+	//			number: weekNumber,
+	//		});
+	//		createdWeeks.push(week);
+	//	}
+	//	for (let week of createdWeeks) {
+	//		await week.createDays();
+	//	}
+	//}
+	// async getCampers(init = false) {
+	// 	console.log({ init });
+	// 	const query =
+	// 		"SELECT * from camper_weeks JOIN campers on camper_id = campers.id WHERE week_id = $1";
+	// 	const values = [this.number];
+	// 	const campers = await fetchManyAndCreate({
+	// 		query,
+	// 		values,
+	// 		Model: Camper,
+	// 	});
+	// 	if (init) {
+	// 		await Promise.all(campers.map((camper) => camper.init()));
+	// 	}
+	// 	return campers;
+	// }
 	async createDays() {
 		// create days and periods for each day
 		for (let day of scheduleDays) {
