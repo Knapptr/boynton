@@ -80,7 +80,7 @@ const AttendanceIndex = () => {
                     selectDay(dayIndex);
                   }}
                 >
-                  <button>{toTitleCase(day.dayName)}</button>
+                  <button>{toTitleCase(day.name)}</button>
                 </MenuSelector>
                 ))}
     </ul>
@@ -100,7 +100,7 @@ const AttendanceIndex = () => {
                 }}
                 isSelected={periodIndex === selected.period}
               >
-                <button>{period.periodNumber}</button>
+                <button>{period.number}</button>
               </MenuSelector>
             ))
         }
