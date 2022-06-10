@@ -21,6 +21,24 @@ describe("creation",()=>{
     });
   })
 })
+describe("Delete",()=>{
+  it("sends true on deletion'",async()=>{
+    expect.assertions(1);
+    weekRepository.get.mockResolvedValueOnce(mappedDBWeek);
+    weekRepository.delete.mockResolvedValue({number: 1,title:"Around the world week"});
+    const week = await Week.get(1);
+    const deleteResult = await week.delete();
+    expect(deleteResult).toBe(true);
+  })
+  it("sends false if not deleted",async()=>{
+    expect.assertions(1)
+    weekRepository.get.mockResolvedValue(mappedDBWeek);
+    weekRepository.delete.mockResolvedValue(false)
+    const week = await Week.get(1) ;
+    const deleteResult = await week.delete()
+    expect(deleteResult).toBe(false);
+  })
+})
 
 describe("Get",()=>{
   it("gets all weeks",()=>{

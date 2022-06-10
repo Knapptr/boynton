@@ -24,6 +24,13 @@ class Week {
       days: this.days,
     }
   }
+  async delete(){
+    const deletedWeek = await this._weekRepository.delete(this.number);
+    if(deletedWeek){
+      return true
+    }
+    return false
+  }
 	static async get(weekNumber,weekRepository=defaultWeekRepository) {
     const week = await weekRepository.get(weekNumber)
     return new Week(week)
