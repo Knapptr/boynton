@@ -2,7 +2,9 @@ const { fetchOne, fetchMany } = require("../utils/pgWrapper");
 const weekRepository = {
   _mapResponse(dbResponse) {
     return dbResponse.reduce((acc, cv) => {
-      const currentWeek = acc.find((w) => w.id === cv.id) || {};
+      const currentWeek = acc.find((w) => {
+        console.log({wnum:w.number,cvnum:cv.number})
+       return w.number === cv.number}) || {};
       currentWeek.title = currentWeek.title || cv.title;
       currentWeek.number = currentWeek.number || cv.number;
       currentWeek.days = currentWeek.days || [];
@@ -18,7 +20,7 @@ const weekRepository = {
         currentWeek.days.push(dayInWeek);
       }
       }
-      if (acc.find((w) => w.id === cv.id)) {
+      if (acc.find((w) => w.number === cv.number)) {
         return acc;
       }
       acc.push(currentWeek);
@@ -69,40 +71,12 @@ const weekRepository = {
     const deletedWeek = await fetchOne(query,values);
     return deletedWeek;
   },
-  //work on this method, this is garbage
-  async create({ title, number, days=[] }) {
-    //YIKES this needs to be refactored TODO
+  async create({ title, number}) {
     const weekQuery = `INSERT INTO weeks (title,number) VALUES ($1,$2) RETURNING *`;
     const weekValues = [title, number];
     const insertWeekResponse = await fetchOne(weekQuery, weekValues);
-    const weekId = insertWeekResponse.number;
-    const dayInserts = days.map(async requestDay=>{
-      const dayQuery = "INSERT INTO days (name,week_id) VALUES($1,$2) RETURNING *";
-      const dayValues = [requestDay.name,weekId];
-      const dayResponse = await fetchOne(dayQuery,dayValues);
-      return {id: dayResponse.id,name:dayResponse.name,numberOfPeriods:requestDay.numberOfPeriods};
-    })
-    const insertedDays = await Promise.all(dayInserts) 
-    const periodInserts = insertedDays.map(insertedDay=>{
-      return Promise.all(
-        Array.from(Array(insertedDay.numberOfPeriods),(v,i)=>{
-          const periodQuery = "INSERT INTO periods (day_id,period_number) VALUES ($1,$2) RETURNING *"
-          const periodValues = [insertedDay.id,i+1]
-          return fetchOne(periodQuery,periodValues);
-        })
-      )
-    }) 
-    const insertedPeriods = await Promise.all(periodInserts)
-    const flattenedPeriodInserts =  insertedPeriods.reduce((acc,cv)=>[...acc,...cv],[] );
-    let results = flattenedPeriodInserts.map(insertedPeriod=>{
-      const day = insertedDays.find(d=>d.id === insertedPeriod.day_id);
-      return {title,number,day_id:day.id,day_name:day.name,period_id:insertedPeriod.id,period_number:insertedPeriod.number};
-    }) 
-    if ( results.length ===0 ){
-      results = [{title,number,days}]
-    }
-    const week = this._mapResponse(results);
-    return week[0]
+    if(insertWeekResponse){ insertWeekResponse.days = [];
+    }    return insertWeekResponse
   },
 };
 
