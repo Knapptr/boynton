@@ -1,57 +1,99 @@
 import { useParams } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import useGetDataOnMount from "../hooks/useGetData";
 import tw, { styled } from "twin.macro";
 import "styled-components/macro";
 import { MenuSelector } from "../components/styled";
 
 const AttendantWrapper = styled.li(({ isChecked }) => [
-  tw`bg-red-100 font-bold py-3 `,
-  isChecked && tw`line-through bg-green-100`,
+  tw`bg-red-400 font-bold py-3 select-none transition-colors`,
+  isChecked && tw`bg-green-100`,
 ]);
-const CamperAttendant = ({ camperIndex,camper, activity,toggleIsPresent }) => {
+const AttendanceName = styled.p(({ isPresent }) => [
+  isPresent && tw`line-through`,
+]);
+const AttendanceButton = styled.button(({ isPresent }) => [
+  tw`px-2 border shadow-xl bg-gray-200 ml-auto rounded-lg`,
+  isPresent && tw`no-underline`,
+]);
+const CamperAttendant = ({
+  camperIndex,
+  camper,
+  activity,
+  toggleIsPresent,
+}) => {
   return (
-    <AttendantWrapper
-      onClick={async () => {
-        toggleIsPresent(camperIndex); 
-        const options = {
-          method: "PUT",
-          headers: {
-            "content-type": "application/json",
-            authorization: `Bearer ${localStorage.getItem("bearerToken")}`,
-          },
-          body: JSON.stringify({ isPresent: !(camper.isPresent) }),
-        };
-        await fetch(
-          `/api/activities/${activity.id}/campers/${camper.camperActivityId}`,
-          options
-        );
-        }}
-      isChecked={camper.isPresent}
-    >
-      {camper.firstName} {camper.lastName}
+    <AttendantWrapper isChecked={camper.isPresent}>
+      <div tw="flex mx-auto md:w-1/3 px-8">
+        <AttendanceName isPresent={camper.isPresent}>
+          {camper.firstName} {camper.lastName}
+        </AttendanceName>
+        <AttendanceButton
+          isPresent={camper.isPresent}
+          onClick={async () => {
+            toggleIsPresent(camperIndex);
+            const options = {
+              method: "PUT",
+              headers: {
+                "content-type": "application/json",
+                authorization: `Bearer ${localStorage.getItem("bearerToken")}`,
+              },
+              body: JSON.stringify({ isPresent: !camper.isPresent }),
+            };
+            await fetch(
+              `/api/activities/${activity.id}/campers/${camper.camperActivityId}`,
+              options
+            );
+          }}
+        >
+          {!camper.isPresent && "Not"} Here
+        </AttendanceButton>
+      </div>
     </AttendantWrapper>
   );
 };
-const Activity = ({ activityId, editable }) => {
-  const [activity, setActivity] = useGetDataOnMount({
+const Activity = ({ activityId, refresh }) => {
+  const [activity, setActivity, refreshActivities] = useGetDataOnMount({
     url: `/api/activities/${activityId}`,
     initialState: false,
     useToken: true,
     runOn: [activityId],
   });
+  const timerRef = useRef(null);
+
+  useEffect(() => {
+    if (refresh) {
+      timerRef.current = setInterval(() => {
+        refreshActivities();
+      }, 7000);
+    }else{
+      if(timerRef.current){
+      clearInterval(timerRef.current)
+      }
+    }
+    
+    return () => {
+      clearInterval(timerRef.current);
+    };
+  }, [refresh]);
+
   const toggleIsPresent = (camperIndex) => {
     const newCampers = [...activity.campers];
-    console.log(camperIndex)
-    const newCamper = {...newCampers[camperIndex], isPresent: !newCampers[camperIndex].isPresent}
-    newCampers.splice(camperIndex,1,newCamper);
-    console.log({newCampers})
-    setActivity((act) => ({ ...act,campers:newCampers }));
+    console.log(camperIndex);
+    const newCamper = {
+      ...newCampers[camperIndex],
+      isPresent: !newCampers[camperIndex].isPresent,
+    };
+    newCampers.splice(camperIndex, 1, newCamper);
+    console.log({ newCampers });
+    setActivity((act) => ({ ...act, campers: newCampers }));
   };
-  const getUnaccountedFor = ()=>{
-    const unaccounted = activity.campers.filter(camper=>camper.isPresent === false);
-    return unaccounted.length
-  }
+  const getUnaccountedFor = () => {
+    const unaccounted = activity.campers.filter(
+      (camper) => camper.isPresent === false
+    );
+    return unaccounted.length;
+  };
   return (
     <>
       {activity && (
@@ -65,7 +107,9 @@ const Activity = ({ activityId, editable }) => {
                 {activity.campers.length} campers total
               </h3>
               <h3 tw="text-sm text-right bg-gray-300 py-px font-bold px-2">
-                {getUnaccountedFor()?`${getUnaccountedFor()} unaccounted for`:"All Here!"} 
+                {getUnaccountedFor()
+                  ? `${getUnaccountedFor()} unaccounted for`
+                  : "All Here!"}
               </h3>
             </header>
             <ul>
@@ -76,10 +120,10 @@ const Activity = ({ activityId, editable }) => {
                   .sort((camper1, camper2) => {
                     return camper1.lastName > camper2.lastName ? 1 : -1;
                   })
-                  .map((camper,camperIndex) => (
+                  .map((camper, camperIndex) => (
                     <CamperAttendant
                       key={`camper ${activity.name}-${camperIndex}`}
-                      toggleIsPresent = {toggleIsPresent}
+                      toggleIsPresent={toggleIsPresent}
                       camperIndex={camperIndex}
                       camper={camper}
                       activity={activity}
@@ -97,8 +141,9 @@ const Activity = ({ activityId, editable }) => {
 const ActivitySelector = () => {
   const { periodId } = useParams();
   const [selected, setSelected] = useState("none");
-  const [displayAll, setDisplayAll] = useState(false);
-  const [activities, setActivities] = useGetDataOnMount({
+  const [displayAll, setDisplayAll] = useState(true);
+  const [shouldRefresh,setShouldRefresh] = useState(false)
+  const [activities, setActivities, updateActivities] = useGetDataOnMount({
     url: `/api/periods/${periodId}/activities`,
     initialState: [],
     useToken: true,
@@ -106,6 +151,7 @@ const ActivitySelector = () => {
   return (
     <>
       <ul tw="flex gap-1 flex-wrap justify-center">
+
         {activities &&
           activities.map((activity, index) => (
             <MenuSelector
@@ -133,13 +179,21 @@ const ActivitySelector = () => {
           </button>
         </MenuSelector>
       </ul>
+      <div tw="flex justify-center items-center mt-2">
+        <div tw="bg-blue-300 rounded py-px px-1">
+        <label tw="mx-2" htmlFor="autoRefresh">Enable Auto Refresh</label>
+          <input onChange={()=>{
+            setShouldRefresh(r=>!r)
+          } } type="checkbox" name="autoRefresh" id="autoRefresh"/>
+        </div>
+      </div>
       <div>
         {displayAll
           ? activities.map((activity, index) => (
-              <Activity activityId={activity.id} />
+              <Activity refresh={shouldRefresh} activityId={activity.id} />
             ))
           : selected !== "none" && (
-              <Activity activityId={activities[selected].id} />
+              <Activity refresh={shouldRefresh} activityId={activities[selected].id} />
             )}
       </div>
     </>
