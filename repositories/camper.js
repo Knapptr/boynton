@@ -1,4 +1,5 @@
 const { fetchOne, fetchMany } = require("../utils/pgWrapper");
+
 module.exports = {
   _mapResponse(dbResponse) {
     return dbResponse.reduce((acc, cv) => {
@@ -65,6 +66,7 @@ module.exports = {
     `;
     const values = [id]
     const dbResponse = await fetchMany(query,values);
+    if(!dbResponse){return false};
     const mappedResponse = this._mapResponse(dbResponse);
     return mappedResponse[0]
 

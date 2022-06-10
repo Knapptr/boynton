@@ -13,9 +13,16 @@ describe("get", () => {
       expect(res).toEqual(mappedCampers);
     });
   });
-  it("gets one camper from db", () => {
+  it("returns false for no camper", () => {
     const camperId = 1;
-    fetchOne.mockResolvedValue(
+    fetchMany.mockResolvedValue(false);
+    return camperRepository.getOne(camperId).then((res) => {
+      expect(res).toBe(false);
+    });
+  });
+  it("gets one camper from db", () => {
+    const camperId = 409;
+    fetchMany.mockResolvedValue(
       unmappedCamperResult.filter((c) => c.id === camperId)
     );
     return camperRepository.getOne(camperId).then((res) => {
