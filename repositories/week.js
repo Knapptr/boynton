@@ -3,7 +3,6 @@ const weekRepository = {
   _mapResponse(dbResponse) {
     return dbResponse.reduce((acc, cv) => {
       const currentWeek = acc.find((w) => {
-        console.log({wnum:w.number,cvnum:cv.number})
        return w.number === cv.number}) || {};
       currentWeek.title = currentWeek.title || cv.title;
       currentWeek.number = currentWeek.number || cv.number;

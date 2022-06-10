@@ -24,21 +24,18 @@ const camperWeek = {
 const camper = {
 	firstName: "Tyler",
 	lastName: "Knapp",
+	gender: "Male",
+	id: 103,
+	age: 12,
 	weeks: [
 		{
 			weekNumber: 3,
 			weekTitle: "Holiday Week",
 			camperWeekID: 10241,
-			// CABIN DETAILS
 			cabinSessionID: 22,
 			cabinName: "8",
-			// WILL NOT BE IN RESPONSE IF
-			// CABIN NOT ASSIGNED
 		},
 	],
-	gender: "Male",
-	id: 103,
-	age: 12,
 };
 const activity = {
 	name: "activityName",

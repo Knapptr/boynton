@@ -1,13 +1,4 @@
-const pool = require("../db/index");
-const mapManyToOne = require("../utils/remap");
 const defaultWeekRepository = require("../repositories/week");
-const { scheduleDays, weeks } = require("../config.json");
-const {
-	fetchOneAndCreate,
-	fetchManyAndCreate,
-	fetchMany,
-} = require("../utils/pgWrapper");
-const Camper = require("./camper");
 
 class Week {
 	constructor({ title, number,days=[] },weekRepository = defaultWeekRepository) {
