@@ -18,7 +18,7 @@ const PeriodNav = ({ days, selectPeriod, selectedDay, selectedPeriod }) => {
 					}}
 					key={`period-${index}`}
 				>
-					Activity Period {period.periodNumber}
+					Activity Period {period.number}
 				</MenuSelector>
 			))}
 		</ul>

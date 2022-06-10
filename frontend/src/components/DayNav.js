@@ -16,7 +16,7 @@ const DayNav = ({
 						tw="w-1/5"
 						color="blue"
 						key={`selectDay-${index}`}
-						isSelected={days[selectedDay].dayID === day.dayID}
+						isSelected={days[selectedDay].id === day.id}
 						onClick={() => {
 							selectDay(index);
 							const periodsToSelectFrom = days[index].periods;
@@ -25,7 +25,7 @@ const DayNav = ({
 							}
 						}}
 					>
-						{day.dayName}
+						{day.name}
 					</MenuSelector>
 				))}
 		</ul>
