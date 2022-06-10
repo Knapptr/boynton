@@ -60,20 +60,25 @@ const Activity = ({ activityId, refresh }) => {
     runOn: [activityId],
   });
   const timerRef = useRef(null);
+  const timeOutRef = useRef(null);
 
   useEffect(() => {
     if (refresh) {
       timerRef.current = setInterval(() => {
         refreshActivities();
       }, 7000);
+      setTimeout(()=>{
+        timeOutRef.current = clearInterval(timerRef.current);
+      },10 *60 * 1000)
     }else{
       if(timerRef.current){
       clearInterval(timerRef.current)
+        clearTimeout(timeOutRef.current);
       }
     }
-    
     return () => {
       clearInterval(timerRef.current);
+      clearTimeout(timeOutRef.current);
     };
   }, [refresh]);
 
@@ -183,6 +188,8 @@ const ActivitySelector = () => {
         <div tw="bg-blue-300 rounded py-px px-1">
         <label tw="mx-2" htmlFor="autoRefresh">Enable Auto Refresh</label>
           <input onChange={()=>{
+            //refresh immedately
+            if(!shouldRefresh){updateActivities()}
             setShouldRefresh(r=>!r)
           } } type="checkbox" name="autoRefresh" id="autoRefresh"/>
         </div>
