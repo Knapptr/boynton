@@ -12,6 +12,19 @@ import toTitleCase from "../toTitleCase";
 
 const Periods = tw.ul` gap-2 flex justify-center`;
 
+const dayAbbrev = {
+  MON: "Monday",
+  TUE: "Tuesday",
+  WED: "Wednesday",
+  THU: "Thursday",
+  FRI: "Friday",
+};
+
+const NextButton = styled.button(({disabled}) => [
+  tw`self-end py-2 px-4 bg-green-100 rounded shadow transition-colors mx-2 text-black`,
+  disabled && tw`bg-gray-500 cursor-default text-gray-600`
+
+]);
 const Controls = styled.nav(({ showControls }) => [
 	tw`hidden`,
 	showControls && tw`block`,
@@ -19,7 +32,6 @@ const Controls = styled.nav(({ showControls }) => [
 
 const CreateSchedulePage = () => {
 	const [selectedDay, setSelectedDay] = useState(0);
-	const location = useLocation();
 	const [selectedPeriod, setSelectedPeriod] = useState(0);
 	const { weekNumber, cabin } = useParams();
 	const [showControls, setShowControls] = useState(false);
@@ -57,43 +69,69 @@ const CreateSchedulePage = () => {
 			return false;
 		}
 	};
-	const selectNext = () => {
+	const selectNext = (numberToIncrement) => {
 		const currentDayIndex = selectedDay;
 		const currentPeriods = week.days[currentDayIndex].periods;
 		const currentPeriodIndex = selectedPeriod;
-		const nextPeriodIndex = currentPeriodIndex + 1;
+		const nextPeriodIndex = currentPeriodIndex + numberToIncrement
 		const itIsTheLastPeriod = currentPeriods.length === nextPeriodIndex;
+    const itIstheFirstPeriod = currentPeriodIndex === 0
 
-		if (!itIsTheLastPeriod) {
+    if (!itIsTheLastPeriod && nextPeriodIndex >=0 ) {
 			setSelectedPeriod(nextPeriodIndex);
 			return;
+
 		} else {
-			if (currentDayIndex >= 0) {
-				const nextIndex = currentDayIndex + 1;
-				const thereIsANextDay = week.days.length > nextIndex;
+				const nextIndex = currentDayIndex + numberToIncrement;
+				const thereIsANextDay = week.days[nextIndex] !== undefined
+      const periodToChoose = numberToIncrement > 0 ? 0 : week.days[nextIndex].periods.length -1
 				if (thereIsANextDay) {
 					setSelectedDay(nextIndex);
-					setSelectedPeriod(0);
-				}
+					setSelectedPeriod(periodToChoose);
 			}
 		}
 	};
 
 	return (
 		<div tw="flex flex-col justify-center min-h-screen">
-			<header tw="p-4 m-5">
-				<h5 tw="italic">Week {weekNumber}</h5>
+			<header tw="mb-3 flex items-center justify-around">
 				<h1 tw="font-bold text-3xl">Cabin {`${toTitleCase(cabin)}`}</h1>
+				<h5 tw="text-xl font-bold text-gray-600">Week {weekNumber}</h5>
 			</header>
-			{weekLoaded && (
+      <div tw="mx-auto flex w-full md:w-2/3 justify-between bg-green-700 p-2 font-bold text-white">
+                <NextButton
+                  disabled={selectedDay === 0 && selectedPeriod === 0}
+                  previous
+                  onClick={() => {
+                    selectNext(-1);
+                  }}
+                >
+                  { "<<" }
+                </NextButton>
+      {week.days && 
+                  <div tw="flex flex-col justify-center">
+                  <h1 >{dayAbbrev[week.days[selectedDay].name] }</h1>
+                  <h1>Activity Period {week.days[selectedDay].periods[selectedPeriod].number
+                  }</h1>
+                  </div>
+      }
+                <NextButton
+                  disabled={isTheLastPeriod()}
+                  onClick={() => {
+                    selectNext(1);
+                  }}
+                >
+                  {">>"}
+                </NextButton>
+            </div>
+	{weekLoaded && (
 				<div tw="flex-grow ">
 					<SelectActivities
 						selectNext={selectNext}
 						isTheLastPeriod={isTheLastPeriod}
-						dayName={week.days[selectedDay].dayName}
-						periodName={
-							week.days[selectedDay].periods[selectedPeriod]
-								.periodNumber
+						dayName={week.days[selectedDay].name}
+						periodNumber={
+							week.days[selectedDay].periods[selectedPeriod].number
 						}
 						cabinName={cabin}
 						periodID={
@@ -135,7 +173,7 @@ const CreateSchedulePage = () => {
 						}}
 						tw=" font-thin border rounded py-2 px-4 mt-2"
 					>
-						{showControls ? "Hide" : "Show"} Controls
+						{showControls ? "Hide" : "More Options"} 
 					</button>
 				</div>
 			)}

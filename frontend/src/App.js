@@ -1,5 +1,4 @@
 import "./App.css";
-import { useContext } from "react";
 import { Link, Route, Routes, BrowserRouter } from "react-router-dom";
 import CabinAssignmentRoutes from "./pages/CabinAssignment";
 import NotFound from "./pages/NotFound";
@@ -9,40 +8,44 @@ import NavWrapper from "./components/NavWrapper";
 import Protected from "./components/Protected";
 import Dashboard from "./pages/dashboard";
 import UserContext, { useUserData } from "./components/UserContext";
+import tw from "twin.macro"
+import 'styled-components/macro'
 
 function App() {
   const userState = useUserData();
   return (
+          <div className="App">
+      <div tw="max-w-3xl mx-auto">
     <UserContext.Provider value={userState}>
-      <BrowserRouter>
-        <div className="App">
-          <Routes>
+        <BrowserRouter>
+            <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route
               path="/"
-              element={
-                <Protected>
-                  <Dashboard />
-                </Protected>
+  element={
+              <Protected>
+              <Dashboard />
+      </Protected>
               }
             ></Route>
-            <Route path="/*" element={<Protected><NavWrapper /></Protected>}>
+              <Route path="/*" element={<Protected><NavWrapper /></Protected>}>
               <Route path="cabins/*">{CabinAssignmentRoutes()}</Route>
               <Route
                 path="schedule/*"
-                element={
-                  <Protected>
-                    <ScheduleRoutes />
-                  </Protected>
+  element={
+                <Protected>
+                <ScheduleRoutes />
+      </Protected>
                 }
               />
               <Route path="*" element={<NotFound />} />
-            </Route>
+              </Route>
             <Route path="*" element={<NotFound />} />
-          </Routes>
-        </div>
-      </BrowserRouter>
+              </Routes>
+          </BrowserRouter>
     </UserContext.Provider>
+    </div>
+      </div>
   );
 }
 

@@ -6,14 +6,14 @@ import "styled-components/macro";
 import { MenuSelector } from "../components/styled";
 
 const SummaryBanner = styled.div(({allHere})=>[
-  tw`text-sm text-right  py-px font-bold px-2 bg-red-400 text-white transition-colors`,
+  tw`text-sm flex justify-between  py-px font-bold px-2 bg-red-500 text-white transition-colors border border-b-black`,
   allHere && tw`bg-green-500`
 
 ])
 
 const AttendantWrapper = styled.li(({ isChecked }) => [
-  tw`bg-red-400 font-bold py-3 select-none transition-colors border border-white`,
-  isChecked && tw`bg-green-100`,
+  tw`bg-yellow-300 font-bold py-3 select-none transition-colors border border-white`,
+  isChecked && tw`bg-green-400`,
 ]);
 const AttendanceName = styled.p(({ isPresent }) => [
   isPresent && tw`line-through`,
@@ -30,7 +30,7 @@ const CamperAttendant = ({
 }) => {
   return (
     <AttendantWrapper isChecked={camper.isPresent}>
-      <div tw="flex mx-auto md:w-1/3 px-8">
+      <div tw="flex mx-auto px-8 md:px-32">
         <AttendanceName isPresent={camper.isPresent}>
           {camper.firstName} {camper.lastName}
         </AttendanceName>
@@ -109,21 +109,19 @@ const Activity = ({ activityId, refresh }) => {
     <>
       {activity && (
         <>
-          <div tw="relative">
-            <header tw="my-4 sticky top-0">
+          <div tw="relative ">
+            <header tw="mb-4 sticky top-0">
               <h2 tw="py-3 bg-lightBlue-500 text-xl font-bold text-white ">
                 {activity.name}
               </h2>
-              <h3 tw="text-sm text-right bg-gray-300 py-px font-bold px-2">
-                {activity.campers.length} campers total
-              </h3>
               <SummaryBanner allHere={getUnaccountedFor() === 0} >
+                <span>{activity.campers.length} campers total</span>
                 {getUnaccountedFor()
-                  ? `${getUnaccountedFor()} unaccounted for`
-                  : "All Here!"}
+                  ? <span>{getUnaccountedFor()} unaccounted for</span>
+                  : <span>"All Here!"</span>}
               </SummaryBanner>
             </header>
-            <ul>
+            <ul tw="w-11/12 mx-auto">
               {activity.campers.length === 0 ? (
                 <li>no campers</li>
               ) : (
@@ -190,7 +188,7 @@ const ActivitySelector = () => {
           </button>
         </MenuSelector>
       </ul>
-      <div tw="flex justify-center items-center mt-2">
+      <div tw="flex justify-center items-center my-2">
         <div tw="bg-blue-300 rounded py-px px-1">
         <label tw="mx-2" htmlFor="autoRefresh">Enable Auto Refresh</label>
           <input onChange={()=>{
@@ -200,7 +198,7 @@ const ActivitySelector = () => {
           } } type="checkbox" name="autoRefresh" id="autoRefresh"/>
         </div>
       </div>
-      <div>
+      <div tw="flex flex-col gap-2 ">
         {displayAll
           ? activities.map((activity, index) => (
               <Activity refresh={shouldRefresh} activityId={activity.id} />

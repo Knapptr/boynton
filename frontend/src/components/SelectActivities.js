@@ -7,19 +7,6 @@ import "styled-components/macro";
 import toTitleCase from "../toTitleCase";
 import UserContext from "./UserContext";
 
-const dayAbbrev = {
-  MON: "Monday",
-  TUE: "Tuesday",
-  WED: "Wednesday",
-  THU: "Thursday",
-  FRI: "Friday",
-};
-
-const NextButton = styled.button(({ allDone }) => [
-  tw`self-end py-2 px-4 bg-blue-400 rounded border-2`,
-  allDone && tw`bg-green-500`,
-]);
-
 const CamperItem = styled.li(({ isDragging }) => [
   tw`border p-1 bg-green-50`,
   isDragging && tw`bg-green-400`,
@@ -34,7 +21,7 @@ const SelectActivities = ({
   periodID,
   cabinName,
   dayName,
-  periodName,
+  periodNumber,
   isTheLastPeriod,
   selectNext,
 }) => {
@@ -104,21 +91,6 @@ const SelectActivities = ({
           <h2 tw="animate-bounce">Loading</h2>
         ) : (
           <>
-            <div tw="mx-auto flex w-10/12 justify-between">
-              <div tw="flex flex-col justify-center">
-                <h1 tw="italic">{dayAbbrev[dayName]}</h1>
-                <h1>Activity Period {periodName}</h1>
-              </div>
-              {!isTheLastPeriod() && (
-                <NextButton
-                  onClick={() => {
-                    selectNext();
-                  }}
-                >
-                  Next{" "}
-                </NextButton>
-              )}
-            </div>
             <div tw=" flex-col md:flex-row flex justify-center ">
               {activityLists.unassigned &&
                 activityLists.unassigned.campers.length > 0 && (
