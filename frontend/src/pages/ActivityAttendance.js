@@ -5,8 +5,14 @@ import tw, { styled } from "twin.macro";
 import "styled-components/macro";
 import { MenuSelector } from "../components/styled";
 
+const SummaryBanner = styled.div(({allHere})=>[
+  tw`text-sm text-right  py-px font-bold px-2 bg-red-400 text-white transition-colors`,
+  allHere && tw`bg-green-500`
+
+])
+
 const AttendantWrapper = styled.li(({ isChecked }) => [
-  tw`bg-red-400 font-bold py-3 select-none transition-colors`,
+  tw`bg-red-400 font-bold py-3 select-none transition-colors border border-white`,
   isChecked && tw`bg-green-100`,
 ]);
 const AttendanceName = styled.p(({ isPresent }) => [
@@ -111,11 +117,11 @@ const Activity = ({ activityId, refresh }) => {
               <h3 tw="text-sm text-right bg-gray-300 py-px font-bold px-2">
                 {activity.campers.length} campers total
               </h3>
-              <h3 tw="text-sm text-right bg-gray-300 py-px font-bold px-2">
+              <SummaryBanner allHere={getUnaccountedFor() === 0} >
                 {getUnaccountedFor()
                   ? `${getUnaccountedFor()} unaccounted for`
                   : "All Here!"}
-              </h3>
+              </SummaryBanner>
             </header>
             <ul>
               {activity.campers.length === 0 ? (

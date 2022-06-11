@@ -10,7 +10,7 @@ const HeaderBar = () => {
   const user = useContext(UserContext);
   return (
     <>
-      <div tw="flex items-end justify-end p-2 bg-white shadow-inner shadow my-1">
+      <div tw="flex items-end justify-end p-2 bg-white  my-1 bg-white">
         <Link tw="w-1/6 md:w-1/12 " to="/">
           <img tw="" src={logo} alt="Camp Leslie" />
         </Link>
