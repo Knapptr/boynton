@@ -1,18 +1,15 @@
-const pool = require("../db/index");
 const mapManyToOne = require("../utils/remap");
-const error = require("../utils/jsonError");
-const Camper = require("./camper");
 const Activity = require("./activity");
+const defaultPeriodRepository = require("../repositories/period");
 const {
-	fetchOneAndCreate,
 	fetchManyAndCreate,
 	fetchMany,
 } = require("../utils/pgWrapper");
 
 class Period {
-	constructor({ periodNumber, dayID, id, activities }) {
-		this.periodNumber = periodNumber;
-		this.dayID = dayID;
+	constructor({number, dayId, id, activities }) {
+		this.number = number,
+		this.dayId = dayId;
 		this.activities = activities || [];
 		this.id = id;
 	}
@@ -27,64 +24,20 @@ class Period {
 		};
 		return period;
 	}
-	static async create({ periodNumber, dayID }) {
-		const query =
-			"INSERT INTO periods (period_number,day_id) VALUES ($1,$2) RETURNING id";
-		const values = [periodNumber, dayID];
-		const period = await fetchOneAndCreate({
-			query,
-			values,
-			Model: Period,
-		});
-		return period;
+	static async create({number, dayId },periodRepository=defaultPeriodRepository) {
+    const result = await periodRepository.create({number,dayId});
+    if(!result){throw new Error("Cannot create period.")}
+    return new Period(result);
 	}
-	static async getAll() {
-		const query = `
-SELECT 
-day_id,period_number,p.id, 
-a.name,a.description,a.id as activity_id
-FROM periods p 
-LEFT JOIN activities a ON a.period_id = p.id
-		`;
-		const results = await fetchMany(query);
-		const parsedResults = results.map((result) =>
-			Period._parseResults(result)
-		);
-		const mappedPeriods = mapManyToOne({
-			array: parsedResults,
-			identifier: "id",
-			newField: "activities",
-			fieldsToRemain: ["dayID", "number", "id"],
-			fieldsToMap: ["activityName", "activityDescription", "activityID"],
-		});
-		const periods = mappedPeriods.map((p) => new Period(p));
-
-		return periods;
+	static async getAll(periodRepository = defaultPeriodRepository) {
+      const periods = await periodRepository.getAll();
+    if(!periods){return false};
+      return periods.map(p=>new Period(p))
 	}
-	static async get(id) {
-		const query = `
-SELECT 
-day_id,period_number,p.id, 
-a.name,a.description,a.id as activity_id
-FROM periods p 
-LEFT JOIN activities a ON a.period_id = p.id
-WHERE p.id = $1
-		`;
-		const values = [id];
-		const results = await fetchMany(query, values);
-		const parsedResults = results.map((result) =>
-			Period._parseResults(result)
-		);
-		const mappedPeriods = mapManyToOne({
-			array: parsedResults,
-			identifier: "id",
-			newField: "activities",
-			fieldsToRemain: ["dayID", "number", "id"],
-			fieldsToMap: ["activityName", "activityDescription", "activityID"],
-		});
-		const period = new Period(mappedPeriods[0]);
-
-		return period;
+	static async get(id,periodRepository=defaultPeriodRepository) {
+    const period = await periodRepository.get(id);
+    if(!period){return false};
+    return new Period(period);
 	}
 	async getActivities() {
 		const query = "SELECT * from activities WHERE period_id = $1";

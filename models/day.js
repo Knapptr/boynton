@@ -6,6 +6,13 @@ class Day {
     this.weekNumber = weekNumber;
     this.id = id;
   }
+  toJSON(){
+    return {
+      id:this.id,
+      name:this.name,
+      weekNumber: this.weekNumber,
+    }
+  }
 
   static async create({ name, weekNumber },dayRepository=defaultDayRepository) {
     const result = await dayRepository.create({name,weekNumber});
