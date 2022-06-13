@@ -1,34 +1,19 @@
+const { mapToGroups } = require("../utils/aggregation");
 const { fetchOne, fetchMany } = require("../utils/pgWrapper");
+const {camelCaseProps} = require("../utils/cases")
 
 module.exports = {
-  _mapResponse(dbResponse) {
-    return dbResponse.reduce((acc, cv) => {
-      const camperExists = acc.find((c) => c.id === cv.id);
-      const currentCamper = camperExists ? camperExists : {};
-      currentCamper.firstName = currentCamper.firstName || cv.first_name;
-      currentCamper.lastName = currentCamper.lastName || cv.last_name;
-      currentCamper.gender = currentCamper.gender || cv.gender;
-      currentCamper.age = currentCamper.age || cv.age;
-      currentCamper.id = currentCamper.id || cv.id;
-      currentCamper.weeks = currentCamper.weeks || [];
-      let weekSession = currentCamper.weeks.find(
-        (w) => w.number === cv.week_number
-      );
-      if (!weekSession) {
-        currentCamper.weeks.push({
-          number: cv.week_number,
-          title: cv.week_title,
-          id: cv.camper_week_id,
-          cabinSessionId: cv.cabin_session_id || null,
-          cabinName: cv.cabin_name || null,
-        });
-      }
-      if (!camperExists) {
-        acc.push(currentCamper);
-        return acc;
-      }
-      return acc;
-    }, []);
+
+  _mapResponse(dbResponse){
+    const camelCased = dbResponse.map(c=>camelCaseProps(c));
+    return mapToGroups(camelCased, "id", "weeks",{
+      weekNumber: "number",
+      weekTitle: "title",
+      cabinName: "cabinName",
+      cabinSessionId: "cabinSessionId",
+      camperWeekId: "id"
+
+    } );
   },
   async getAll() {
     const query = `SELECT 
@@ -48,7 +33,7 @@ module.exports = {
     const mappedResponse = this._mapResponse(dbResponse);
     return mappedResponse;
   },
-  async getOne(id){
+  async getOne(id) {
     const query = `SELECT 
      c.first_name,
      c.last_name ,
@@ -64,14 +49,15 @@ module.exports = {
      LEFT JOIN cabins cab ON cs.cabin_name = cab.name 
      WHERE c.id = $1
     `;
-    const values = [id]
-    const dbResponse = await fetchMany(query,values);
-    if(!dbResponse){return false};
+    const values = [id];
+    const dbResponse = await fetchMany(query, values);
+    if (!dbResponse) {
+      return false;
+    }
     const mappedResponse = this._mapResponse(dbResponse);
-    return mappedResponse[0]
-
+    return mappedResponse[0];
   },
-  async create({firstName,lastName,age,gender,id}){
+  async create({ firstName, lastName, age, gender, id }) {
     const query = `
       INSERT INTO campers (id,first_name,last_name,age,gender)
       VALUES ($1,$2,$3,$4,$5)
@@ -82,17 +68,18 @@ module.exports = {
       last_name = $3,
       age = $4,
       RETURNING *
-    `
-    const values = [id,firstName,lastName,age,gender]
-    const result = await fetchOne(query,values);
-    if(!result){return false};
+    `;
+    const values = [id, firstName, lastName, age, gender];
+    const result = await fetchOne(query, values);
+    if (!result) {
+      return false;
+    }
     return {
       firstName: result.first_name,
       lastName: result.last_name,
       age: result.age,
       gender: result.gender,
-      weeks: []
-    }
-
-  }
+      weeks: [],
+    };
+  },
 };
