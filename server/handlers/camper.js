@@ -17,7 +17,7 @@ const handler = {
 		if (req.query.week) {
 			const week = Number.parseInt(req.query.week);
 			campers = campers.filter((camper) =>
-				camper.weeks.some((session) => session.weekNumber === week)
+				camper.weeks.some((session) => session.number === week)
 			);
 		}
 		if (req.query.cabin) {
@@ -28,7 +28,7 @@ const handler = {
 				camper.weeks.some((session) => {
 					return week
 						? session.cabinName === cabin &&
-								session.weekNumber === week
+								session.number === week
 						: session.cabinName === cabin;
 				})
 			);
