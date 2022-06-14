@@ -9,7 +9,7 @@ module.exports = {
       week_number: 1,
       week_title: "Around the world week",
       camper_week_id: 606,
-      cabin_session_id_id: null,
+      cabin_session_id: null,
       cabin_name: null,
     },
     {

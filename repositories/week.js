@@ -1,30 +1,24 @@
 const { fetchOne, fetchMany } = require("../utils/pgWrapper");
+const { camelCaseProps } = require("../utils/cases");
+const { mapToGroups } = require("../utils/aggregation");
+
 const weekRepository = {
   _mapResponse(dbResponse) {
-    return dbResponse.reduce((acc, cv) => {
-      const currentWeek = acc.find((w) => {
-       return w.number === cv.number}) || {};
-      currentWeek.title = currentWeek.title || cv.title;
-      currentWeek.number = currentWeek.number || cv.number;
-      currentWeek.days = currentWeek.days || [];
-      if(cv.day_id){
+    const camelCased = dbResponse.map((w) => camelCaseProps(w));
+    const remappedWithDays = mapToGroups(camelCased,"number","days",{
+      dayName: "name",
+      dayId: "id",
+      periodId: "periodId",
+      periodNumber: "periodNumber",
 
-      const dayInWeek = currentWeek.days.find((d) => d.id === cv.day_id) || {
-        id: cv.day_id,
-        name: cv.day_name,
-        periods: [],
-      };
-      dayInWeek.periods.push({ number: cv.period_number, id: cv.period_id });
-      if (!currentWeek.days.find((d) => d.id === cv.day_id)) {
-        currentWeek.days.push(dayInWeek);
-      }
-      }
-      if (acc.find((w) => w.number === cv.number)) {
-        return acc;
-      }
-      acc.push(currentWeek);
-      return acc;
-    }, []);
+    });
+    const remapped = remappedWithDays.map(w=>{
+      return {...w,days: mapToGroups(w.days,"id","periods",{
+        periodNumber: "number",
+        periodId:"id"
+      },)}
+    })
+    return remapped
   },
   async getAll() {
     const query = `SELECT 
@@ -64,18 +58,20 @@ const weekRepository = {
     return mappedData[0];
   },
 
-  async delete(weekNumber){
-    const query = "DELETE FROM weeks WHERE number = $1 RETURNING *"
+  async delete(weekNumber) {
+    const query = "DELETE FROM weeks WHERE number = $1 RETURNING *";
     const values = [weekNumber];
-    const deletedWeek = await fetchOne(query,values);
+    const deletedWeek = await fetchOne(query, values);
     return deletedWeek;
   },
-  async create({ title, number}) {
+  async create({ title, number }) {
     const weekQuery = `INSERT INTO weeks (title,number) VALUES ($1,$2) RETURNING *`;
     const weekValues = [title, number];
     const insertWeekResponse = await fetchOne(weekQuery, weekValues);
-    if(insertWeekResponse){ insertWeekResponse.days = [];
-    }    return insertWeekResponse
+    if (insertWeekResponse) {
+      insertWeekResponse.days = [];
+    }
+    return insertWeekResponse;
   },
 };
 
