@@ -37,7 +37,7 @@ const handler = {
 	},
 	async getOneCamper(req, res, next) {
 		const id = req.params.camperID;
-		let camper = await Camper.getById(id, true);
+		let camper = await Camper.getById(id);
 		res.json(camper);
 	},
 };

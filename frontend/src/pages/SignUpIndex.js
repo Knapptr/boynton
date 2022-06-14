@@ -9,8 +9,6 @@ import cl from "../cl.png";
 import UserContext from "../components/UserContext";
 
 const SignUpIndex = () => {
-    const auth = useContext(UserContext)
-	const navigate = useNavigate();
 	const [cabins] = useGetDataOnMount({
 		url: "/api/cabins",
 		initialState: [],

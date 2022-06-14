@@ -4,7 +4,7 @@
 	"description": "",
 	"main": "index.js",
 	"scripts": {
-		"test": "jest",
+		"test": "jest --watch",
 		"start": "nodemon index.js"
 	},
 	"author": "Tyler Knapp <knapptr@gmail.com>",
@@ -32,5 +32,8 @@
 	"devDependencies": {
 		"jest": "^28.1.0",
 		"nodemon": "^2.0.16"
-	}
+	},
+  "jest":{
+    "testPathIgnorePatterns": ["<rootDir>/oldtests/","<rootDir>/frontend/"] 
+  }
 }

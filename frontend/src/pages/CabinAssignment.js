@@ -8,7 +8,6 @@ import UserContext from '../components/UserContext';
 import tw from "twin.macro";
 import "styled-components/macro";
 import useCabinSessions from "../hooks/useCabinSessions";
-import Protected from "../components/Protected";
 import CabinAssignmentIndex from './cabinAssignmentIndex';
 import UnitHeadAccess from "../components/ProtectedUnitHead";
 
