@@ -5,12 +5,19 @@ import "styled-components/macro";
 import { useCallback, useContext, useEffect, useState } from "react";
 import fetchWithToken from "../fetchWithToken";
 import UserContext from "../components/UserContext";
+import {useParams} from "react-router-dom";
 
 const CabinListPage = () => {
+  const {weekNumber:weekNumberString} = useParams();
+  const weekNumber = Number.parseInt(weekNumberString);
   const auth = useContext(UserContext);
-  const [selected, setSelected] = useState({ week: null, cabin: "all" });
+  const [selected, setSelected] = useState({ cabin: "all" });
   const [campersByCabin, setCampersByCabin] = useState({});
   const [displayedCabins, setDisplayedCabins] = useState([]);
+
+  const selectCabin = (cabinName)=>{
+    setSelected(s=>({...s,cabin:cabinName}));
+  }
 
   useEffect(() => {
     const cabins = campersByCabin.cabins;
@@ -37,31 +44,15 @@ const CabinListPage = () => {
     ]);
   }, [selected, campersByCabin]);
 
-  const [weeks] = useGetDataOnMount({
-    url: "/api/weeks",
-    useToken: true,
-    initialState: [],
-  });
-  const selectWeek = (selectedIndex) => {
-    setSelected((s) => ({ ...s, week: selectedIndex }));
-  };
-  const selectCabin = (cabinName) => {
-    setSelected((s) => ({ ...s, cabin: cabinName }));
-  };
-  const selectedWeek = useCallback(() => {
-    return weeks[selected.week].number;
-  }, [selected, weeks]);
 
   useEffect(() => {
-    if (selected.week === null) {
-      return;
-    }
     const groupCampersByCabin = (campers) => {
       const data = campers.reduce(
         (acc, cv) => {
           const camperSession = cv.weeks.find(
-            (w) => w.number === selectedWeek()
+            (w) => w.number === weekNumber
           );
+          console.log({camperSession,cv})
           if (!acc.cabins.includes(camperSession.cabinName)) {
             acc.cabins.push(camperSession.cabinName);
           }
@@ -96,7 +87,7 @@ const CabinListPage = () => {
     };
     const getCampersByCabin = async () => {
       const camperResponse = await fetchWithToken(
-        `/api/campers?week=${selectedWeek()}`,
+        `/api/campers?week=${weekNumber}`,
         {},
         auth
       );
@@ -104,51 +95,44 @@ const CabinListPage = () => {
       setCampersByCabin(groupCampersByCabin(campers));
     };
     getCampersByCabin();
-  }, [selected, selectedWeek, auth]);
+  }, [weekNumber,auth]);
   return (
     <>
-      <h1>Week</h1>
-      <ul tw="flex justify-center gap-3">
-        {weeks.map((week, weekIndex) => (
-          <MenuSelector
-            tw="px-4"
-            onClick={() => selectWeek(weekIndex)}
-            isSelected={selected.week === weekIndex}
-          >
-            <button>{week.number}</button>
-          </MenuSelector>
-        ))}
-      </ul>
-      <ul tw="flex justify-center gap-3 flex-wrap">
+      <ul tw="flex justify-center gap-1 flex-wrap">
+        <MenuSelector
+          tw="px-2"
+          onClick={() => selectCabin("all")}
+          isSelected={selected.cabin === "all"}
+        >
+          All
+        </MenuSelector>
         {campersByCabin.cabins &&
             campersByCabin.cabins.filter(cabinName=>cabinName !== null).map((cabinName, cabinIndex) => (
             <MenuSelector
-              tw="px-4"
+              tw="px-2"
               onClick={() => selectCabin(cabinName)}
               isSelected={selected.cabin === cabinName}
             >
               <button>{cabinName}</button>
             </MenuSelector>
           ))}
-        <MenuSelector
-          tw="px-4"
-          onClick={() => selectCabin("all")}
-          isSelected={selected.cabin === "all"}
-        >
-          All
-        </MenuSelector>
       </ul>
-      <ul>
+      <header tw="my-2"><h2 tw="text-xl font-bold ">Week {weekNumber}</h2></header>
+      <ul tw="flex flex-col gap-2">
         {displayedCabins.length > 0 &&
           displayedCabins.map((cabin) => {
             console.log( {displayedCabins,cabin} )
             return (
               <li>
-                {cabin.cabinName}
-                <ul>
+                <header tw="bg-green-200 sticky top-0">
+                  <h3 tw="font-bold text-xl">
+                  {cabin.cabinName}
+                  </h3>
+                </header>
+                <ul tw="flex flex-col gap-1 w-11/12 mx-auto">
                   {cabin.campers.map((camper) => (
-                    <li>
-                      {camper.firstName} {camper.lastName}
+                    <li tw="bg-slate-100 text-lg shadow">
+                      {camper.firstName} {camper.lastName} <span tw="italic font-light">{camper.age}</span>
                     </li>
                   ))}
                 </ul>

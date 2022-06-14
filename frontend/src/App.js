@@ -8,9 +8,10 @@ import NavWrapper from "./components/NavWrapper";
 import Protected from "./components/Protected";
 import Dashboard from "./pages/dashboard";
 import UserContext, { useUserData } from "./components/UserContext";
-import CabinListPage from './pages/CabinList'
+import CabinListPage from "./pages/CabinList";
 import tw from "twin.macro";
 import "styled-components/macro";
+import CabinListIndex from "./pages/CabinListIndex";
 
 function App() {
   const userState = useUserData();
@@ -37,16 +38,22 @@ function App() {
                   </Protected>
                 }
               >
-                <Route path="cabins/*">
+                <Route path="cabins/">
                   {CabinAssignmentRoutes()}{" "}
-                  <Route
-                    path="list/"
-                    element={
-                      <Protected>
-                        <CabinListPage />
-                      </Protected>
-                    }
-                  ></Route>
+                  <Route path="list/">
+                    <Route
+                      index
+                      element={
+                        <Protected>
+                          <CabinListIndex />
+                        </Protected>
+                      }
+                    ></Route>
+                    <Route
+                      path=":weekNumber"
+                      element={<CabinListPage />}
+                    ></Route>
+                  </Route>
                 </Route>
                 <Route
                   path="schedule/*"
