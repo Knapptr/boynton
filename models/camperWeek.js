@@ -1,7 +1,5 @@
 const pool = require("../db");
 const {
-    fetchOneAndCreate,
-    fetchManyAndCreate,
     fetchMany,
     fetchOne,
 } = require("../utils/pgWrapper");
