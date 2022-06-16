@@ -1,5 +1,3 @@
-const mapManyToOne = require("../utils/remap");
-const { fetchMany } = require("../utils/pgWrapper");
 const defaultCamperRepository = require('../repositories/camper');
 
 class Camper {
