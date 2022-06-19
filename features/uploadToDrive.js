@@ -29,7 +29,8 @@ const uploadFile = async (auth, filePath, fileName, folderID) => {
 const auth = () => {
 	try {
 		const serviceAuth = new GoogleAuth({
-			keyFile: "./credentials.json",
+			// keyFile: "./credentials.json",
+      credentials: JSON.parse(process.env.GOOGLE_CREDENTIALS),
 			scopes: SCOPES,
 		});
 		return serviceAuth;
