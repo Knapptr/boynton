@@ -47,12 +47,6 @@ const AttendanceIndex = () => {
     }
   }, [selected.period]);
 
-  const getSelectedPeriodId = () => {
-    const period =
-      schedule[selected.week].days[selected.day].periods[selected.period];
-    return period.id;
-  };
-  const urls = ["/api/weeks"];
   return (
     <>
       <h1>Select Week</h1>
