@@ -15,3 +15,4 @@ createAdmin.js
 anjanotes.md
 package.json
 oldtests/
+tests/tryIfExists.js

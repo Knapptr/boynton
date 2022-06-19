@@ -1,7 +1,7 @@
 const defaultRepository = require("../repositories/score");
 class Score {
   constructor({ awardedTo, points, awardedFor, weekNumber, id }) {
-    this.id = id;
+   this.id = id;
     this.awardedTo = awardedTo;
     this.awardedFor = awardedFor;
     this.weekNumber = weekNumber;
