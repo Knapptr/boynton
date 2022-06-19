@@ -1,7 +1,6 @@
 const {fetchMany,fetchOne} = require('../utils/pgWrapper')
 module.exports = {
   _mapResponse(dbResponse){
-    console.log({dbResponse})
     return {
         id:dbResponse.id,
       awardedAt:dbResponse.awarded_at,
@@ -25,7 +24,6 @@ module.exports = {
     const awardedAt = Date.now();
     const values = [awardedTo,points,awardedFor,weekNumber,awardedAt];
     const result = await fetchOne(query,values);
-    console.log(result)
     return this._mapResponse(result)
 
   }
