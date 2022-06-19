@@ -1,4 +1,4 @@
-const { weeks } = require("../config.json");
+const { weeks } = JSON.parse(process.env.CONFIG);
 const getYear = () => {
 	return new Date().getFullYear();
 };

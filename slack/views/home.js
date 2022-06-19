@@ -1,4 +1,4 @@
-const flEvalURL = require("../../config.json").flEvalURL;
+const { flEvalURL  }= JSON.parse(process.env.CONFIG);
 const ROOTURL = process.env.ROOTURL;
 const homeView = {
 	type: "home",
