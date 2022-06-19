@@ -3,7 +3,10 @@ const {fetchMany, fetchOne} = require('../../utils/pgWrapper');
 jest.mock('../../utils/pgWrapper')
 const response = require('../dbResponses/score');
 
-describe('get',()=>{
+describe('unorganized tests',()=>{
+  it('has an init function',()=>{
+    expect(scoreRepo.init).toBeDefined();
+  })
   it('has a get all function',()=>{
     expect(scoreRepo.getAll).not.toBeUndefined()
   })
@@ -32,4 +35,5 @@ describe('get',()=>{
       expect(res).toEqual(response.repo[0])
     })
   })
+  
 })
