@@ -34,6 +34,9 @@ it("returns false if week does not exist", () => {
 });
 
 describe("create", () => {
+  it('has an init method',()=>{
+    expect(weekRepository.init).toBeDefined();
+  })
   it("creates a week", () => {
     const createData = {
       title: "A new Week",
