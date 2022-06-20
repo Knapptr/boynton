@@ -14,9 +14,9 @@ WHERE d.week_id = $1 AND d.name=$2 AND p.period_number = $3
 	return periodId;
 };
 
-const insertActivity = async (activityName, activityDescription, periodId) => {
-	const query = `INSERT INTO activities (name,description,period_id) VALUES ($1,$2,$3) ON CONFLICT ON CONSTRAINT no_duplicates DO UPDATE set name=$1, description=$2`;
-	const values = [activityName, activityDescription, periodId];
+const insertActivity = async (id,activityName, activityDescription, periodId) => {
+	const query = `INSERT INTO activities (id,name,description,period_id) VALUES ($1,$2,$3,$4) ON CONFLICT ON CONSTRAINT activities_pkey DO UPDATE set name=$2, description=$3`;
+	const values = [id,activityName, activityDescription, periodId];
 	const result = await pool.query(query, values);
 	return result.rows;
 };
@@ -26,10 +26,11 @@ const getPeriodIdAndInsert = async ({
 	activity,
 	description,
 	period,
+  id,
 	day,
 }) => {
 	const periodId = await getPeriodId(weekNumber, day, period);
-	const results = await insertActivity(activity, description, periodId);
+	const results = await insertActivity(id,activity, description, periodId);
 	return results;
 };
 
@@ -43,5 +44,4 @@ const insertActivities = async (schedule) => {
 		})
 	);
 };
-
-parseSchedule(1).then((s) => insertActivities(s));
+module.exports = insertActivities;
