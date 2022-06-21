@@ -1,3 +1,5 @@
+Make route to sync activites✅
+protect action route to admin only
 Day Repo init
 Week Repo init✅
 Camper Repo init
@@ -7,6 +9,6 @@ User Repo init
 Score Repo init✅
 Scores router
 Scores controller
-Boynton scoreboar
+Boynton scoreboard
 Boynton award-points
 
