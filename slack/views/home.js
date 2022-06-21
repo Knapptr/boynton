@@ -21,6 +21,16 @@ const homeView = {
 					type: "button",
 					text: {
 						type: "plain_text",
+						text: "Give Points",
+						emoji: true,
+					},
+					action_id: "awardPoints",
+				},
+
+				{
+					type: "button",
+					text: {
+						type: "plain_text",
 						text: "Eval FL",
 						emoji: true,
 					},
