@@ -95,12 +95,9 @@ const getBlocks = async (index = 0) => {
 			block_id: "camperNames",
 			label: { type: "plain_text", text: "Camper Name" },
 			element: {
-				// type: "multi_static_select",
 				type: "multi_external_select",
 				placeholder: { type: "plain_text", text: "Select Campers" },
 				action_id: "camper_options",
-				// action_id: "select",
-				// option_groups: await createCamperSelectionOptions(),
 			},
 		},
 	];

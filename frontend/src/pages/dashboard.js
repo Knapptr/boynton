@@ -18,6 +18,9 @@ const Dashboard = () => {
 			/>
 			<nav>
 				<ul tw="flex flex-col gap-2 w-1/2 mx-auto mt-8">
+					<NavBarLink color="orange">
+						<Link to="scoreboard">Scoreboard</Link>
+					</NavBarLink>
 					<NavBarLink color="green">
 						<Link to="schedule/sign-up">Schedule Sign-Up</Link>
 					</NavBarLink>

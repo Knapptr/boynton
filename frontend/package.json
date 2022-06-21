@@ -18,7 +18,7 @@
 	},
 	"proxy": "http://localhost:3000",
 	"scripts": {
-		"start": "react-scripts start",
+		"start": "PORT=3001 BROWSER=none react-scripts start",
 		"build": "react-scripts build",
 		"test": "react-scripts test",
 		"eject": "react-scripts eject"

@@ -32,6 +32,9 @@ describe("Get",()=>{
 })
 
 describe("Create",()=>{
+  it("has an init function",()=>{
+    expect(dayRepository.init).toBeDefined();
+  })
   it("Returns a created day",()=>{
     fetchOne.mockResolvedValue(responseMocks.dbResponse[0])
     return dayRepository.create({name:"MON",weekId:1}).then(res=>{

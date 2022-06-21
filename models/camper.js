@@ -18,7 +18,6 @@ class Camper {
       age: this.age,
       gender: this.gender,
       weeks: this.weeks,
-
     }
   }
   async save(){

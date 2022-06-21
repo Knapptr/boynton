@@ -32,6 +32,9 @@ describe("get",()=>{
   })
 })
 describe("creation",()=>{
+  it('has an init method',()=>{
+    expect(periodRepository.init).toBeDefined();
+  })
   it("inserts a period",()=>{
     fetchOne.mockResolvedValue({day_id:106,period_number:1,id:777})
     return periodRepository.create({dayId:106,number:1}).then(res=>{

@@ -1,5 +1,19 @@
 const { fetchOne, fetchMany } = require("../utils/pgWrapper");
 
+const createTableQuery = `
+CREATE TABLE IF NOT EXISTS public.periods
+(
+    id integer NOT NULL DEFAULT nextval('period_id_seq'::regclass),
+    day_id integer NOT NULL DEFAULT nextval('period_day_id_seq'::regclass),
+    period_number integer NOT NULL,
+    CONSTRAINT period_pkey PRIMARY KEY (id),
+    CONSTRAINT day_id FOREIGN KEY (day_id)
+        REFERENCES public.days (id) MATCH SIMPLE
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+        NOT VALID
+)
+`
 module.exports = {
   _mapResponse(dbResponse){
     return dbResponse.reduce((acc, cv) => {
@@ -21,6 +35,14 @@ module.exports = {
       });
       return acc
     }, []);
+a },
+  async init(){
+    try {
+     await fetchOne(createTableQuery) 
+      return true
+    } catch (e) {
+     return false 
+    }
   },
 
   async getAll() {

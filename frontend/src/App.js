@@ -12,7 +12,8 @@ import CabinListPage from "./pages/CabinList";
 import tw from "twin.macro";
 import "styled-components/macro";
 import CabinListIndex from "./pages/CabinListIndex";
-
+import Scoreboard from "./pages/Scoreboard";
+import Score from "./components/Score"
 function App() {
   const userState = useUserData();
   return (
@@ -55,6 +56,10 @@ function App() {
                     ></Route>
                   </Route>
                 </Route>
+                <Route path="scoreboard" element={<Scoreboard/>}>
+                  <Route path=":weekNumber" element={<Score/>}/>
+                </Route>
+                <Route path="cabins/*">{CabinAssignmentRoutes()}</Route>
                 <Route
                   path="schedule/*"
                   element={

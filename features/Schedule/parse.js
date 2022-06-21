@@ -13,6 +13,10 @@ const loginCredentials = {
 	private_key: process.env.GOOGLE_PRIVATE_KEY,
 };
 
+const createId = ({weekNumber,periodNumber,optionNumber})=>{
+  return `${weekNumber}-${periodNumber}-${optionNumber}`
+}
+
 const parseSchedule = async (weekNumber = getWeek()) => {
 	const doc = new GoogleSpreadsheet(sheetID);
 	await doc.useServiceAccountAuth(loginCredentials);
@@ -22,6 +26,7 @@ const parseSchedule = async (weekNumber = getWeek()) => {
 	const optionsAndDescriptions = sheet.headerValues.slice(2);
 	const activities = rows.reduce((acc, cv) => {
 		const options = [];
+    let optionNumber =1
 		for (let i = 0; i < optionsAndDescriptions.length; i += 2) {
 			const activityHeader = optionsAndDescriptions[i];
 			const descriptionHeader = optionsAndDescriptions[i + 1];
@@ -32,12 +37,15 @@ const parseSchedule = async (weekNumber = getWeek()) => {
 					period: cv["Period"],
 					activity: cv[activityHeader],
 					description: cv[descriptionHeader],
+          id: createId({weekNumber,periodNumber:cv["Period"],optionNumber:optionNumber})
 				});
 			}
+      optionNumber +=1;
 		}
 		acc = [...acc, ...options];
 		return acc;
 	}, []);
+  console.log(activities);
 	return activities;
 };
 
