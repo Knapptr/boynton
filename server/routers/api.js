@@ -7,8 +7,10 @@ const cabinSessionRouter = require("./cabinSession");
 const cabinRouter = require("./cabins");
 const camperWeekRouter = require("./camperWeeks");
 const weekRouter = require("./weeks");
+const scoreRouter = require('./scores');
 const passport = require("passport");
 
+router.use('/scores',scoreRouter);
 router.use(passport.authenticate("jwt", { session: false }));
 router.use("/activities", activityRouter);
 router.use("/campers", camperRouter);

@@ -11,4 +11,5 @@ Scores router
 Scores controller
 Boynton scoreboard
 Boynton award-points
+db initializer
 
