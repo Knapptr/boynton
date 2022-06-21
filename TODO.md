@@ -7,6 +7,7 @@ User Repo init
 Score Repo init✅
 Scores router
 Scores controller
-Boynton scoreboar
+Boynton scoreboard
 Boynton award-points
+db initializer
 
