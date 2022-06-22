@@ -18,6 +18,7 @@ module.exports = {
         res.json(activities);
     },
     async addCamper(req, res, next) {
+      console.log({body:req.body});
         const { camperWeekId, periodId } = req.body;
         const activityId = req.params.activityID;
         const activity = await Activity.get(activityId);
@@ -28,7 +29,7 @@ module.exports = {
         res.json({ camperActivityID });
     },
     async attendance(req, res) {
-        const activityId = req.params.activityID;
+        // const activityId = req.params.activityID;
         const isPresent = req.body.isPresent;
         const camperActivityID = req.params.camperActivityID;
         const camperActivity = await CamperActivity.get(camperActivityID);
