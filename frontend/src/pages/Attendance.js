@@ -10,6 +10,10 @@ import ActivityAttendance from "../components/ActivityAttendance";
 import ActivitySelectors from "../components/ActivitySelectors";
 import ReassignmentSelectionDialog from "../components/AttendanceReassignDialog";
 import fetchWithToken from "../fetchWithToken";
+import AttendanceSearch from "../components/AttendanceSearch";
+
+const refreshRate = 1000 * 10;
+const cancelIntervalTime = 1000 * 60 * 8;
 
 const AttendanceDisplay = () => {
   const { periodId } = useParams();
@@ -17,12 +21,42 @@ const AttendanceDisplay = () => {
   const [selected, setSelected] = useState(null);
   const [selectedCampers, setSelectedCampers] = useState([]);
   const [displayAll, setDisplayAll] = useState(true);
-  const [displayModal, setDisplayModal] = useState(false);
+  const [showReassignModal, setShowReassignModal] = useState(false);
+  const [showSearchModal, setShowSearchModal] = useState(false);
+  const [autoRefresh, setAutoRefresh] = useState(true);
   const [period, setPeriod, updatePeriod] = useGetDataOnMount({
     url: `/api/periods/${periodId}`,
     initialState: null,
     useToken: true,
   });
+  const timeoutRef = useRef(null);
+  const intervalRef = useRef(null);
+
+  useEffect(() => {
+    if (autoRefresh) {
+      intervalRef.current = setInterval(() => {
+        updatePeriod();
+      }, refreshRate);
+      timeoutRef.current = setTimeout(() => {
+        setAutoRefresh(false);
+      }, cancelIntervalTime);
+      return () => {
+        clearInterval(intervalRef.current);
+        clearTimeout(timeoutRef.current);
+      };
+    }
+    clearInterval(intervalRef.current);
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+  }, [autoRefresh,updatePeriod]);
+
+  const openSearchModal = () => {
+    setShowSearchModal(true);
+  };
+  const closeSearchModal = () => {
+    setShowSearchModal(false);
+  };
   const selectSpecific = (index) => {
     setSelected(index);
     setDisplayAll(false);
@@ -99,34 +133,42 @@ const AttendanceDisplay = () => {
 
   return (
     <>
-
-        <div tw="mb-32">
-    {period && (
+      <div tw="mb-32">
+        {period && (
           <>
-            <div tw="mb-6">
-            <ActivitySelectors
-              selectAll={selectAll}
-              selectSpecific={selectSpecific}
-              period={period}
-              displayAll={displayAll}
-              selected={selected}
+            <AttendanceSearch
+              closeSearchModal={closeSearchModal}
+              shouldDisplay={showSearchModal}
+              periodNumber={period.number}
+              activities={period.activities}
             />
-      </div>
-      </>
+            <div tw="mb-6">
+              <button tw="bg-blue-200" onClick={openSearchModal}>
+                Search
+              </button>
+              <ActivitySelectors
+                selectAll={selectAll}
+                selectSpecific={selectSpecific}
+                period={period}
+                displayAll={displayAll}
+                selected={selected}
+              />
+            </div>
+          </>
         )}
         {period && displayAll && renderAllActivities()}
         {period && !displayAll && renderSelectedActivity()}
-          </div>
-            <ReassignmentSelectionDialog
-              selectedCampers={selectedCampers}
-              camperSelection={camperSelection}
-              setDisplayModal={setDisplayModal}
-                />
-      {displayModal && selectedCampers.length > 0 && (
+      </div>
+      <ReassignmentSelectionDialog
+        selectedCampers={selectedCampers}
+        camperSelection={camperSelection}
+        setDisplayModal={setShowReassignModal}
+      />
+      {showReassignModal && selectedCampers.length > 0 && (
         <ReassignModal
           selectedCampers={selectedCampers}
           period={period}
-          setDisplayModal={setDisplayModal}
+          setDisplayModal={setShowReassignModal}
           updatePeriod={updatePeriod}
           camperSelection={camperSelection}
         />

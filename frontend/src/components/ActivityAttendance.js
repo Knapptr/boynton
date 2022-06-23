@@ -50,7 +50,7 @@ const CamperAttendant = ({
           </button>
         </div>
         <AttendanceName isPresent={camper.isPresent}>
-          {camper.firstName} {camper.lastName}
+          {camper.firstName} {camper.lastName} <span tw="font-light">{camper.cabinName}</span>
         </AttendanceName>
         <AttendanceButton
           isPresent={camper.isPresent}

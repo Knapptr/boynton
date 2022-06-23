@@ -9,7 +9,7 @@ import toTitleCase from "../toTitleCase";
 const HeaderBar = () => {
   const user = useContext(UserContext);
   return (
-      <div tw="">
+      <div tw="flex items-center px-4 py-2">
         <div tw="w-1/6">
           <Link to="/">
           <img  tw="" src={logo} alt="Camp Leslie" />

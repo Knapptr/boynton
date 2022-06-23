@@ -18,7 +18,7 @@ const ActivityList = styled.ul(({ blue, isDraggingOver }) => [
   isDraggingOver && blue && tw`bg-blue-500`,
 ]);
 const SelectActivities = ({
-  periodID,
+  periodId,
   cabinName,
   dayName,
   periodNumber,
@@ -29,7 +29,7 @@ const SelectActivities = ({
     loading: activitiesLoading,
     activityLists,
     updateActivityAttendance,
-  } = useActivityAttendance(periodID, cabinName);
+  } = useActivityAttendance(periodId, cabinName);
   const auth = useContext(UserContext)
   const addCamperActivityToDB = async (camperWeekId, activityId, periodId) => {
     const camper = {
@@ -70,7 +70,7 @@ const SelectActivities = ({
     if (destinationListId === "unassigned") {
       return;
     }
-    await addCamperActivityToDB(camper.id, destinationListId, periodID);
+    await addCamperActivityToDB(camper.weekId, destinationListId, periodId);
   };
   return (
     <DragDropContext
@@ -110,8 +110,8 @@ const SelectActivities = ({
                             activityLists.unassigned.campers.map((c, index) => (
                               <Draggable
                                 index={index}
-                                draggableId={`${c.id}`}
-                                key={`unassigned-draggable-${c.id}`}
+                                draggableId={`${c.weekId}`}
+                                key={`unassigned-draggable-${c.weekId}`}
                               >
                                 {(provided, snapshot) => (
                                   <CamperItem
