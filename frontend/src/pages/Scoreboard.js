@@ -16,6 +16,7 @@ const WeekLink = ({to,children})=>{
   console.log(path);
   return (
     <>
+    
       <div tw="mb-11">
       <h2>Week:</h2>
         <ul tw="flex justify-center gap-2">

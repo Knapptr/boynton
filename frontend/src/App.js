@@ -12,50 +12,50 @@ import tw from "twin.macro";
 import "styled-components/macro";
 import Scoreboard from "./pages/Scoreboard";
 import Score from "./components/Score"
+
 function App() {
   const userState = useUserData();
   return (
     <div className="App">
-      <div tw="max-w-3xl mx-auto">
+      <div tw="max-w-3xl mx-auto" >
         <UserContext.Provider value={userState}>
-          <BrowserRouter>
-            <Routes>
-              <Route path="/login" element={<LoginPage />} />
-              <Route
-                path="/"
-                element={
-                  <Protected>
-                    <Dashboard />
-                  </Protected>
-                }
-              ></Route>
-              <Route
-                path="/*"
-                element={
-                  <Protected>
-                    <NavWrapper />
-                  </Protected>
-                }
-              >
-                <Route path="scoreboard" element={<Scoreboard/>}>
-                  <Route path=":weekNumber" element={<Score/>}/>
-                </Route>
-                <Route path="cabins/*">{CabinAssignmentRoutes()}</Route>
-                <Route
-                  path="schedule/*"
-                  element={
-                    <Protected>
-                      <ScheduleRoutes />
-                    </Protected>
-                  }
-                />
-                <Route path="*" element={<NotFound />} />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
+            <Route
+              path="/"
+              element={
+                <Protected>
+                  <Dashboard />
+                </Protected>
+              }
+            ></Route>
+            <Route
+              path="/*"
+              element={
+                <Protected>
+                  <NavWrapper />
+                </Protected>
+              }
+            >
+              <Route path="scoreboard" element={<Scoreboard/>}>
+                <Route path=":weekNumber" element={<Score/>}/>
               </Route>
+              <Route path="cabins/*">{CabinAssignmentRoutes()}</Route>
+              <Route
+                path="schedule/*"
+                element={
+                  <Protected>
+                    <ScheduleRoutes />
+                  </Protected>
+                }
+              />
               <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </UserContext.Provider>
-      </div>
+            </Route>
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </UserContext.Provider></div>
     </div>
   );
 }

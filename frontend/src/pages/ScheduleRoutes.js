@@ -2,7 +2,7 @@ import { Routes, Route, Outlet } from "react-router-dom";
 import CreateSchedulePage from "./CreateSchedule";
 import SignUpIndex from "./SignUpIndex";
 import AttendanceIndex from "./AttendanceIndex";
-import ActivityAttendance from "./ActivityAttendance";
+import Attendance from "./Attendance";
 
 const ScheduleRoutes = () => {
     return (
@@ -17,7 +17,7 @@ const ScheduleRoutes = () => {
                     <Route index element={<AttendanceIndex />}></Route>
                     <Route
                         path=":periodId"
-                        element={<ActivityAttendance />}
+                        element={<Attendance />}
                     ></Route>
                 </Route>
             </Routes>
