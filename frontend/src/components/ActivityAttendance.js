@@ -18,8 +18,8 @@ const AttendanceButton = styled.button(({ isPresent }) => [
   isPresent && tw`no-underline`,
 ]);
 
-const SummaryBanner = styled.div(({ allHere }) => [
-  tw`z-50 text-sm flex justify-between  py-px font-bold px-2 bg-red-500 text-white transition-colors border border-b-black`,
+const AttendanceSummary = styled.div(({ allHere }) => [
+  tw`z-50 text-sm py-px font-bold px-2 bg-red-500 text-white transition-colors rounded flex items-center w-2/5 justify-center`,
   allHere && tw`bg-green-500`,
 ]);
 
@@ -27,7 +27,6 @@ const CamperAttendant = ({
   camperIndex,
   camper,
   activity,
-  activityIndex,
   toggleIsPresent,
   camperSelection,
 }) => {
@@ -88,20 +87,20 @@ const ActivityAttendance = ({ activity, activityIndex, toggleHere, camperSelecti
   return (
     <>
       <div tw="relative ">
-        <header tw="mb-4 sticky top-0">
-          <h2 tw="py-3 bg-lightBlue-500 text-xl font-bold text-white ">
+        <header tw="mb-4 bg-lightBlue-500 sticky top-0 flex justify-center py-2 px-3">
+          <h2 tw="py-3 px-2 text-xl font-bold text-white w-1/2 sm:w-2/3 ">
             {activity.name}
+            <span tw="text-gray-800 ml-3 font-thin">{activity.campers.length}</span>
           </h2>
-          <SummaryBanner allHere={getUnaccountedFor() === 0}>
-            <span>{activity.campers.length} campers total</span>
+          <AttendanceSummary allHere={getUnaccountedFor() === 0}>
             {getUnaccountedFor() ? (
-              <span>{getUnaccountedFor()} unaccounted for</span>
+              <span>{getUnaccountedFor()} unaccounted</span>
             ) : (
-              <span>"All Here!"</span>
+              <span>All Here!</span>
             )}
-          </SummaryBanner>
+          </AttendanceSummary>
         </header>
-        <ul tw="w-11/12 mx-auto">
+        <ul tw="w-11/12 mx-auto my-3">
           {activity.campers.length === 0 ? (
             <li>no campers</li>
           ) : (
