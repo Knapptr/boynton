@@ -1,3 +1,4 @@
+add daycamp and FL flags to db
 Make route to sync activites✅
 protect action route to admin only
 Day Repo init

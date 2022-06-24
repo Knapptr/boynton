@@ -1,9 +1,7 @@
 import { useParams } from "react-router-dom";
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
-import useGetDataOnMount from "../hooks/useGetData";
 import tw, { styled } from "twin.macro";
 import "styled-components/macro";
-import { MenuSelector, PopOut } from "../components/styled";
 import UserContext from "../components/UserContext";
 import ReassignModal from "../components/ReassignModal";
 import ActivityAttendance from "../components/ActivityAttendance";
@@ -141,11 +139,9 @@ const AttendanceDisplay = () => {
               activities={period.activities}
             />
             <div tw="mb-6">
-              <button tw="bg-blue-200" onClick={openSearchModal}>
-                Search
-              </button>
               <ActivitySelectors
                 selectAll={selectAll}
+                openSearchModal={openSearchModal}
                 selectSpecific={selectSpecific}
                 period={period}
                 displayAll={displayAll}
