@@ -91,7 +91,7 @@ const SignUpIndex = () => {
 						</PopOut>
 					)}
 					<ul tw="flex gap-1 flex-wrap flex-col">
-						{weeks.map((w) => (
+						{weeks.map((w,wIndex) => (
 							<MenuSelector
 								tw="p-1 border  cursor-pointer"
 								isSelected={w.number === selected.week}

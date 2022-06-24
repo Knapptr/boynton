@@ -3,8 +3,8 @@ import { Droppable } from "@react-forked/dnd";
 import tw, { styled } from "twin.macro";
 import { AssignmentHeader } from "./styled";
 
-const CamperList = styled.div(() => [
-    tw`flex w-full  py-2  flex-wrap gap-1 md:gap-2 `,
+const CamperList = styled.ul(() => [
+    tw`flex w-full  py-2 px-4  flex-wrap justify-start gap-1 md:gap-2 `,
 ]);
 const Campers = ({ list, allCampers }) => {
 	return (
@@ -21,8 +21,9 @@ const Campers = ({ list, allCampers }) => {
 					>
 						{list.map((camper, index) => (
 							<Camper
+                full
 								key={`camper-${camper.id}`}
-								{...camper}
+                camper={camper}
 								index={index}
 							/>
 						))}

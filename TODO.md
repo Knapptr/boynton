@@ -1,4 +1,14 @@
+Need to Repo
+CamperWeek
+CamperActivity
+Cabin session
+Cabin
+Camper Activity
+Activity✅
+
+
 add daycamp and FL flags to db
+add confirmation of unassign all cabins
 Make route to sync activites✅
 protect action route to admin only
 Day Repo init

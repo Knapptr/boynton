@@ -1,7 +1,7 @@
 import tw, { styled } from "twin.macro";
 import "styled-components/macro";
 export const AssignmentHeader = styled.header(() => [
-  tw`sticky top-0 items-center flex justify-between flex-grow md:flex-grow-0 rounded p-2 text-white align-baseline bg-sky-500`,
+  tw`sticky top-0 items-center mb-2 flex justify-between flex-grow md:flex-grow-0 rounded p-2 text-white align-baseline bg-sky-500`,
 ]);
 
 const NavBarLinkColors = {

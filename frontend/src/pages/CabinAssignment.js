@@ -3,16 +3,16 @@ import Campers from "../components/Campers";
 import Cabins from "../components/Cabins";
 import { DragDropContext } from "@react-forked/dnd";
 import { Route } from "react-router-dom";
-import { useState,useContext } from "react";
-import UserContext from '../components/UserContext';
+import { useState, useContext } from "react";
+import UserContext from "../components/UserContext";
 import tw from "twin.macro";
 import "styled-components/macro";
 import useCabinSessions from "../hooks/useCabinSessions";
-import CabinAssignmentIndex from './cabinAssignmentIndex';
+import CabinAssignmentIndex from "./cabinAssignmentIndex";
 import UnitHeadAccess from "../components/ProtectedUnitHead";
 
-const CabinsOnlyButton = tw.button`bg-green-400 rounded p-3 text-white font-bold`
-const AssignmentHeader =tw.header`flex justify-around items-center bg-violet-500 gap-4 rounded-t text-white`;
+const CabinsOnlyButton = tw.button`bg-green-400 rounded p-3 text-white font-bold`;
+const AssignmentHeader = tw.header`flex justify-around items-center bg-violet-500 gap-4 rounded-t text-white mb-2`;
 const areas = ["ba", "ga"];
 const weeks = ["1", "2", "3", "4", "5", "6"];
 
@@ -33,15 +33,24 @@ const CabinAssignmentRoutes = () => {
       );
     }
   }
-    return <>
-        <Route path="assignment" element={<UnitHeadAccess><CabinAssignmentIndex/></UnitHeadAccess>}/>
-        { routes }</>
+  return (
+    <>
+      <Route
+        path="assignment"
+        element={
+          <UnitHeadAccess>
+            <CabinAssignmentIndex />
+          </UnitHeadAccess>
+        }
+      />
+      {routes}
+    </>
+  );
 };
 
 const CabinAssignment = ({ area, weekNumber }) => {
-
-    const auth  = useContext(UserContext)
-    const token = auth.userData.token
+  const auth = useContext(UserContext);
+  const token = auth.userData.token;
 
   const [cabinsOnly, setCabinsOnly] = useState(false);
 
@@ -64,9 +73,9 @@ const CabinAssignment = ({ area, weekNumber }) => {
     optionalSortFunction: (camper1, camper2) => camper1.age - camper2.age,
   });
 
-    const allAssigned = ()=>{
-            return unassignedCampers.length === 0
-    }
+  const allAssigned = () => {
+    return unassignedCampers.length === 0;
+  };
   const unassignCamper = (camperSession, camperIndex, cabinName) => {
     dragOptions.cabinToCampers({
       sourceList: cabinName,
@@ -99,7 +108,10 @@ const CabinAssignment = ({ area, weekNumber }) => {
       cabinSessions.find((cabin) => cabin.cabinName === cabinNumber) || null;
     const requestConfig = {
       method: "PUT",
-        headers: { "Content-Type": "application/json",Authorization: `Bearer ${token}`},
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
       body: JSON.stringify({
         cabinSessionID: cabinSession ? cabinSession.id : null,
       }),
@@ -188,18 +200,7 @@ const CabinAssignment = ({ area, weekNumber }) => {
   const showAll = () => {
     return (
       <>
-        <AssignmentHeader ><h1 tw="inline">Cabin assignment <p tw="font-bold italic md:inline">{area.toUpperCase()}-Week {weekNumber}</p></h1>
-          <CabinsOnlyButton
-            onClick={() => {
-              toggleCabinsOnly();
-            }}
-          >
-            Show Cabins Only
-          </CabinsOnlyButton>
-        </AssignmentHeader>
-        <div>
-        </div>
-        <div tw="max-h-[45vh] overflow-auto relative ">
+        <div tw="max-h-[45vh] lg:w-1/2 lg:max-h-screen overflow-auto relative ">
           <Campers
             list={unassignedCampers}
             allCampers={allCampers}
@@ -208,9 +209,10 @@ const CabinAssignment = ({ area, weekNumber }) => {
           />
         </div>
 
-        <div tw=" flex flex-wrap overflow-auto max-h-[45vh]">
+        <div tw="max-h-[45vh] lg:w-1/2 lg:max-h-screen flex lg:flex-col flex-wrap lg:flex-nowrap overflow-auto ">
           <Cabins
             unassignCamper={unassignCamper}
+            cabinsOnly={false}
             cabinSessions={cabinSessions}
             lists={cabinList}
             weekNumber={weekNumber}
@@ -224,22 +226,12 @@ const CabinAssignment = ({ area, weekNumber }) => {
   const showOnlyCabins = () => {
     return (
       <div>
-        <AssignmentHeader ><h1 tw="inline">Cabin assignment <p tw="font-bold italic inline">{area.toUpperCase()}-Week {weekNumber}</p></h1>
-          {!allAssigned() &&
-          <CabinsOnlyButton
-            onClick={() => {
-              toggleCabinsOnly();
-            }}
-          >
-            Show Unassigned Campers
-          </CabinsOnlyButton>
-        }
-        </AssignmentHeader>
         <div tw=" overscroll-none flex flex-wrap overflow-auto ">
           <Cabins
             unassignCamper={unassignCamper}
-              showAllLists = {cabinsOnly || allAssigned()}
+            showAllLists={cabinsOnly || allAssigned()}
             cabinSessions={cabinSessions}
+            cabinsOnly={true}
             lists={cabinList}
             weekNumber={weekNumber}
             area={area}
@@ -251,13 +243,34 @@ const CabinAssignment = ({ area, weekNumber }) => {
   };
 
   return (
-    <div tw="relative ">
+    <div tw="relative">
       <DragDropContext
         onDragEnd={(drop) => {
           dragCamper(drop);
         }}
       >
-        {cabinsOnly || allAssigned() ? showOnlyCabins() : showAll()}
+          <AssignmentHeader>
+            <h1 tw="inline">
+              Cabin assignment{" "}
+              <p tw="font-bold italic inline">
+                {area.toUpperCase()}-Week {weekNumber}
+              </p>
+            </h1>
+            {!allAssigned() && (
+              <CabinsOnlyButton
+                onClick={() => {
+                  toggleCabinsOnly();
+                }}
+              >
+                {cabinsOnly && "Show Unassigned Campers"}
+                {!cabinsOnly && "Show Cabins Only"}
+              </CabinsOnlyButton>
+            )}
+          </AssignmentHeader>
+        <div tw="flex flex-col lg:flex-row">
+          {( cabinsOnly || allAssigned() ) && showOnlyCabins() }
+          {!cabinsOnly && !allAssigned() && showAll()}
+        </div>
       </DragDropContext>
       <footer tw="h-1"></footer>
     </div>

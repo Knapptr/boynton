@@ -19,7 +19,7 @@ function App() {
   const userState = useUserData();
   return (
     <div className="App">
-      <div tw="max-w-3xl mx-auto" >
+      <div tw="max-w-4xl mx-auto" >
         <UserContext.Provider value={userState}>
           <BrowserRouter>
             <Routes>

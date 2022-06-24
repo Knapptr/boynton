@@ -1,24 +1,24 @@
-import tw , {styled} from 'twin.macro';
-import 'styled-components/macro';
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
-import {faCircleDot,faCircle} from '@fortawesome/free-regular-svg-icons'
+import tw, { styled } from "twin.macro";
+import "styled-components/macro";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faCircleDot,
+  faCircle,
+  faSquare,
+  faSquareCheck,
+} from "@fortawesome/free-regular-svg-icons";
 
 const AttendantWrapper = styled.li(({ isChecked, isSelected }) => [
-  tw`bg-yellow-300 font-bold py-3 select-none transition-colors border border-white`,
-  isChecked && tw`bg-green-400`,
-  isSelected &&  tw`z-0 ring ring-inset ring-orange-500`,
-  isSelected && isChecked && tw`bg-green-600`,
-  isSelected && !isChecked && tw`bg-yellow-600`
+  tw`bg-yellow-200 even:bg-yellow-300 font-bold py-3 select-none transition-colors border border-white`,
+  isChecked && tw`bg-green-300 even:bg-green-400`,
+  isSelected && tw`z-0 ring ring-inset ring-orange-500`,
+  isSelected && isChecked && tw`bg-green-600 even:bg-green-600`,
+  isSelected && !isChecked && tw`bg-yellow-600 even:bg-yellow-600`,
 ]);
 
-const AttendanceName = styled.p(({ isPresent }) => [
-  isPresent && tw`line-through`,
-]);
+const AttendanceName = tw.div`flex justify-start flex-grow px-4`;
 
-const AttendanceButton = styled.button(({ isPresent }) => [
-  tw`px-2 border shadow-xl bg-gray-200 ml-auto rounded-lg`,
-  isPresent && tw`no-underline`,
-]);
+const AttendanceButton = styled.button(({ isPresent }) => [tw`px-2 ml-auto`]);
 
 const AttendanceSummary = styled.div(({ allHere }) => [
   tw`z-50 text-sm py-px font-bold px-2 bg-red-500 text-white transition-colors rounded flex items-center w-2/5 justify-center`,
@@ -32,12 +32,25 @@ const CamperAttendant = ({
   toggleIsPresent,
   camperSelection,
 }) => {
+  const assignHere = async () => {
+    toggleIsPresent(activity.id, camperIndex);
+    const options = {
+      method: "PUT",
+      headers: {
+        "content-type": "application/json",
+        authorization: `Bearer ${localStorage.getItem("bearerToken")}`,
+      },
+      body: JSON.stringify({ isPresent: !camper.isPresent }),
+    };
+    await fetch(`/api/activities/${activity.id}/campers/${camper.id}`, options);
+  };
+
   return (
     <AttendantWrapper
       isChecked={camper.isPresent}
       isSelected={camperSelection.isSelected(camper)}
     >
-      <div tw="flex mx-auto px-8 md:px-32">
+      <div tw="flex mx-auto px-2 md:px-32">
         <div tw="mr-auto">
           <button
             onClick={() => {
@@ -48,38 +61,36 @@ const CamperAttendant = ({
               camperSelection.select(camper);
             }}
           >
-            {camperSelection.isSelected(camper) ? <FontAwesomeIcon icon={faCircleDot}/> : <FontAwesomeIcon icon={faCircle}/>}
+            {camperSelection.isSelected(camper) ? (
+              <FontAwesomeIcon icon={faCircleDot} />
+            ) : (
+              <FontAwesomeIcon icon={faCircle} />
+            )}
           </button>
         </div>
         <AttendanceName isPresent={camper.isPresent}>
-          {camper.firstName} {camper.lastName} <span tw="font-light">{camper.cabinName}</span>
+          <p>
+          {camper.firstName} {camper.lastName}
+          </p>
+          <span tw="font-light ml-3">{camper.cabinName}</span>
         </AttendanceName>
-        <AttendanceButton
-          isPresent={camper.isPresent}
-          onClick={async () => {
-            toggleIsPresent(activity.id, camperIndex);
-            const options = {
-              method: "PUT",
-              headers: {
-                "content-type": "application/json",
-                authorization: `Bearer ${localStorage.getItem("bearerToken")}`,
-              },
-              body: JSON.stringify({ isPresent: !camper.isPresent }),
-            };
-            await fetch(
-              `/api/activities/${activity.id}/campers/${camper.id}`,
-              options
-            );
-          }}
-        >
-          {!camper.isPresent && "Not"} Here
+        <AttendanceButton isPresent={camper.isPresent} onClick={assignHere}>
+          {camper.isPresent && (
+            <FontAwesomeIcon size="xl" icon={faSquareCheck} />
+          )}
+          {!camper.isPresent && <FontAwesomeIcon size="xl" icon={faSquare} />}
         </AttendanceButton>
       </div>
     </AttendantWrapper>
   );
 };
 
-const ActivityAttendance = ({ activity, activityIndex, toggleHere, camperSelection }) => {
+const ActivityAttendance = ({
+  activity,
+  activityIndex,
+  toggleHere,
+  camperSelection,
+}) => {
   const getUnaccountedFor = () => {
     const unaccounted = activity.campers.filter(
       (camper) => camper.isPresent === false
@@ -92,7 +103,9 @@ const ActivityAttendance = ({ activity, activityIndex, toggleHere, camperSelecti
         <header tw="mb-4 bg-lightBlue-500 sticky top-0 flex justify-center py-2 px-3">
           <h2 tw="py-3 px-2 text-xl font-bold text-white w-1/2 sm:w-2/3 ">
             {activity.name}
-            <span tw="text-gray-800 ml-3 font-thin">{activity.campers.length}</span>
+            <span tw="text-gray-800 ml-3 font-thin">
+              {activity.campers.length}
+            </span>
           </h2>
           <AttendanceSummary allHere={getUnaccountedFor() === 0}>
             {getUnaccountedFor() ? (
@@ -107,20 +120,20 @@ const ActivityAttendance = ({ activity, activityIndex, toggleHere, camperSelecti
             <li>no campers</li>
           ) : (
             activity.campers
-            .sort((camper1, camper2) => {
-              return camper1.lastName > camper2.lastName ? 1 : -1;
-            })
-            .map((camper, camperIndex) => (
-              <CamperAttendant
-                camperSelection={camperSelection}
-                key={`camper-${activity.name}-${camperIndex}`}
-                toggleIsPresent={toggleHere}
-                camperIndex={camperIndex}
-                camper={camper}
-                activityIndex={activityIndex}
-                activity={activity}
-              ></CamperAttendant>
-            ))
+              .sort((camper1, camper2) => {
+                return camper1.lastName > camper2.lastName ? 1 : -1;
+              })
+              .map((camper, camperIndex) => (
+                <CamperAttendant
+                  camperSelection={camperSelection}
+                  key={`camper-${activity.name}-${camperIndex}`}
+                  toggleIsPresent={toggleHere}
+                  camperIndex={camperIndex}
+                  camper={camper}
+                  activityIndex={activityIndex}
+                  activity={activity}
+                ></CamperAttendant>
+              ))
           )}
         </ul>
       </div>

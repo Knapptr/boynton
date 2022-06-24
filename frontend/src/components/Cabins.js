@@ -5,11 +5,15 @@ import tw, { styled } from "twin.macro";
 import "styled-components/macro";
 import { AssignmentHeader } from "./styled";
 
-const CabinsList = styled.div(() => [tw`w-full bg-sky-300 flex flex-wrap`]);
+const CabinsList = styled.div(() => [tw`w-full bg-sky-300 flex flex-wrap gap-1`]);
 
 const Button = styled.button(() => [tw`bg-green-600 rounded text-white p-2`]);
-const Cabins = ({showAllLists, unassignAll, cabinSessions, lists, unassignCamper }) => {
-	// console.log({ cabinSessions, lists });
+const UnassignButton = styled.button(({anyAssignments})=>[
+  tw`bg-coolGray-300 py-2 px-3 rounded`,
+  anyAssignments && tw`bg-red-500`
+
+]);
+const Cabins = ({showAllLists, unassignAll, cabinSessions,cabinsOnly, lists, unassignCamper }) => {
 	const [hideFull, setHideFull] = useState(false);
 	const areEmpty = () => {
 		if (Object.keys(lists).length === 0 || cabinSessions.length === 0) {
@@ -29,6 +33,7 @@ const Cabins = ({showAllLists, unassignAll, cabinSessions, lists, unassignCamper
 		return list.map((cabinSession) => {
 			return (
 				<Cabin
+          cabinsOnly={cabinsOnly}
 					key={`cabin-${cabinSession.cabinName}`}
 					unassignCamper={unassignCamper}
 					allOpenState={showAllLists}
@@ -45,6 +50,13 @@ const Cabins = ({showAllLists, unassignAll, cabinSessions, lists, unassignCamper
 				<AssignmentHeader tw="w-full">
 					<h2 tw="font-bold text-lg">Cabins</h2>
 					<div>
+        <UnassignButton
+          tw="mr-5"
+          anyAssignments={!areEmpty()}
+          onClick={()=>{if(!areEmpty()){ unassignAll() }}}
+        >
+          Unassign All
+    </UnassignButton>
 						<label htmlFor="hideFullToggle">Hide Full</label>
 						<input
 							tw="m-1"
@@ -58,14 +70,6 @@ const Cabins = ({showAllLists, unassignAll, cabinSessions, lists, unassignCamper
 					</div>
 				</AssignmentHeader>
 				<CabinsList>{cabinSessions && displayCabins()}</CabinsList>
-				{!areEmpty() && (
-					<button
-						tw="bg-red-600 p-2 w-full font-bold text-white"
-						onClick={unassignAll}
-					>
-						Unassign All
-					</button>
-				)}
 		</>
 	);
 };
