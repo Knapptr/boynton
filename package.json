@@ -1,11 +1,13 @@
 {
-	"name": "awarder",
+	"name": "boynton",
 	"version": "1.0.0",
 	"description": "",
 	"main": "index.js",
 	"scripts": {
 		"test": "jest --watch",
-		"start": "nodemon index.js"
+		"start": "node index.js",
+    "dev":"nodemon index.js",
+    "heroku-postbuild": "cd frontend && npm install && npm run build"
 	},
 	"author": "Tyler Knapp <knapptr@gmail.com>",
 	"license": "MIT",
