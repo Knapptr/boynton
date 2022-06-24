@@ -2,6 +2,8 @@ import tw from 'twin.macro';
 import 'styled-components/macro'
 import {useState} from 'react'
 import {PopOut} from './styled'
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
+import {faCircleXmark} from '@fortawesome/free-regular-svg-icons'
 
 const ReassignModal = ({
   setDisplayModal,
@@ -37,7 +39,7 @@ const ReassignModal = ({
           onClick={() => setDisplayModal(false)}
           tw="top-0 right-1 absolute"
         >
-          x
+          <FontAwesomeIcon size="lg"icon={faCircleXmark}/>
         </button>
         <h2 tw="bg-orange-400 p-2 rounded-t mb-2">
           Reassign {selectedCampers.length} camper(s)?

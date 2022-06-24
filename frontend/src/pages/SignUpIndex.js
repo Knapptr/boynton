@@ -7,6 +7,8 @@ import "styled-components/macro";
 import { PopOut, MenuSelector } from "../components/styled";
 import cl from "../cl.png";
 import UserContext from "../components/UserContext";
+import {faCircleXmark} from '@fortawesome/free-regular-svg-icons'
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome"
 
 const SignUpIndex = () => {
 	const [cabins] = useGetDataOnMount({
@@ -69,7 +71,7 @@ const SignUpIndex = () => {
 										});
 									}}
 								>
-									X
+                    <FontAwesomeIcon icon={faCircleXmark}/>
 								</button>
 								<header tw="text-xl">
 									<h1 tw="text-base">Sign-Up</h1>

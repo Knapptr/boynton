@@ -9,6 +9,8 @@ import { LabeledDivider, MenuSelector } from "../components/styled";
 import DayNav from "../components/DayNav";
 import PeriodNav from "../components/PeriodNav";
 import toTitleCase from "../toTitleCase";
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
+import {faForwardStep,faBackwardStep} from '@fortawesome/free-solid-svg-icons'
 
 const Periods = tw.ul` gap-2 flex justify-center`;
 
@@ -106,7 +108,7 @@ const CreateSchedulePage = () => {
                     selectNext(-1);
                   }}
                 >
-                  { "<<" }
+                  <FontAwesomeIcon icon={faBackwardStep} />
                 </NextButton>
       {week.days && 
                   <div tw="flex flex-col justify-center">
@@ -121,7 +123,7 @@ const CreateSchedulePage = () => {
                     selectNext(1);
                   }}
                 >
-                  {">>"}
+                  <FontAwesomeIcon icon={faForwardStep} />
                 </NextButton>
             </div>
 	{weekLoaded && (

@@ -21,7 +21,6 @@ const AttendanceDisplay = () => {
   const [displayAll, setDisplayAll] = useState(true);
   const [showReassignModal, setShowReassignModal] = useState(false);
   const [showSearchModal, setShowSearchModal] = useState(false);
-  const [autoRefresh, setAutoRefresh] = useState(true);
   const [period, setPeriod] = useState(undefined);
   const timeoutRef = useRef(null);
   const intervalRef = useRef(null);

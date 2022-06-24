@@ -1,5 +1,7 @@
 import tw , {styled} from 'twin.macro';
 import 'styled-components/macro';
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
+import {faCircleDot,faCircle} from '@fortawesome/free-regular-svg-icons'
 
 const AttendantWrapper = styled.li(({ isChecked, isSelected }) => [
   tw`bg-yellow-300 font-bold py-3 select-none transition-colors border border-white`,
@@ -46,7 +48,7 @@ const CamperAttendant = ({
               camperSelection.select(camper);
             }}
           >
-            {camperSelection.isSelected(camper) ? "Deselect" : "Select"}
+            {camperSelection.isSelected(camper) ? <FontAwesomeIcon icon={faCircleDot}/> : <FontAwesomeIcon icon={faCircle}/>}
           </button>
         </div>
         <AttendanceName isPresent={camper.isPresent}>

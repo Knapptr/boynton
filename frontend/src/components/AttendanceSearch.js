@@ -2,6 +2,8 @@ import tw from "twin.macro";
 import "styled-components/macro";
 import { PopOut } from "./styled";
 import { useEffect, useState } from "react";
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
+import {faCircleXmark} from '@fortawesome/free-regular-svg-icons'
 
 const AttendanceSearch = ({
   shouldDisplay,
@@ -45,7 +47,7 @@ const AttendanceSearch = ({
         }}
         tw="bg-coolGray-100 p-5 w-11/12 lg:w-1/2 my-4 rounded shadow-lg flex-grow relative flex flex-col overflow-scroll overscroll-none "
       >
-        <button tw="absolute top-1 right-3"onClick={closeSearchModal}>x</button>
+        <button tw="absolute top-1 right-3"onClick={closeSearchModal}><FontAwesomeIcon size="xl" icon={faCircleXmark} /></button>
         <header>
           <h2 tw="text-2xl font-bold">Act {periodNumber} Camper Search</h2>
         </header>
