@@ -1,19 +1,38 @@
 const { mapToGroups } = require("../utils/aggregation");
 const { fetchOne, fetchMany } = require("../utils/pgWrapper");
-const {camelCaseProps} = require("../utils/cases")
+const { camelCaseProps } = require("../utils/cases");
 
 module.exports = {
-
-  _mapResponse(dbResponse){
-    const camelCased = dbResponse.map(c=>camelCaseProps(c));
-    return mapToGroups(camelCased, "id", "weeks",{
+  async init() {
+    const query = `
+			CREATE TABLE IF NOT EXISTS campers
+			(
+			first_name character varying(255) COLLATE pg_catalog."default" NOT NULL,
+			last_name character varying(255) COLLATE pg_catalog."default" NOT NULL,
+			id integer NOT NULL,
+			gender character varying(255) COLLATE pg_catalog."default",
+			sessions character varying(255) COLLATE pg_catalog."default",
+			age integer,
+			CONSTRAINT camper_pkey PRIMARY KEY (id)
+			)
+  `;
+    try {
+      await fetchOne(query);
+      return true;
+    } catch (e) {
+      console.log(e);
+      return false;
+    }
+  },
+  _mapResponse(dbResponse) {
+    const camelCased = dbResponse.map((c) => camelCaseProps(c));
+    return mapToGroups(camelCased, "id", "weeks", {
       weekNumber: "number",
       weekTitle: "title",
       cabinName: "cabinName",
       cabinSessionId: "cabinSessionId",
-      camperWeekId: "id"
-
-    } );
+      camperWeekId: "id",
+    });
   },
   async getAll() {
     const query = `SELECT 

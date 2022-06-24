@@ -2,41 +2,43 @@ const { fetchOne, fetchMany } = require("../utils/pgWrapper");
 const { camelCaseProps } = require("../utils/cases");
 const { mapToGroups } = require("../utils/aggregation");
 
-const createTableQuery = ` CREATE TABLE IF NOT EXISTS weeks
-(
-    "number" integer NOT NULL,
-    title character varying(255) COLLATE pg_catalog."default" NOT NULL,
-    CONSTRAINT week_pkey PRIMARY KEY ("number"),
-    CONSTRAINT "uniqueWeekName" UNIQUE (title),
-    CONSTRAINT "uniqueWeekNumber" UNIQUE ("number")
-)
-`;
-
 const weekRepository = {
+  async init() {
+    const query = `
+        CREATE TABLE IF NOT EXISTS weeks
+        (
+        "number" integer NOT NULL,
+        title character varying(255) COLLATE pg_catalog."default" NOT NULL,
+        CONSTRAINT week_pkey PRIMARY KEY ("number"),
+        CONSTRAINT "uniqueWeekName" UNIQUE (title),
+        CONSTRAINT "uniqueWeekNumber" UNIQUE ("number")
+        )
+`;
+    try {
+      await fetchOne(query);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  },
   _mapResponse(dbResponse) {
     const camelCased = dbResponse.map((w) => camelCaseProps(w));
-    const remappedWithDays = mapToGroups(camelCased,"number","days",{
+    const remappedWithDays = mapToGroups(camelCased, "number", "days", {
       dayName: "name",
       dayId: "id",
       periodId: "periodId",
       periodNumber: "periodNumber",
-
     });
-    const remapped = remappedWithDays.map(w=>{
-      return {...w,days: mapToGroups(w.days,"id","periods",{
-        periodNumber: "number",
-        periodId:"id"
-      },)}
-    })
-    return remapped
-  },
-  async init(){
-    try {
-     await fetchOne(createTableQuery) 
-      return true
-    } catch (e) {
-     return false 
-    }
+    const remapped = remappedWithDays.map((w) => {
+      return {
+        ...w,
+        days: mapToGroups(w.days, "id", "periods", {
+          periodNumber: "number",
+          periodId: "id",
+        }),
+      };
+    });
+    return remapped;
   },
   async getAll() {
     const query = `SELECT 

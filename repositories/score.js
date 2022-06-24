@@ -1,25 +1,32 @@
 const { fetchMany, fetchOne } = require("../utils/pgWrapper");
 const { formatmmddyyyy } = require("../utils/getDates");
 
-const createTableQuery = `
-CREATE TABLE IF NOT EXISTS  scores
-(
-    points integer NOT NULL,
-    id serial,
-    awarded_to character varying(1) NOT NULL,
-    awarded_for character varying(255) NOT NULL,
-    awarded_at date NOT NULL,
-    week_number integer,
-    PRIMARY KEY (id),
-    CONSTRAINT week_number FOREIGN KEY (week_number)
-        REFERENCES public.weeks ("number") MATCH SIMPLE
-        ON UPDATE NO ACTION
-        ON DELETE SET NULL
-        NOT VALID
-)
-`;
-
 module.exports = {
+  async init() {
+    const query = `
+      CREATE TABLE IF NOT EXISTS  scores
+      (
+      points integer NOT NULL,
+      id serial,
+      awarded_to character varying(1) NOT NULL,
+      awarded_for character varying(255) NOT NULL,
+      awarded_at date NOT NULL,
+      week_number integer,
+      PRIMARY KEY (id),
+      CONSTRAINT week_number FOREIGN KEY (week_number)
+      REFERENCES public.weeks ("number") MATCH SIMPLE
+      ON UPDATE NO ACTION
+      ON DELETE SET NULL
+      NOT VALID
+      )
+`;
+    try {
+      await fetchMany(query);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  },
   _mapResponse(dbResponse) {
     return {
       id: dbResponse.id,
@@ -29,14 +36,6 @@ module.exports = {
       awardedFor: dbResponse.awarded_for,
       weekNumber: dbResponse.week_number,
     };
-  },
-  async init() {
-    try {
-      const results = await fetchMany(createTableQuery);
-      return true;
-    } catch (e) {
-      return false;
-    }
   },
   async getAll() {
     const query = `
