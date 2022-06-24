@@ -14,7 +14,7 @@ const init = (query) => {
     }
   };
 };
-const activityRepo = { init: init(queries.activityRepo) };
+const activityRepo = { init: init(queries.activities) };
 const cabinSessionRepo = { init: init(queries.cabinSessions) };
 const cabinRepo = {init: init(queries.cabins)};
 const camperActivityRepo = {init: init(queries.camperActivities)}
@@ -27,4 +27,8 @@ const scoreRepo = require("./repositories/score");
 const weekRepo = require("./repositories/week");
 
 //order matters here
-const repos = [weekRepo, dayRepo, periodRepo, camperRepo, userRepo, scoreRepo];
+const repos = [weekRepo, dayRepo, periodRepo, activityRepo, cabinRepo,cabinSessionRepo,camperRepo,camperWeekRepo,camperActivityRepo, userRepo, scoreRepo];
+
+Promise.all(repos.map(r=>r.init())).then(()=>console.log('db initialized')).catch(()=>console.log('something went wrong during db init'));
+
+
