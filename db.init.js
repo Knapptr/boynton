@@ -29,6 +29,6 @@ const weekRepo = require("./repositories/week");
 //order matters here
 const repos = [weekRepo, dayRepo, periodRepo, activityRepo, cabinRepo,cabinSessionRepo,camperRepo,camperWeekRepo,camperActivityRepo, userRepo, scoreRepo];
 
-Promise.all(repos.map(r=>r.init())).then(()=>console.log('db initialized')).catch(()=>console.log('something went wrong during db init'));
+module.exports = () => Promise.all(repos.map(r=>r.init())).then(()=>console.log('db initialized')).catch(()=>console.log('something went wrong during db init'));
 
 
