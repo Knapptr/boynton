@@ -3,45 +3,50 @@ import "styled-components/macro";
 import cl from "../cl.png";
 import { NavBarLink } from "../components/styled";
 import { Link } from "react-router-dom";
-import {useContext} from 'react';
+import { useContext } from "react";
 import UserContext from "../components/UserContext";
 
 const Dashboard = () => {
-  const { logOut,userData } = useContext(UserContext)
-  const {user} = userData;
-	return (
-		<>
-			<img
-				tw="mt-6 w-11/12 mx-auto md:w-1/2 max-w-md"
-				src={cl}
-				alt="Camp Leslie"
-			/>
-			<nav>
-				<ul tw="flex flex-col gap-2 w-1/2 mx-auto mt-8">
-					<NavBarLink color="orange">
-						<Link to="scoreboard">Scoreboard</Link>
-					</NavBarLink>
-					<NavBarLink color="green">
-						<Link to="schedule/sign-up">Schedule Sign-Up</Link>
-					</NavBarLink>
-					<NavBarLink color="blue">
-						<Link to="schedule/attendance">Attendance</Link>
-					</NavBarLink>
-					<NavBarLink color="red">
-						<Link to="cabins/list">Cabin Lists</Link>
-					</NavBarLink>
-          {( user.role === "admin" || user.role === "unitHead" ) &&
-            <NavBarLink color="purple">
-            <Link to="cabins/assignment">Cabin Assignment</Link>
-            </NavBarLink>
-        }
-          <NavBarLink tw="mt-8" onClick={()=>{logOut()}}>
-            <button >Log Out</button>
-            </NavBarLink>
-				</ul>
-			</nav>
-		</>
-	);
+  const { logOut, userData } = useContext(UserContext);
+  const { user } = userData;
+  return (
+    <>
+      <img
+        tw="mt-6 w-11/12 mx-auto md:w-1/2 max-w-md"
+        src={cl}
+        alt="Camp Leslie"
+      />
+      <nav>
+        <ul tw="flex flex-col gap-2 w-1/2 mx-auto mt-8">
+          <Link to="scoreboard">
+            <NavBarLink color="orange">Scoreboard</NavBarLink>
+          </Link>
+          <Link to="schedule/sign-up">
+            <NavBarLink color="green">Schedule Sign-Up</NavBarLink>
+          </Link>
+          <Link to="schedule/attendance"><NavBarLink color="blue">
+            Attendance
+          </NavBarLink></Link>
+          <Link to="cabins/list"><NavBarLink color="red">
+            Cabin Lists
+          </NavBarLink></Link>
+          {(user.role === "admin" || user.role === "unitHead") && (
+            <Link to="cabins/assignment"><NavBarLink color="purple">
+              Cabin Assignment
+            </NavBarLink></Link>
+          )}
+          <NavBarLink
+            tw="mt-8"
+            onClick={() => {
+              logOut();
+            }}
+          >
+            <button>Log Out</button>
+          </NavBarLink>
+        </ul>
+      </nav>
+    </>
+  );
 };
 
 export default Dashboard;

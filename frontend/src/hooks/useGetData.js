@@ -1,4 +1,4 @@
-import { useContext, useState, useEffect } from "react";
+import { useContext, useState, useEffect, useCallback } from "react";
 import UserContext from "../components/UserContext";
 import fetchWithToken from "../fetchWithToken";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -43,7 +43,7 @@ const useGetDataOnMount = ({
       callback(data);
     }
   };
-  const update = () => {
+  const update = useCallback( () => {
     fetchAndSet({
       url,
       beforeSet,
@@ -52,7 +52,7 @@ const useGetDataOnMount = ({
       optionalSortFunction,
       useToken,
     });
-  };
+  },[beforeSet,optionalSortFunction,useToken,afterSet,url,fetchAndSet]);
   useEffect(() => {
     fetchAndSet({
       url,

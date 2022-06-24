@@ -1,4 +1,4 @@
-import { useState, useEffect,useContext } from "react";
+import { useState, useEffect,useContext, useCallback } from "react";
 import fetchWithToken from "../fetchWithToken";
 import UserContext from '../components/UserContext';
 
@@ -23,7 +23,7 @@ const useActivityAttendance = (period, cabin) => {
 		});
 	};
 
-	const getCampers = async (periodID, cabinName) => {
+	const getCampers = useCallback(async (periodID, cabinName) => {
 		setLoading(true);
 		const camperUrl = `/api/periods/${periodID}/campers?cabin=${cabinName}`;
 		const activityUrl = `/api/activities?period=${periodID}`;
@@ -42,19 +42,20 @@ const useActivityAttendance = (period, cabin) => {
 			};
 		});
 		campers.forEach((camper) => {
-			if (camper.activityID === null) {
+			if (camper.activityId === null) {
 				listing.unassigned.campers.push(camper);
 			} else {
-				listing[camper.activityID].campers.push(camper);
+				listing[camper.activityId].campers.push(camper);
 			}
 		});
 		setLists(listing);
 		setLoading(false);
-	};
+	},
 
-	useEffect(() => {
+ [auth])
+  useEffect(() => {
 		getCampers(period, cabin);
-	}, [period, cabin]);
+	}, [period, cabin,getCampers]);
 
 	return { activityLists: lists, updateActivityAttendance: update, loading };
 };

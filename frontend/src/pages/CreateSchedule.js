@@ -134,7 +134,7 @@ const CreateSchedulePage = () => {
 							week.days[selectedDay].periods[selectedPeriod].number
 						}
 						cabinName={cabin}
-						periodID={
+						periodId={
 							week.days[selectedDay].periods[selectedPeriod].id
 						}
 					/>

@@ -14,11 +14,12 @@ import "styled-components/macro";
 import CabinListIndex from "./pages/CabinListIndex";
 import Scoreboard from "./pages/Scoreboard";
 import Score from "./components/Score"
+
 function App() {
   const userState = useUserData();
   return (
     <div className="App">
-      <div tw="max-w-3xl mx-auto">
+      <div tw="max-w-3xl mx-auto" >
         <UserContext.Provider value={userState}>
           <BrowserRouter>
             <Routes>
@@ -70,11 +71,10 @@ function App() {
                 />
                 <Route path="*" element={<NotFound />} />
               </Route>
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </UserContext.Provider>
-      </div>
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </UserContext.Provider></div>
     </div>
   );
 }
