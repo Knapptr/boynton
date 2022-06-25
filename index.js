@@ -4,7 +4,7 @@ const { App, ExpressReceiver } = require("@slack/bolt");
 const Awarder = require("./features/Awards/Awarder");
 const receiver = require("./server/index");
 const dbInit = require('./db.init');
-
+const port = process.env.PORT || 3000
 const app = new App({
 	token: process.env.BOT_TOKEN,
 	receiver: receiver,
@@ -18,8 +18,8 @@ registerListeners(app);
 (async () => {
 	try {
     await dbInit();
-		await app.start(3000)
-		console.log("listening on port 3000");
+		await app.start(port)
+		console.log(`listening on port ${port}`);
 	} catch (e) {
 		console.log(e);
 	}
