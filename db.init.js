@@ -41,28 +41,21 @@ const repos = [
 ];
 
 module.exports = async () => {
-  try {
-    await Promise.all(repos.map((r) => r.init()));
-    console.log('db initialized');
-  } catch (e) {
-    throw new Error(`Error with db init: ${e}`);
-  }
+  // this does not guarantee the order of execution
+  // try {
+  //   await Promise.all(repos.map((r) => r.init()));
+  //   console.log('db initialized');
+  // } catch (e) {
+  //   throw new Error(`Error with db init: ${e}`);
+  // }
 
-  // weekRepo
-  //   .init()
-  //   .then(() => dayRepo.init())
-  //   .then(() => periodRepo.init())
-  //   .then(() => activityRepo.init())
-  //   .then(() => cabinRepo.init())
-  //   .then(() => cabinSessionRepo.init())
-  //   .then(() => camperRepo.init())
-  //   .then(() => camperWeekRepo.init())
-  //   .then(() => camperActivityRepo.init())
-  //   .then(() => userRepo.init())
-  //   .then(() => scoreRepo.init())
-  //   .then(() => console.log("db initialized"))
-  //   .catch(() => {
-  //     console.log("something went wrong during db init");
-  //     throw new Error(e);
-  //   });
+  for(let repo of repos){
+    try{
+      await repo.init()
+    }
+  catch (e){
+      console.log("something went wrong during db init");
+    console.log("repo:", repo)
+      throw new Error(e);
+    }}
 };
