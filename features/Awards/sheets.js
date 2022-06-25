@@ -8,22 +8,26 @@ const loginCredentials = {
 };
 
 const addAwards = async (list) => {
-	const doc = new GoogleSpreadsheet(sheetID);
-	await doc.useServiceAccountAuth(loginCredentials);
-	await doc.loadInfo();
-	const sheet = doc.sheetsByTitle[`${getYear()}-${getWeek()}`];
-	const awardList = [];
-	list.forEach((award) => {
-		awardList.push({
-			awardFor: award.awardFor,
-			programArea: award.programArea,
-			first: award.first,
-			last: award.last,
-			commandEntry: award.commandEntry || "",
-			date: formatmmddyyyy(new Date()),
-		});
-	});
-	sheet.addRows(awardList);
+  try{
+    const doc = new GoogleSpreadsheet(sheetID);
+    await doc.useServiceAccountAuth(loginCredentials);
+    await doc.loadInfo();
+    const sheet = doc.sheetsByTitle[`${getYear()}-${getWeek()}`];
+    const awardList = [];
+    list.forEach((award) => {
+      awardList.push({
+        awardFor: award.awardFor,
+        programArea: award.programArea,
+        first: award.first,
+        last: award.last,
+        commandEntry: award.commandEntry || "",
+        date: formatmmddyyyy(new Date()),
+      });
+    });
+    sheet.addRows(awardList);
+  }catch (e){
+    console.log(e);
+  }
 };
 
 const getAwards = async (week = getWeek()) => {
