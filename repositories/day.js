@@ -49,7 +49,7 @@ module.exports = {
     };
   },
   async create({ name, weekNumber }) {
-    const query = "INSERT INTO days (name,week_id) VALUES ($1,$2)";
+    const query = "INSERT INTO days (name,week_id) VALUES ($1,$2) RETURNING *";
     const values = [name, weekNumber];
     const result = await fetchOne(query, values);
     if (!result) {

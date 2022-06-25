@@ -15,8 +15,9 @@ class Day {
   }
 
   static async create({ name, weekNumber },dayRepository=defaultDayRepository) {
+    console.log({name,weekNumber})
     const result = await dayRepository.create({name,weekNumber});
-    if(!result){ throw new Error("Could not create week.")}
+    if(!result){ throw new Error("Could not create day.")}
     return new Day(result);
   }
   static async get(id,dayRepository=defaultDayRepository) {
