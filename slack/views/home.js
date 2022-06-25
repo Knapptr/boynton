@@ -36,15 +36,15 @@ const homeView = {
 					},
 					url: flEvalURL,
 				},
-				// {
-				// 	type: "button",
-				// 	text: {
-				// 		type: "plain_text",
-				// 		text: "Activity Sign Up",
-				// 		emoji: true,
-				// 	},
-				// 	url: `${ROOTURL}/schedule/sign-up`,
-				// },
+				{
+					type: "button",
+					text: {
+						type: "plain_text",
+						text: "Activity Sign Up",
+						emoji: true,
+					},
+					url: `${ROOTURL}/schedule/sign-up`,
+				},
 			],
 		},
 	],
