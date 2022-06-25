@@ -41,22 +41,29 @@ const repos = [
   scoreRepo,
 ];
 
-module.exports = () => {
-  weekRepo
-    .init()
-    .then(() => dayRepo.init())
-    .then(() => periodRepo.init())
-    .then(() => activityRepo.init())
-    .then(() => cabinRepo.init())
-    .then(() => cabinSessionRepo.init())
-    .then(() => camperRepo.init())
-    .then(() => camperWeekRepo.init())
-    .then(() => camperActivityRepo.init())
-    .then(() => userRepo.init())
-    .then(() => scoreRepo.init())
-    .then(() => console.log("db initialized"))
-    .catch(() => {
-      console.log("something went wrong during db init");
-      throw new Error(e);
-    });
+module.exports = async () => {
+  try {
+    await Promise.all(repos.map((r) => r.init()));
+    console.log('db initialized');
+  } catch (e) {
+    throw new Error("Error with db init");
+  }
+
+  // weekRepo
+  //   .init()
+  //   .then(() => dayRepo.init())
+  //   .then(() => periodRepo.init())
+  //   .then(() => activityRepo.init())
+  //   .then(() => cabinRepo.init())
+  //   .then(() => cabinSessionRepo.init())
+  //   .then(() => camperRepo.init())
+  //   .then(() => camperWeekRepo.init())
+  //   .then(() => camperActivityRepo.init())
+  //   .then(() => userRepo.init())
+  //   .then(() => scoreRepo.init())
+  //   .then(() => console.log("db initialized"))
+  //   .catch(() => {
+  //     console.log("something went wrong during db init");
+  //     throw new Error(e);
+  //   });
 };
