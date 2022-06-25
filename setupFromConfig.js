@@ -3,6 +3,8 @@ const config = JSON.parse(process.env.CONFIG);
 const Week = require("./models/week");
 const Day = require("./models/day");
 const Period = require("./models/period");
+const Cabin = require('./models/cabin');
+const CabinSession = require('./models/cabinSession');
 
 const setup = () => {
   const insertAll = async () => {
@@ -22,6 +24,10 @@ const setup = () => {
         }
       }
     }
+    //cabins and cabin sessions
+    const {cabins} = config;
+    const insertedCabins = await Promise.all(cabins.map(c=>(Cabin.create({name:c.name,capacity:c.capacity,area:c.area}))))
+    await Promise.all(insertedWeeks.map(w=>Promise.all(insertedCabins.map(c=>c.createSession(w.number)))));
   }
   insertAll();
 }

@@ -45,7 +45,7 @@ module.exports = async () => {
     await Promise.all(repos.map((r) => r.init()));
     console.log('db initialized');
   } catch (e) {
-    throw new Error("Error with db init");
+    throw new Error(`Error with db init: ${e}`);
   }
 
   // weekRepo
