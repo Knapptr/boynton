@@ -20,7 +20,7 @@ module.exports = {
       return true;
     } catch (e) {
       console.log(e);
-      return false;
+      throw new Error(`Cannot init with query: ${query})
     }
   },
   _mapResponse(dbResponse) {

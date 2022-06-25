@@ -18,7 +18,7 @@ const weekRepository = {
       await fetchOne(query);
       return true;
     } catch (e) {
-      return false;
+      throw new Error(`Cannot init with query: ${query})
     }
   },
   _mapResponse(dbResponse) {

@@ -31,8 +31,8 @@ class Week {
     const weeks = await weekRepository.getAll();
     return weeks.map(weekData=> new Week(weekData));
 	}
-	static async create({ title, number,days=[] },weekRepository = defaultWeekRepository) {
-    const weekResponse = await weekRepository.create({title,number,days})
+	static async create({ title, number},weekRepository = defaultWeekRepository) {
+    const weekResponse = await weekRepository.create({title,number})
 		return new Week(weekResponse);
 	}
 }

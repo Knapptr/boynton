@@ -9,8 +9,7 @@ const init = (query) => {
       await fetchOne(query);
       return true;
     } catch (e) {
-      console.log(e);
-      return false;
+      throw new Error(`can not init with query: ${query}`)
     }
   };
 };

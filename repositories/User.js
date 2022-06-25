@@ -15,8 +15,7 @@ const UserRepository = {
       await fetchOne(query);
       return true;
     } catch (e) {
-      console.log(e);
-      return false;
+      throw new Error(`Cannot init with query: ${query})
     }
   },
   async get(username) {
