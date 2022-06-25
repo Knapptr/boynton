@@ -4,8 +4,8 @@ camperWeeks:`
   (
   id serial NOT NULL  ,
   week_id integer NOT NULL,
-  camper_id serial NOT NULL,
-  cabin_session_id serial,
+  camper_id integer NOT NULL,
+  cabin_session_id integer,
   CONSTRAINT camper_weeks_pkey PRIMARY KEY (id),
   CONSTRAINT one_week_per_camper UNIQUE (week_id, camper_id),
   CONSTRAINT cabin_assignment FOREIGN KEY (cabin_session_id)
@@ -24,9 +24,9 @@ camperActivities:`
   CREATE TABLE IF NOT EXISTS camper_activities
   (
   id serial NOT NULL  ,
-  camper_week_id serial NOT NULL ,
-  activity_id serial NOT NULL,
-  period_id serial NOT NULL,
+  camper_week_id integer NOT NULL ,
+  activity_id integer NOT NULL,
+  period_id integer NOT NULL,
   is_present boolean NOT NULL DEFAULT false,
   CONSTRAINT camper_periods_pkey PRIMARY KEY (id),
   CONSTRAINT one_activity_per_camper UNIQUE (period_id, camper_week_id),
@@ -56,8 +56,8 @@ activities:`
   (
   name character varying(255) COLLATE pg_catalog."default" NOT NULL,
   description character varying(255) COLLATE pg_catalog."default",
-  id serial NOT NULL ,
-  period_id serial NOT NULL ,
+  id integer NOT NULL ,
+  period_id integer NOT NULL ,
   CONSTRAINT activity_pkey PRIMARY KEY (id),
   CONSTRAINT no_duplicates UNIQUE (name, period_id),
   CONSTRAINT p UNIQUE (period_id, id),
@@ -72,7 +72,7 @@ activities:`
   CREATE TABLE IF NOT EXISTS cabin_sessions
   (
   id serial NOT NULL  ,
-  week_id serial NOT NULL  ,
+  week_id integer NOT NULL  ,
   cabin_name character varying COLLATE pg_catalog."default",
   CONSTRAINT cabin_sessions_pkey PRIMARY KEY (id),
   CONSTRAINT "one camper cabin assigment per week" UNIQUE (week_id, cabin_name),

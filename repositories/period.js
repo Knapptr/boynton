@@ -6,7 +6,7 @@ module.exports = {
     CREATE TABLE IF NOT EXISTS periods
     (
     id serial NOT NULL  ,
-    day_id serial NOT NULL  ,
+    day_id integer NOT NULL  ,
     period_number integer NOT NULL,
     CONSTRAINT period_pkey PRIMARY KEY (id),
     CONSTRAINT day_id FOREIGN KEY (day_id)

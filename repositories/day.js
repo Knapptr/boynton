@@ -7,7 +7,7 @@ module.exports = {
     (
     name character varying(3) COLLATE pg_catalog."default",
     id serial NOT NULL,
-    week_id serial NOT NULL ,
+    week_id integer NOT NULL ,
     CONSTRAINT day_pkey PRIMARY KEY (id),
     CONSTRAINT week_id_name FOREIGN KEY (week_id)
     REFERENCES weeks ("number") MATCH SIMPLE
