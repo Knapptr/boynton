@@ -5,8 +5,7 @@ const { camelCaseProps } = require("../utils/cases");
 module.exports = {
   async init() {
     const query = `
-			CREATE TABLE IF NOT EXISTS campers
-			(
+			CREATE TABLE IF NOT EXISTS campers (
 			first_name character varying(255) COLLATE pg_catalog."default" NOT NULL,
 			last_name character varying(255) COLLATE pg_catalog."default" NOT NULL,
 			id integer NOT NULL,

@@ -53,6 +53,7 @@ const weekRepository = {
     JOIN periods p ON p.day_id = d.id  
     `;
     const responseData = await fetchMany(query);
+      if(!responseData){return []}
     const mappedData = this._mapResponse(responseData);
     return mappedData;
   },

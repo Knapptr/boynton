@@ -6,11 +6,11 @@ module.exports = {
     CREATE TABLE IF NOT EXISTS days
     (
     name character varying(3) COLLATE pg_catalog."default",
-    id integer NOT NULL DEFAULT nextval('day_id_seq'::regclass),
-    week_id integer NOT NULL DEFAULT nextval('day_week_id_seq'::regclass),
+    id serial NOT NULL,
+    week_id serial NOT NULL ,
     CONSTRAINT day_pkey PRIMARY KEY (id),
     CONSTRAINT week_id_name FOREIGN KEY (week_id)
-    REFERENCES public.weeks ("number") MATCH SIMPLE
+    REFERENCES weeks ("number") MATCH SIMPLE
     ON UPDATE CASCADE
     ON DELETE CASCADE
     NOT VALID

@@ -40,7 +40,7 @@ class Cabin {
 			query,
 			Model: Cabin,
 		});
-		if (init) {
+		if (init && cabins) {
 			await Promise.all(cabins.map((cabin) => cabin.init()));
 		}
 		return cabins;

@@ -5,12 +5,12 @@ module.exports = {
     const query = `
     CREATE TABLE IF NOT EXISTS periods
     (
-    id integer NOT NULL DEFAULT nextval('period_id_seq'::regclass),
-    day_id integer NOT NULL DEFAULT nextval('period_day_id_seq'::regclass),
+    id serial NOT NULL  ,
+    day_id serial NOT NULL  ,
     period_number integer NOT NULL,
     CONSTRAINT period_pkey PRIMARY KEY (id),
     CONSTRAINT day_id FOREIGN KEY (day_id)
-    REFERENCES public.days (id) MATCH SIMPLE
+    REFERENCES days (id) MATCH SIMPLE
     ON UPDATE CASCADE
     ON DELETE CASCADE
     NOT VALID

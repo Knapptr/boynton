@@ -49,7 +49,6 @@ module.exports = () => {
     .then(() => activityRepo.init())
     .then(() => cabinRepo.init())
     .then(() => cabinSessionRepo.init())
-    .then(() => cabinSessionRepo.init())
     .then(() => camperRepo.init())
     .then(() => camperWeekRepo.init())
     .then(() => camperActivityRepo.init())

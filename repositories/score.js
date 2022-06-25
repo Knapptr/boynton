@@ -7,14 +7,14 @@ module.exports = {
       CREATE TABLE IF NOT EXISTS  scores
       (
       points integer NOT NULL,
-      id serial,
+      id serial NOT NULL,
       awarded_to character varying(1) NOT NULL,
       awarded_for character varying(255) NOT NULL,
       awarded_at date NOT NULL,
       week_number integer,
       PRIMARY KEY (id),
       CONSTRAINT week_number FOREIGN KEY (week_number)
-      REFERENCES public.weeks ("number") MATCH SIMPLE
+      REFERENCES weeks ("number") MATCH SIMPLE
       ON UPDATE NO ACTION
       ON DELETE SET NULL
       NOT VALID
