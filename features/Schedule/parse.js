@@ -10,7 +10,7 @@ const sheetID = process.env.ACTIVITY_SHEET_ID;
 
 const loginCredentials = {
 	client_email: process.env.SERVICE_ACCOUNT_EMAIL,
-	private_key: process.env.GOOGLE_PRIVATE_KEY,
+	private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g,"\n")
 };
 
 const createId = ({weekNumber,periodNumber,optionNumber})=>{
