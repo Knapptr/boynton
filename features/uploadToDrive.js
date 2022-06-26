@@ -5,7 +5,7 @@ const SCOPES = ["https://www.googleapis.com/auth/drive"];
 
 const credentials = {
   email: process.env.SERVICE_ACCOUNT_EMAIL,
-  key: process.env.GOOGLE_PRIVATE_KEY,
+  key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g,"\n"),
 };
 
 console.log(credentials)
@@ -42,9 +42,10 @@ const auth = () => {
     //   credentials,
     //   scopes: SCOPES,
     // });
+      console.log(serviceAuth)
     return serviceAuth;
   } catch (e) {
-    console.log(e);
+    console.log('errer with service auth',e);
   }
 };
 const authAndUpload = async (filePath, fileName, folderID) => {
