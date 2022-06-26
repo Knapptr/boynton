@@ -35,7 +35,7 @@ const uploadFile = async (auth, filePath, fileName, folderID) => {
 };
 const auth = () => {
   try {
-    const serviceAuth = new google.auth.JWT(credentials.email,null,credentials.key)
+    const serviceAuth = new google.auth.JWT(credentials.email,null,credentials.key,SCOPES)
     // const serviceAuth = new GoogleAuth({
     //   // keyFile: "./credentials.json",
     //   // credentials: JSON.parse(process.env.GOOGLE_CREDENTIALS),
