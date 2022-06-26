@@ -25,7 +25,7 @@ camperActivities:`
   (
   id serial NOT NULL  ,
   camper_week_id integer NOT NULL ,
-  activity_id integer NOT NULL,
+  activity_id varchar(8) NOT NULL,
   period_id integer NOT NULL,
   is_present boolean NOT NULL DEFAULT false,
   CONSTRAINT camper_periods_pkey PRIMARY KEY (id),
@@ -56,9 +56,9 @@ activities:`
   (
   name character varying(255) COLLATE pg_catalog."default" NOT NULL,
   description character varying(255) COLLATE pg_catalog."default",
-  id serial NOT NULL ,
+  id varchar(6) NOT NULL ,
   period_id integer NOT NULL ,
-  CONSTRAINT activity_pkey PRIMARY KEY (id),
+  CONSTRAINT activities_pkey PRIMARY KEY (id),
   CONSTRAINT no_duplicates UNIQUE (name, period_id),
   CONSTRAINT p UNIQUE (period_id, id),
   CONSTRAINT period_id FOREIGN KEY (period_id)
