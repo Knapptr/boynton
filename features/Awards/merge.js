@@ -10,7 +10,9 @@ const mergeOutputFiles = async (format, outputName) => {
 	};
 
 	const allFiles = await fs.readdir("./output");
-	const fileNames = allFiles.filter(testForMergeName);
+	let fileNames = allFiles.filter(testForMergeName);
+//get rid of .gitKeep
+  fileNames = allFiles.filter(f=>f!==".gitKeep")
 	if (fileNames.length === 0) {
 		throw new Error("Cannot merge awards: nothing to merge");
 	}
