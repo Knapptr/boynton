@@ -1,3 +1,9 @@
+Production bugs
+-Ack slack fl eval
+-Crashes on nonexistant User
+-google escaped keys
+
+
 Need to Repo
 CamperWeek
 CamperActivity
