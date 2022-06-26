@@ -33,6 +33,6 @@ describe("create",()=>{
   })
   it("Throw an error on no creation",()=>{
     dayRepository.create.mockResolvedValue(false);
-    expect(Day.create({name:"MON"})).rejects.toThrow("Could not create week.")
+    expect(Day.create({name:"MON"})).rejects.toThrow("Could not create day.")
   })
 })

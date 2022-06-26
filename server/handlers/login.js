@@ -10,10 +10,12 @@ module.exports = {
     // 	res.status(400).json(error("No username or password"));
     // 	return;
     // }
-    const { user, isAuthenticated } = await User.authenticate({
+     const authResponse = await User.authenticate({
       username,
       password,
     });
+    if(!authResponse){res.status(401);res.json(error('Not authorized'))}
+    const { user, isAuthenticated } = authResponse;
     console.log({ isAuthenticated });
     if (!isAuthenticated) {
       res.status(401);

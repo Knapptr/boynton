@@ -5,10 +5,10 @@ jest.mock("../../repositories/User");
 jest.mock("../../utils/comparePassword");
 
 describe("Fetch Users", () => {
-  it("throws error if user does not exist ", () => {
+  it("returns false if no user", () => {
     userRepository.get.mockResolvedValue(false);
-    return expect(User.get("user1", userRepository)).rejects.toThrow(
-      "User does not exist"
+    return expect(User.get("user1", userRepository)).resolves.toBe(
+false
     );
   });
   it("returns user if it exists", () => {
@@ -58,14 +58,14 @@ describe("create users", () => {
 });
 
 describe("authenticate users", () => {
-  it("throws an error if user does not exist", () => {
+  it("returns false if user does not exist", () => {
     userRepository.get.mockResolvedValue(false);
     expect(
       User.authenticate(
         { username: "userNull", password: "xox" },
         userRepository
       )
-    ).rejects.toThrow("User does not exist.");
+    ).resolves.toBe(false);
   });
   it("returns new user on creation",()=>{
     userRepository.get.mockResolvedValue({username:"user1",password:"xox"});

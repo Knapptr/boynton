@@ -15,7 +15,7 @@ module.exports = class User {
   static async get(username, userRepository=defaultUserRepository) {
     const userData = await userRepository.get(username);
     if (!userData) {
-      throw new Error("User does not exist.");
+      return false
     }
     return new User({ ...userData }, userRepository);
   }
@@ -42,6 +42,7 @@ module.exports = class User {
 
   static async authenticate({ username, password }, userRepository=defaultUserRepository) {
     const user = await User.get(username, userRepository);
+    if(!user){return false}
     const isAuthenticated = await compare(password, user.password);
     return { user, isAuthenticated };
   }
