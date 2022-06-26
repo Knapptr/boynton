@@ -14,7 +14,7 @@ module.exports = {
       username,
       password,
     });
-    if(!authResponse){res.status(401);res.json(error('Not authorized'))}
+    if(!authResponse){res.status(401);res.json(error('Not authorized'));return;}
     const { user, isAuthenticated } = authResponse;
     console.log({ isAuthenticated });
     if (!isAuthenticated) {
