@@ -3,6 +3,9 @@ const { google } = require("googleapis");
 const { GoogleAuth } = require("google-auth-library");
 const SCOPES = ["https://www.googleapis.com/auth/drive"];
 
+const credentials = {client_email: process.env.SERVICE_ACCOUNT_EMAIL,
+  private_key: process.env.GOOGLE_PRIVATE_KEY}
+
 const uploadFile = async (auth, filePath, fileName, folderID) => {
 	const drive = google.drive({ version: "v3", auth });
 	try {
@@ -30,7 +33,8 @@ const auth = () => {
 	try {
 		const serviceAuth = new GoogleAuth({
 			// keyFile: "./credentials.json",
-      credentials: JSON.parse(process.env.GOOGLE_CREDENTIALS),
+      // credentials: JSON.parse(process.env.GOOGLE_CREDENTIALS),
+      credentials,
 			scopes: SCOPES,
 		});
 		return serviceAuth;
