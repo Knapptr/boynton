@@ -2,9 +2,7 @@ const { GoogleSpreadsheet } = require("google-spreadsheet");
 const { formatmmddyyyy, getWeek, getYear } = require("../../utils/getDates");
 const sheetID = process.env.AWARD_SHEET_ID;
 
-console.log({private_key_before: process.env.GOOGLE_PRIVATE_KEY})
 	const private_key = process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g,"\n")
-console.log({private_key})
 
 const loginCredentials = {
 	client_email: process.env.SERVICE_ACCOUNT_EMAIL,

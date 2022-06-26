@@ -43,7 +43,6 @@ module.exports = {
       });
       return acc;
     }, []);
-    a;
   },
 
   async getAll() {
