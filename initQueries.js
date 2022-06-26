@@ -56,7 +56,7 @@ activities:`
   (
   name character varying(255) COLLATE pg_catalog."default" NOT NULL,
   description character varying(255) COLLATE pg_catalog."default",
-  id integer NOT NULL ,
+  id serial NOT NULL ,
   period_id integer NOT NULL ,
   CONSTRAINT activity_pkey PRIMARY KEY (id),
   CONSTRAINT no_duplicates UNIQUE (name, period_id),
