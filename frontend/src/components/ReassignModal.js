@@ -15,7 +15,7 @@ const ReassignModal = ({
   const [reassignmentOption, setReassignmentOption] = useState("default");
   const reassignCampers = async () => {
     const activity = period.activities.find(
-      (a) => a.id === Number.parseInt(reassignmentOption)
+      (a) => a.id === reassignmentOption
     );
     await Promise.all(
       selectedCampers.map((c) => camperSelection.reassign(c, activity))

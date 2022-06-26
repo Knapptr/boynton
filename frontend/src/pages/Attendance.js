@@ -77,6 +77,7 @@ const AttendanceDisplay = () => {
       setSelectedCampers([]);
     },
     async reassign(camper, activity) {
+      console.log({camper,activity})
       const url = `/api/activities/${activity.id}/campers`;
       const options = {
         method: "POST",

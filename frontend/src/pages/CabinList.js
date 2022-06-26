@@ -63,25 +63,28 @@ const CabinListPage = () => {
         { cabins: [] }
       );
       data.cabins.sort((a, b) => {
-        if (typeof a === Number) {
-          if (typeof b === Number) {
+        const numberA = Number.parseInt(a)
+        const numberB = Number.parseInt(b)
+        if (numberA) {
+          if (numberB) {
             return a - b;
           }
-          return 1;
-        }
-        if (typeof b === Number) {
-          return 1;
-        }
-        if (a === null) {
-          return 1;
-        }
-        if (b === null) {
           return -1;
         }
-        if (a < b) {
-          return -1;
-        }
-        return 1;
+        if (numberB) {
+          return 1;}
+        return 0
+      
+       // if (a === null) {
+        //   return 1;
+        // }
+        // if (b === null) {
+        //   return -1;
+        // }
+        // if (a < b) {
+        //   return -1;
+        // }
+        // return 1;
       });
       return data;
     };

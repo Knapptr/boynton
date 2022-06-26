@@ -45,7 +45,7 @@ const AttendanceIndex = () => {
         schedule[selected.week].days[selected.day].periods[selected.period].id;
       navigate(`/schedule/attendance/${selectedPeriodId}`);
     }
-  }, [selected.period]);
+  }, [selected,schedule,navigate]);
 
   return (
     <>
