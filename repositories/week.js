@@ -51,7 +51,7 @@ const weekRepository = {
     FROM weeks w
     JOIN days d ON d.week_id = w.number
     JOIN periods p ON p.day_id = d.id  
-    ORDER BY w.number,p.period_number
+    ORDER BY w.number,d.id,p.period_number
     `;
     const responseData = await fetchMany(query);
       if(!responseData){return []}
