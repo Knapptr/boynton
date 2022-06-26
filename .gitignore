@@ -2,7 +2,8 @@ node_modules/
 credentials.json
 .env
 token.json
-output/
+output/*
+!output/.gitkeep
 config.json
 todo.md
 routes.md
