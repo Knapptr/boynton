@@ -25,9 +25,11 @@ const createDocsPPT = async (awardType, awards, templateList) => {
 		throw new Error("no template provided");
 	}
 
+  
 	const templateContent = await fs.readFile(filePath, "binary");
 
 	for (award of awards) {
+    console.log('rendering award:',award)
 		const zip = new pizZip(templateContent);
 		const template = new Templater(zip);
 		// format data

@@ -2,6 +2,7 @@ const { Automizer } = require("pptx-automizer");
 const fs = require("fs/promises");
 
 const mergePPT = async (fileNames, path = "./output", outputName) => {
+  console.log('merging')
 	const filesWithNoMerged = fileNames.filter((name) => name !== outputName);
 	const root = filesWithNoMerged.pop();
 	const automizer = new Automizer({ templateDir: path, outputDir: path });

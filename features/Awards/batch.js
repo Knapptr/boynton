@@ -1,4 +1,4 @@
-const { templatePaths, programAreas } = JSON.parse(process.env.CONFIG);
+const { templatePaths  } = JSON.parse(process.env.CONFIG);
 // const { createDocsPDF } = require("./createDocs");
 const { createDocsPPT } = require("./createDocs");
 
