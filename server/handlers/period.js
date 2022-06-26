@@ -28,6 +28,7 @@ module.exports = {
 		const { periodId } = req.params;
 		const period = await Period.get(periodId);
 		let campers = await period.getCampers();
+    console.log({campers})
 		if (cabin) {
 			campers = campers.filter((c) => c.cabinName === cabin);
 		}

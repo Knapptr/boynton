@@ -42,7 +42,7 @@ const useActivityAttendance = (period, cabin) => {
 			};
 		});
 		campers.forEach((camper) => {
-			if (camper.activityId === null) {
+			if (camper.activityId === 'Unassigned') {
 				listing.unassigned.campers.push(camper);
 			} else {
 				listing[camper.activityId].campers.push(camper);
