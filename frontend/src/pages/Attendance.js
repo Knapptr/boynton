@@ -71,7 +71,7 @@ const AttendanceDisplay = () => {
       setSelectedCampers(updatedCampers);
     },
     isSelected(camper) {
-      return selectedCampers.find((c) => c.id === camper.id);
+      return selectedCampers.find((c) => c.weekId === camper.weekId);
     },
     clear() {
       setSelectedCampers([]);

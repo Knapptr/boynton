@@ -74,12 +74,14 @@ const CamperAttendant = ({
           </p>
           <span tw="font-light ml-3">{camper.cabinName}</span>
         </AttendanceName>
-        <AttendanceButton isPresent={camper.isPresent} onClick={assignHere}>
-          {camper.isPresent && (
-            <FontAwesomeIcon size="xl" icon={faSquareCheck} />
+        {camper.activityName &&
+          <AttendanceButton isPresent={camper.isPresent} onClick={assignHere}>
+            {camper.isPresent && (
+              <FontAwesomeIcon size="xl" icon={faSquareCheck} />
           )}
           {!camper.isPresent && <FontAwesomeIcon size="xl" icon={faSquare} />}
-        </AttendanceButton>
+          </AttendanceButton>
+      }
       </div>
     </AttendantWrapper>
   );
@@ -93,7 +95,7 @@ const ActivityAttendance = ({
 }) => {
   const getUnaccountedFor = () => {
     const unaccounted = activity.campers.filter(
-      (camper) => camper.isPresent === false
+      (camper) => camper.isPresent === false || camper.activityName === null
     );
     return unaccounted.length;
   };

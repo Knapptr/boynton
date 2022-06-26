@@ -19,6 +19,7 @@ module.exports = {
   async getOne(req,res,next){
     const {periodId} = req.params;
     const period = await Period.get(periodId);
+    console.log({periodBeforeCampers:period})
     await period.getCampers();
     res.json(period);
   },

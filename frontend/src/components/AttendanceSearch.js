@@ -71,7 +71,7 @@ const AttendanceSearch = ({
                   <span tw="w-1/2 font-bold ">
                     {camper.firstName} {camper.lastName}
                   </span>
-                  <span >{camper.activityName}</span>
+                  <span >{camper.activityName || "Unassigned"}</span>
                 </li>
               );
             })}

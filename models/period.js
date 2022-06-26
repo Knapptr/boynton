@@ -81,10 +81,11 @@ class Period {
 				lastName: res.last_name,
 				cabinName: res.name,
         isPresent: res.is_present,
-				activityId: res.activity_id || null,
+				activityId: res.activity_id || 'Unassigned',
         activityName: res.activity_name,
 			};
 		})
+    this.activities.push({name:'Unassigned',id:'Unassigned'})
     this.activities = this.activities.map(act=>{
       const campersInActivity = parsedQuery.filter(c=>c.activityId === act.id);
       return {...act,campers:campersInActivity};

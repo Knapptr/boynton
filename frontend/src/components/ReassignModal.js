@@ -66,7 +66,7 @@ const ReassignModal = ({
             <option disabled value={"default"}>
               Select an option
             </option>
-            {period.activities.map((a,aIndex) => (
+            {period.activities.filter(a=>a.id !== 'Unassigned').map((a,aIndex) => (
               <option key={`reassign-option-${aIndex}`}value={a.id}>{a.name}</option>
             ))}
           </select>
