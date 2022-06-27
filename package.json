@@ -6,12 +6,15 @@
 	"scripts": {
 		"test": "jest --watch",
 		"start": "node index.js",
-    "dev":"nodemon index.js",
-    "heroku-postbuild": "cd frontend && npm install && npm run build"
+		"dev": "nodemon index.js",
+		"heroku-postbuild": "cd frontend && npm install && npm run build"
 	},
 	"author": "Tyler Knapp <knapptr@gmail.com>",
 	"license": "MIT",
 	"dependencies": {
+		"@fortawesome/free-regular-svg-icons": "^6.1.1",
+		"@fortawesome/free-solid-svg-icons": "^6.1.1",
+		"@fortawesome/react-fontawesome": "^0.1.18",
 		"@slack/bolt": "^3.11.0",
 		"babel-plugin-macros": "^3.1.0",
 		"bcrypt": "^5.0.1",
