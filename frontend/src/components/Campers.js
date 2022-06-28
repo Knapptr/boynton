@@ -2,7 +2,6 @@ import Camper from "./Camper";
 import { Droppable } from "@react-forked/dnd";
 import tw, { styled } from "twin.macro";
 import { AssignmentHeader } from "./styled";
-import { PropagateLoader } from "react-spinners";
 
 const CamperList = styled.ul(() => [
   tw`flex w-full  py-2 px-4  flex-wrap justify-start gap-1 md:gap-2 `,
@@ -17,12 +16,6 @@ const Campers = ({ list, allCampers }) => {
             <h1>{allCampers.length} Total Campers</h1>
           </AssignmentHeader>
           <CamperList {...provided.droppableProps} ref={provided.innerRef}>
-
-            {list.length === 0 &&
-            <div tw="my-2 py-8 text-center w-full ">
-            <PropagateLoader loading={true} />
-            </div>
-            }
             {list.map((camper, index) => (
               <Camper
                 full
