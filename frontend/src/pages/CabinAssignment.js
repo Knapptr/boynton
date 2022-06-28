@@ -10,6 +10,8 @@ import "styled-components/macro";
 import useCabinSessions from "../hooks/useCabinSessions";
 import CabinAssignmentIndex from "./cabinAssignmentIndex";
 import UnitHeadAccess from "../components/ProtectedUnitHead";
+import { PropagateLoader } from "react-spinners";
+import { PopOut } from "../components/styled";
 
 const CabinsOnlyButton = tw.button`bg-green-400 rounded p-3 text-white font-bold`;
 const AssignmentHeader = tw.header`flex justify-around items-center bg-violet-500 gap-4 rounded-t text-white mb-2`;
@@ -51,7 +53,7 @@ const CabinAssignmentRoutes = () => {
 const CabinAssignment = ({ area, weekNumber }) => {
   const auth = useContext(UserContext);
   const token = auth.userData.token;
-
+  const [showUnassignModal, setShowUnassignModal] = useState(false);
   const [cabinsOnly, setCabinsOnly] = useState(false);
 
   const toggleCabinsOnly = () => {
@@ -137,12 +139,7 @@ const CabinAssignment = ({ area, weekNumber }) => {
       updateCabinList(destinationList, sourceItems);
       setCampers([...destinationItems]);
     },
-    cabinToCampers({
-      sourceList,
-      destinationList,
-      sourceIndex,
-      destinationIndex,
-    }) {
+    cabinToCampers({ sourceList, sourceIndex, destinationIndex }) {
       const destinationItems = [...unassignedCampers];
       const sourceItems = [...cabinList[sourceList]];
       const camper = sourceItems.splice(sourceIndex, 1)[0];
@@ -212,12 +209,14 @@ const CabinAssignment = ({ area, weekNumber }) => {
         <div tw="max-h-[45vh] lg:w-1/2 lg:max-h-screen flex lg:flex-col flex-wrap lg:flex-nowrap overflow-auto ">
           <Cabins
             unassignCamper={unassignCamper}
+            toggleUnassignModal={() => {
+              setShowUnassignModal((d) => !d);
+            }}
             cabinsOnly={false}
             cabinSessions={cabinSessions}
             lists={cabinList}
             weekNumber={weekNumber}
             area={area}
-            unassignAll={unassignAll}
           />
         </div>
       </>
@@ -228,6 +227,9 @@ const CabinAssignment = ({ area, weekNumber }) => {
       <div>
         <div tw=" overscroll-none flex flex-wrap overflow-auto ">
           <Cabins
+            toggleUnassignModal={() => {
+              setShowUnassignModal((d) => !d);
+            }}
             unassignCamper={unassignCamper}
             showAllLists={cabinsOnly || allAssigned()}
             cabinSessions={cabinSessions}
@@ -235,7 +237,6 @@ const CabinAssignment = ({ area, weekNumber }) => {
             lists={cabinList}
             weekNumber={weekNumber}
             area={area}
-            unassignAll={unassignAll}
           />
         </div>
       </div>
@@ -243,12 +244,49 @@ const CabinAssignment = ({ area, weekNumber }) => {
   };
 
   return (
-    <div tw="relative">
-      <DragDropContext
-        onDragEnd={(drop) => {
-          dragCamper(drop);
-        }}
-      >
+    <>
+      {" "}
+      {showUnassignModal && (
+        <PopOut
+          onClick={() => {
+            setShowUnassignModal(false);
+          }}
+          shouldDisplay={true}
+        >
+          <div
+            tw="bg-coolGray-200 p-4 rounded shadow"
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
+          >
+            <header>
+              <h4 tw="font-bold text-lg">Unassign All Campers</h4>
+              <p>Are you sure?</p>
+              <button
+                onClick={() => setShowUnassignModal(false)}
+                tw="rounded bg-green-400 p-2 m-2"
+              >
+                Nevermind
+              </button>{" "}
+              <button
+                tw=" rounded bg-red-400 m-2 p-2"
+                onClick={async () => {
+                  await unassignAll();
+                  setShowUnassignModal(false);
+                }}
+              >
+                Get rid of 'em
+              </button>
+            </header>
+          </div>{" "}
+        </PopOut>
+      )}
+      <div tw="relative">
+        <DragDropContext
+          onDragEnd={(drop) => {
+            dragCamper(drop);
+          }}
+        >
           <AssignmentHeader>
             <h1 tw="inline">
               Cabin assignment{" "}
@@ -267,13 +305,19 @@ const CabinAssignment = ({ area, weekNumber }) => {
               </CabinsOnlyButton>
             )}
           </AssignmentHeader>
-        <div tw="flex flex-col lg:flex-row">
-          {( cabinsOnly || allAssigned() ) && showOnlyCabins() }
-          {!cabinsOnly && !allAssigned() && showAll()}
-        </div>
-      </DragDropContext>
-      <footer tw="h-1"></footer>
-    </div>
+          <div tw="flex flex-col lg:flex-row">
+            {unassignedCampers.length === 0 &&
+            <div tw="my-2 py-8 text-center w-full ">
+            <PropagateLoader loading={true} />
+            </div>
+            }
+            {(cabinsOnly || allAssigned()) && showOnlyCabins()}
+            {!cabinsOnly && !allAssigned() && showAll()}
+          </div>
+        </DragDropContext>
+        <footer tw="h-1"></footer>
+      </div>
+    </>
   );
 };
 

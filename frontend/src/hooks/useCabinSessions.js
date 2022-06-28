@@ -32,6 +32,8 @@ const useCabinSessions = (weekNumber, area) => {
 		setCabinList(update);
 	};
 
+
+	useEffect(() => {
 	const setState = async (auth) => {
 		const cabinsState = {};
 		const cabinSessions = await getAllSessionsForWeek(weekNumber, area,auth);
@@ -43,10 +45,8 @@ const useCabinSessions = (weekNumber, area) => {
 		setCabinList(cabinsState);
 		setCabinSessions(cabinSessions);
 	};
-
-	useEffect(() => {
 		setState(auth);
-	}, []);
+	}, [auth,area,weekNumber]);
 
 	return { setCabinList, cabinList, cabinSessions, updateCabinList };
 };

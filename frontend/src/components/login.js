@@ -13,14 +13,22 @@ const SubmitButton = tw.button`bg-green-400 p-4 rounded-lg`;
 
 const Login = () => {
     const auth = useContext(UserContext);
+  const [errors,setErrors] = useState([]);
 	const [formInputs, setFormInputs] = useState({
 		username: "",
 		password: "",
 	});
+  const clearPassword = ()=>{
+    setFormInputs(f=>( {...f,password:""} ))
+  }
+  const clearErrors = ()=>{
+    setErrors([]);
+  }
 	const location = useLocation();
 	const { cameFrom } = location.state || { cameFrom: null };
 	const navigate = useNavigate();
 	const handleUpdate = (e) => {
+    clearErrors();
 		const field = e.target.name;
 		const value = e.target.value;
 		setFormInputs((f) => {
@@ -43,13 +51,16 @@ const Login = () => {
 		const response = await fetch("/auth/login", reqOptions);
 		const data = await response.json();
 		if (response.status === 500) {
-			console.log({ data });
+      const error = {text: "Server Error. Tell an admin"}
+      clearPassword();
+      setErrors(e=>[...e, error])
 		}
 		if (response.status === 400) {
-			console.log({ data });
 		}
 		if (response.status === 401) {
-			console.log({ data });
+      clearPassword();
+      const error = {text:"Incorrect Username or Password"}
+      setErrors(e=>[...e,error])
 		}
 		if (response.status === 200) {
       auth.logIn(data.token,data.user)
@@ -58,26 +69,35 @@ const Login = () => {
 		}
 	};
 	return (
-		<form onSubmit={handleSubmit} tw="w-4/5 sm:w-1/2 md:w-2/5 max-w-sm">
-			<div tw="flex flex-col">
-				<img src={logo} alt="" />
-				<LoginField
-					type="text"
-					name="username"
-					id="usernameInput"
-					placeholder="username"
-					onChange={handleUpdate}
-				/>
-				<LoginField
-					type="password"
-					onChange={handleUpdate}
-					name="password"
-					id="passwordInput"
-					placeholder="password"
-				/>
-				<SubmitButton type="submit">Login</SubmitButton>
-			</div>
-		</form>
+    <><form onSubmit={handleSubmit} tw="w-4/5 sm:w-1/2 md:w-2/5 max-w-sm">
+      <div tw="flex flex-col">
+        <img src={logo} alt="" />
+        <LoginField
+          type="text"
+          name="username"
+          id="usernameInput"
+          placeholder="username"
+          onChange={handleUpdate}
+          value={formInputs.username}
+        />
+        <LoginField
+          type="password"
+          onChange={handleUpdate}
+          name="password"
+          id="passwordInput"
+          placeholder="password"
+          value={formInputs.password}
+        />
+        <SubmitButton type="submit">Login</SubmitButton>
+      </div>
+    </form>
+
+      {errors.length > 0 &&
+      <div>
+        <ul>{errors.map(( e,eIndex )=><li tw="bg-red-400 p-3 rounded m-2 font-bold" key={`error-${eIndex}`}>{e.text}</li>)}</ul>
+          </div>
+      }
+    </>
 	);
 };
 
