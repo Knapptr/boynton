@@ -37,7 +37,7 @@ const parseSchedule = async (weekNumber = getWeek()) => {
 					period: cv["Period"],
 					activity: cv[activityHeader],
 					description: cv[descriptionHeader],
-          id: createId({weekNumber,periodNumber:cv["Period"],optionNumber:optionNumber})
+          id: createId({weekNumber,periodNumber:cv["Period"],optionNumber:optionNumber,dayName:cv["Day"]})
 				});
 			}
       optionNumber +=1;
