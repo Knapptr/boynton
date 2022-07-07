@@ -13,8 +13,8 @@ const loginCredentials = {
 	private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g,"\n")
 };
 
-const createId = ({weekNumber,periodNumber,optionNumber})=>{
-  return `${weekNumber}-${periodNumber}-${optionNumber}`
+const createId = ({weekNumber,periodNumber,optionNumber,dayName})=>{
+  return `${weekNumber}-${dayName}-${periodNumber}-${optionNumber}`
 }
 
 const parseSchedule = async (weekNumber = getWeek()) => {
