@@ -21,7 +21,11 @@ module.exports = {
       console.log({body:req.body});
         const { camperWeekId, periodId } = req.body;
         const activityId = req.params.activityID;
+      console.log({
+        camperWeekId,periodId,activityId
+      })
         const activity = await Activity.get(activityId);
+      console.log({activity});
         const camperActivityID = await activity.addCamper(
             camperWeekId,
             periodId
