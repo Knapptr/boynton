@@ -41,6 +41,7 @@ const SelectActivities = ({
       headers: { "content-type": "application/json" },
       body: JSON.stringify(camper),
     };
+    console.log(reqConfig);
     const result = await fetchWithToken(
       `/api/activities/${activityId}/campers`,
       reqConfig,
