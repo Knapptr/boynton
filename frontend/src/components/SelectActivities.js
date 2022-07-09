@@ -153,9 +153,9 @@ const SelectActivities = ({
                           </header>
                           {activityLists[aid].campers.map((c, index) => (
                             <Draggable
-                              draggableId={`${c.id}`}
+                              draggableId={`${c.weekId}`}
                               index={index}
-                              key={`draggable-camper-${c.id}`}
+                              key={`draggable-camper-${c.weekId}`}
                             >
                               {(provided, snapshot) => (
                                 <CamperItem
