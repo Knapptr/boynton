@@ -35,6 +35,7 @@ const getPeriodIdAndInsert = async ({
 };
 
 const insertActivities = async (schedule) => {
+  console.log(schedule);
 	await Promise.all(
 		schedule.map((option) => {
 			console.log(
