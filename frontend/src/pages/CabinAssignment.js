@@ -62,7 +62,7 @@ const CabinAssignment = ({ area, weekNumber }) => {
   const { cabinSessions, cabinList, updateCabinList, setCabinList } =
     useCabinSessions(weekNumber, area);
 
-  const [allCampers] = useGetDataOnMount({
+  const [allCampers,setData,updateData,loaded] = useGetDataOnMount({
     url: `/api/camper-weeks?week=${weekNumber}&area=${area}`,
     initialState: [],
     useToken: true,
@@ -306,7 +306,7 @@ const CabinAssignment = ({ area, weekNumber }) => {
             )}
           </AssignmentHeader>
           <div tw="flex flex-col lg:flex-row">
-            {unassignedCampers.length === 0 &&
+            { loaded === false &&
             <div tw="my-2 py-8 text-center w-full ">
             <PropagateLoader loading={true} />
             </div>

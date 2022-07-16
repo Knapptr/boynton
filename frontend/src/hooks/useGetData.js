@@ -13,10 +13,11 @@ const useGetDataOnMount = ({
   useToken = false,
 }) => {
   const [data, setData] = useState(initialState);
+  const [loaded,setLoaded] = useState(false)
   const auth = useContext(UserContext);
   const navigate = useNavigate();
   const location = useLocation();
-  const fetchAndSet = async ({
+  const fetchAndSet = useCallback(async ({
     url,
     beforeSet,
     handler,
@@ -39,10 +40,11 @@ const useGetDataOnMount = ({
       data = beforeSet(data);
     }
     handler(data);
+    setLoaded(true)
     if (callback) {
       callback(data);
     }
-  };
+  },[auth,location.pathname,navigate]);
   const update = useCallback( () => {
     fetchAndSet({
       url,
@@ -64,7 +66,7 @@ const useGetDataOnMount = ({
     });
   }, [...runOn]);
 
-  return [data, setData, update];
+  return [data, setData, update,loaded];
 };
 
 export default useGetDataOnMount;

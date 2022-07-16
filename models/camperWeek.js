@@ -11,6 +11,7 @@ class CamperWeek {
         id,
         firstName,
         lastName,
+      dayCamp,
         age,
         gender,
         weekNumber,
@@ -22,6 +23,7 @@ class CamperWeek {
     }) {
         this.weekNumber = weekNumber;
         this.gender = gender;
+        this.dayCamp = dayCamp;
         this.age = age;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -35,6 +37,7 @@ class CamperWeek {
     static _parseResults({
         id,
         camper_id,
+        day_camp,
         first_name,
         last_name,
         age,
@@ -52,6 +55,7 @@ class CamperWeek {
         return {
             id: id,
             camperID: camper_id,
+          dayCamp: day_camp,
             firstName: first_name,
             lastName: last_name,
             age: age,
@@ -71,6 +75,7 @@ class CamperWeek {
         const query = `
 			SELECT 
 			cw.id,
+      cw.day_camp,
 			cw.camper_id,c.first_name,c.last_name,c.age,c.gender,
 			w.number as week_number,w.title as week_title,
 			cw.cabin_session_id,cab.name as cabin_name,
@@ -87,6 +92,7 @@ class CamperWeek {
 
 		`;
         const dbResult = await fetchMany(query);
+      console.log({dbResult});
       if(!dbResult){return []}
         const parsedResult = dbResult.map((oneResult) =>
             CamperWeek._parseResults(oneResult)
@@ -105,6 +111,7 @@ class CamperWeek {
             fieldsToRemain: [
                 "id",
                 "camperID",
+              "dayCamp",
                 "firstName",
                 "lastName",
                 "age",

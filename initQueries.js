@@ -5,6 +5,7 @@ camperWeeks:`
   id serial NOT NULL  ,
   week_id integer NOT NULL,
   camper_id integer NOT NULL,
+  day_camp boolean DEFAULT false,
   cabin_session_id integer,
   CONSTRAINT camper_weeks_pkey PRIMARY KEY (id),
   CONSTRAINT one_week_per_camper UNIQUE (week_id, camper_id),

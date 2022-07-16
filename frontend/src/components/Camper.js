@@ -20,7 +20,7 @@ const Camper = ({
   unassignCamper,
   removable,
 }) => {
-  const { firstName, lastName, age, id } = camper;
+  const { firstName, lastName, age, id,dayCamp } = camper;
   return (
     <Draggable key={id} draggableId={`${id}`} index={index}>
       {(provided, snapshot) => {
@@ -44,6 +44,7 @@ const Camper = ({
             )}
             <p tw="text-lg">
               <span tw="font-light"> {age}</span> {firstName} {lastName}
+              {dayCamp && <span tw="italic"> DAY</span>}
             </p>
           </CamperItem>
         );
