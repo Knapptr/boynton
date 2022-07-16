@@ -31,6 +31,7 @@ module.exports = {
       cabinName: "cabinName",
       cabinSessionId: "cabinSessionId",
       camperWeekId: "id",
+      dayCamp:"dayCamp"
     });
   },
   async getAll() {
@@ -40,6 +41,7 @@ module.exports = {
      c.gender,c.id,c.age,
      w.number AS week_number, w.title AS week_title,
      cw.id AS camper_week_id,
+     cw.day_camp,
      cw.cabin_session_id AS cabin_session_id,
      cab.name AS cabin_name
      FROM campers c

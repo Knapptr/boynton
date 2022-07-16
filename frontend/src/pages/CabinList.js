@@ -135,7 +135,7 @@ const CabinListPage = () => {
                 <ul tw="flex flex-col gap-1 w-11/12 mx-auto">
                   {cabin.campers.map((camper) => (
                     <li tw="bg-slate-100 text-lg shadow">
-                      {camper.firstName} {camper.lastName} <span tw="italic font-light">{camper.age}</span>
+                      {camper.firstName} {camper.lastName} <span tw="italic font-light">{camper.age}</span> {camper.weeks.find(w=>w.number === weekNumber && w.dayCamp===true) && <span>DAY</span>}
                     </li>
                   ))}
                 </ul>
