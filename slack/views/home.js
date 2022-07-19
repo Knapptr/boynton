@@ -1,5 +1,6 @@
 const { flEvalURL  }= JSON.parse(process.env.CONFIG);
 const ROOTURL = process.env.ROOTURL;
+const attendanceURL =`${ROOTURL}/attendance` 
 const homeView = {
 	type: "home",
 
@@ -8,6 +9,15 @@ const homeView = {
 			type: "actions",
 			block_id: "actions1",
 			elements: [
+				{
+					type: "button",
+					text: {
+						type: "plain_text",
+						text: "Attendance",
+						emoji: true,
+					},
+          url: attendanceURL
+				},
 				{
 					type: "button",
 					text: {
