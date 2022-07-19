@@ -1,6 +1,6 @@
 const { flEvalURL  }= JSON.parse(process.env.CONFIG);
 const ROOTURL = process.env.ROOTURL;
-const attendanceURL =`${ROOTURL}/attendance` 
+const attendanceURL =`${ROOTURL}/schedule/attendance` 
 const homeView = {
 	type: "home",
 
