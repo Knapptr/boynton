@@ -8,7 +8,7 @@ const tribes = { N: "Naumkeag", T: "Tahattawan" };
 const submitPoints = async ({ ack, view, client }) => {
   await ack();
   try {
-    let weekNumber = getWeek();
+    let weekNumber = Number.parseInt(getWeek());
     //This should be removed for production
     if (weekNumber === "non") {
       weekNumber = 1;
