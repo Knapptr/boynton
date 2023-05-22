@@ -15,9 +15,10 @@ const app = new App({
 
 registerListeners(app);
 
+console.log("Starting App . . .");
 (async () => {
 	try {
-    await dbInit();
+		await dbInit();
 		await app.start(port)
 		console.log(`listening on port ${port}`);
 	} catch (e) {

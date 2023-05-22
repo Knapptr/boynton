@@ -49,13 +49,15 @@ module.exports = async () => {
   //   throw new Error(`Error with db init: ${e}`);
   // }
 
-  for(let repo of repos){
-    try{
+  for (let repo of repos) {
+    try {
       await repo.init()
     }
-  catch (e){
+    catch (e) {
       console.log("something went wrong during db init");
-    console.log("repo:", repo)
+      console.log("repo:", repo)
       throw new Error(e);
-    }}
+    }
+  }
+  console.log("DB Initialized");
 };
