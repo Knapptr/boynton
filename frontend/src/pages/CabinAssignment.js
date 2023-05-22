@@ -61,12 +61,14 @@ const CabinAssignment = ({ area, weekNumber }) => {
   const token = auth.userData.token;
   const [showUnassignModal, setShowUnassignModal] = useState(false);
   const [cabinsOnly, setCabinsOnly] = useState(false);
+  const [selectedCampers, setSelected] = useState([]);
 
   const toggleCabinsOnly = () => {
     setCabinsOnly((s) => !s);
   };
   const { cabinSessions, cabinList, updateCabinList, setCabinList } =
     useCabinSessions(weekNumber, area);
+
 
   const [allCampers, setData, updateData, loaded] = useGetDataOnMount({
     url: `/api/camper-weeks?week=${weekNumber}&area=${area}`,
@@ -84,6 +86,27 @@ const CabinAssignment = ({ area, weekNumber }) => {
   const allAssigned = () => {
     return unassignedCampers.length === 0;
   };
+
+  const selectCamper = (id) => {
+    setSelected((s) => [...s, id]);
+  }
+
+  const deselectCamper = (id) => {
+    setSelected((s) => {
+      // remove id from array
+      // maybe just use a set here?
+      const index = s.findIndex((v) => v == id);
+      if (index == -1) { console.log(`Cannot deselect camper: ${id}. They are not currently selected.`) } else {
+        // set state to updated array
+        const newState = [...s]
+        newState.splice(index, 1);
+        return newState;
+      }
+    }
+    )
+  }
+
+
   const unassignCamper = (camperSession, camperIndex, cabinName) => {
     dragOptions.cabinToCampers({
       sourceList: cabinName,
@@ -205,6 +228,8 @@ const CabinAssignment = ({ area, weekNumber }) => {
       <>
         <div tw="max-h-[45vh] lg:w-1/2 lg:max-h-screen overflow-auto relative ">
           <Campers
+            select={selectCamper}
+            deselect={deselectCamper}
             list={unassignedCampers}
             allCampers={allCampers}
             weekNumber={weekNumber}
