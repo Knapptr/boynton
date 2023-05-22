@@ -9,10 +9,13 @@ import toTitleCase from "../toTitleCase";
 const HeaderBar = () => {
   const user = useContext(UserContext);
   return (
+    <>
+    // remove this for production
+      <h1 tw="text-white bg-red-600 font-bold"> DEV FRONTEND</h1>
       <div tw="flex items-center px-4 py-2">
         <div tw="w-1/6">
           <Link to="/">
-          <img  tw="" src={logo} alt="Camp Leslie" />
+            <img tw="" src={logo} alt="Camp Leslie" />
           </Link>
         </div>
         <button
@@ -25,6 +28,7 @@ const HeaderBar = () => {
         </button>
         <span tw="rounded-full bg-green-800 px-4 py-2 text-white font-bold">{user.userData.user.userName[0].toUpperCase()}</span>
       </div>
+    </>
   );
 };
 

@@ -11,6 +11,9 @@ const Dashboard = () => {
   const { user } = userData;
   return (
     <>
+    // remove this for production
+      <h1
+        tw="text-white font-bold bg-red-600"> DEVELOPMENT FRONT END </h1>
       <img
         tw="mt-6 w-11/12 mx-auto md:w-1/2 max-w-md"
         src={cl}
