@@ -24,7 +24,7 @@ const Camper = ({
   select,
   deselect
 }) => {
-  const { firstName, lastName, age, id, dayCamp } = camper;
+  const { firstName, lastName, age, id, dayCamp, camperID } = camper;
   const [isSelected, setIsSelected] = useState(false);
   return (
     <CamperItem
@@ -33,7 +33,7 @@ const Camper = ({
           deselect(id);
           setIsSelected(false);
         } else {
-          select(id);
+          select(camperID, id);
           setIsSelected(true);
         }
       }}

@@ -87,16 +87,16 @@ const CabinAssignment = ({ area, weekNumber }) => {
     return unassignedCampers.length === 0;
   };
 
-  const selectCamper = (id) => {
-    setSelected((s) => [...s, id]);
+  const selectCamper = (camperId, sessionId) => {
+    setSelected((s) => [...s, { camperId, id: sessionId }]);
   }
 
-  const deselectCamper = (id) => {
+  const deselectCamper = (sessionId) => {
     setSelected((s) => {
       // remove id from array
       // maybe just use a set here?
-      const index = s.findIndex((v) => v == id);
-      if (index == -1) { console.log(`Cannot deselect camper: ${id}. They are not currently selected.`) } else {
+      const index = s.findIndex((v) => v.id == sessionId);
+      if (index == -1) { console.log(`Cannot deselect camper: ${sessionId}. They are not currently selected.`) } else {
         // set state to updated array
         const newState = [...s]
         newState.splice(index, 1);
@@ -106,6 +106,36 @@ const CabinAssignment = ({ area, weekNumber }) => {
     )
   }
 
+  const assignCabin = async (camperSession, cabinNumber) => {
+    //get id from sessions
+    const cabinSession =
+      cabinSessions.find((cabin) => cabin.cabinName === cabinNumber) || null;
+    const requestConfig = {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        cabinSessionID: cabinSession ? cabinSession.id : null,
+      }),
+    };
+    const results = await fetch(
+      `/api/campers/${camperSession.camperID}/${camperSession.id}/cabin`,
+      requestConfig
+    );
+  };
+
+  const sendToCabin = async (cabinNumber) => {
+    for (let { camperId, id } of selectedCampers) {
+      try {
+        await assignCabin({ camperID: camperId, id }, cabinNumber);
+      } catch {
+        console.log(`ERROR ASSIGNING CABIN: ${cabinNumber} to ${id}`)
+      }
+
+    }
+  }
 
   const unassignCamper = (camperSession, camperIndex, cabinName) => {
     dragOptions.cabinToCampers({
@@ -133,25 +163,6 @@ const CabinAssignment = ({ area, weekNumber }) => {
     setCabinList(updatedCabinList);
   };
 
-  const assignCabin = async (camperSession, cabinNumber) => {
-    //get id from sessions
-    const cabinSession =
-      cabinSessions.find((cabin) => cabin.cabinName === cabinNumber) || null;
-    const requestConfig = {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        cabinSessionID: cabinSession ? cabinSession.id : null,
-      }),
-    };
-    const results = await fetch(
-      `/api/campers/${camperSession.camperID}/${camperSession.id}/cabin`,
-      requestConfig
-    );
-  };
 
   const dragOptions = {
     campersToCabin({
@@ -240,6 +251,7 @@ const CabinAssignment = ({ area, weekNumber }) => {
         <div tw="max-h-[45vh] lg:w-1/2 lg:max-h-screen flex lg:flex-col flex-wrap lg:flex-nowrap overflow-auto ">
           <Cabins
             unassignCamper={unassignCamper}
+            assign={sendToCabin}
             toggleUnassignModal={() => {
               setShowUnassignModal((d) => !d);
             }}

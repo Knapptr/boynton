@@ -17,6 +17,7 @@ const UnassignButton = styled.button(({ anyAssignments }) => [
 ]);
 const Cabins = ({
   showAllLists,
+  assign,
   unassignAll,
   cabinSessions,
   toggleUnassignModal,
@@ -44,6 +45,7 @@ const Cabins = ({
       return (
         <Cabin
           cabinsOnly={cabinsOnly}
+          assign={assign}
           key={`cabin-${cabinSession.cabinName}`}
           unassignCamper={unassignCamper}
           allOpenState={showAllLists}
@@ -85,9 +87,9 @@ const Cabins = ({
       </AssignmentHeader>
       <CabinsList>
         {cabinSessions.length === 0 &&
-        <div tw="my-2 py-8 text-center w-full ">
-          <PropagateLoader loading={true} />
-        </div>
+          <div tw="my-2 py-8 text-center w-full ">
+            <PropagateLoader loading={true} />
+          </div>
         }
         {displayCabins()}
       </CabinsList>

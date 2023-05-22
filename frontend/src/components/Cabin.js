@@ -16,7 +16,7 @@ const CamperList = styled.ul(({ isOpen, hasCampers }) => [
   tw`p-1 rounded flex-grow flex flex-col gap-1`,
   hasCampers && isOpen && tw`bg-sky-800`,
 ]);
-const Cabin = ({ session, list, allOpenState, unassignCamper, cabinsOnly }) => {
+const Cabin = ({ assign, session, list, allOpenState, unassignCamper, cabinsOnly }) => {
   const [isOpen, setIsOpen] = useState(false);
   const toggleOpen = () => {
     setIsOpen((o) => !o);
@@ -27,56 +27,52 @@ const Cabin = ({ session, list, allOpenState, unassignCamper, cabinsOnly }) => {
 
   return (
     <CabinComponentFrame cabinsOnly={cabinsOnly}>
-      <Droppable
-        isDropDisabled={list.length === session.capacity}
-        droppableId={`${session.cabinName}`}
+      <CabinWrapper
+        disabled={list.length === session.capacity}
+        onClick={() => {
+          if (list.length !== session.capacity) {
+            assign(session.cabinName)
+          } else {
+            console.log("Cabin is full.")
+          }
+        }}
       >
-        {(provided, snapshot) => (
-          <CabinWrapper
-            isOver={snapshot.isDraggingOver}
-            {...isOpen}
-            {...provided.droppableProps}
-            ref={provided.innerRef}
-            disabled={list.length === session.capacity}
-          >
-            <header tw="flex justify-between">
-              <h4 tw="font-bold text-xl">{session.cabinName}</h4>
-              <h4 tw="font-bold text-2xl">
-                {list.length}/{session.capacity}
-              </h4>
-            </header>
-            <div tw="flex justify-end">
-              {list.length > 0 && !allOpenState && (
-                <button onClick={toggleOpen}>
-                  {isOpen ? "Hide List" : "View List"}
-                </button>
-              )}
-              <h4 tw="ml-auto">
-                {list.length <= 0
-                  ? "Empty"
-                  : `Ages: ${list[0].age} - ${list[list.length - 1].age}`}
-              </h4>
-            </div>
-            <CamperList isOpen={isOpen} hasCampers={list.length > 0}>
-              {isOpen &&
-                list.map((camper, index) => {
-                  console.log({camprmap:camper})
-                  return (
-                    <Camper
-                      cabinName={session.cabinName}
-                      full
-                      removable
-                      unassignCamper={unassignCamper}
-                      key={`camper-${camper.id}`}
-                      camper={camper}
-                      index={index}
-                    />
-                  );
-                })}
-            </CamperList>
-          </CabinWrapper>
-        )}
-      </Droppable>
+        <header tw="flex justify-between">
+          <h4 tw="font-bold text-xl">{session.cabinName}</h4>
+          <h4 tw="font-bold text-2xl">
+            {list.length}/{session.capacity}
+          </h4>
+        </header>
+        <div tw="flex justify-end">
+          {list.length > 0 && !allOpenState && (
+            <button onClick={toggleOpen}>
+              {isOpen ? "Hide List" : "View List"}
+            </button>
+          )}
+          <h4 tw="ml-auto">
+            {list.length <= 0
+              ? "Empty"
+              : `Ages: ${list[0].age} - ${list[list.length - 1].age}`}
+          </h4>
+        </div>
+        <CamperList isOpen={isOpen} hasCampers={list.length > 0}>
+          {isOpen &&
+            list.map((camper, index) => {
+              console.log({ camprmap: camper })
+              return (
+                <Camper
+                  cabinName={session.cabinName}
+                  full
+                  removable
+                  unassignCamper={unassignCamper}
+                  key={`camper-${camper.id}`}
+                  camper={camper}
+                  index={index}
+                />
+              );
+            })}
+        </CamperList>
+      </CabinWrapper>
     </CabinComponentFrame>
   );
 };
