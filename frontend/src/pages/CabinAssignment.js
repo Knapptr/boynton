@@ -12,6 +12,7 @@ import CabinAssignmentIndex from "./cabinAssignmentIndex";
 import UnitHeadAccess from "../components/ProtectedUnitHead";
 import { PropagateLoader } from "react-spinners";
 import { PopOut } from "../components/styled";
+import NotFound from "./NotFound";
 
 const CabinsOnlyButton = tw.button`bg-green-400 rounded p-3 text-white font-bold`;
 const AssignmentHeader = tw.header`flex justify-around items-center bg-violet-500 gap-4 rounded-t text-white mb-2`;
@@ -46,6 +47,11 @@ const CabinAssignmentRoutes = () => {
         }
       />
       {routes}
+      <Route
+        path="*"
+        element={
+          <NotFound />
+        } />
     </>
   );
 };
@@ -62,7 +68,7 @@ const CabinAssignment = ({ area, weekNumber }) => {
   const { cabinSessions, cabinList, updateCabinList, setCabinList } =
     useCabinSessions(weekNumber, area);
 
-  const [allCampers,setData,updateData,loaded] = useGetDataOnMount({
+  const [allCampers, setData, updateData, loaded] = useGetDataOnMount({
     url: `/api/camper-weeks?week=${weekNumber}&area=${area}`,
     initialState: [],
     useToken: true,
@@ -306,10 +312,10 @@ const CabinAssignment = ({ area, weekNumber }) => {
             )}
           </AssignmentHeader>
           <div tw="flex flex-col lg:flex-row">
-            { loaded === false &&
-            <div tw="my-2 py-8 text-center w-full ">
-            <PropagateLoader loading={true} />
-            </div>
+            {loaded === false &&
+              <div tw="my-2 py-8 text-center w-full ">
+                <PropagateLoader loading={true} />
+              </div>
             }
             {(cabinsOnly || allAssigned()) && showOnlyCabins()}
             {!cabinsOnly && !allAssigned() && showAll()}
