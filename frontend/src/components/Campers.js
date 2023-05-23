@@ -17,6 +17,7 @@ const Campers = ({ select, deselect, list, allCampers }) => {
         {list.map((camper, index) => (
           <Camper
             full
+            selectable={true}
             key={`camper-${camper.id}`}
             camper={camper}
             index={index}

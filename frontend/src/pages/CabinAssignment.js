@@ -16,6 +16,8 @@ import NotFound from "./NotFound";
 
 const CabinsOnlyButton = tw.button`bg-green-400 rounded p-3 text-white font-bold`;
 const AssignmentHeader = tw.header`flex justify-around items-center bg-violet-500 gap-4 rounded-t text-white mb-2`;
+
+// CONSTANTS
 const areas = ["ba", "ga"];
 const weeks = ["1", "2", "3", "4", "5", "6"];
 
@@ -66,17 +68,17 @@ const CabinAssignment = ({ area, weekNumber }) => {
   const toggleCabinsOnly = () => {
     setCabinsOnly((s) => !s);
   };
-  const { cabinSessions, cabinList, updateCabinList, setCabinList } =
+  const { cabinSessions, refreshCabins, cabinList, updateCabinList, setCabinList } =
     useCabinSessions(weekNumber, area);
 
 
-  const [allCampers, setData, updateData, loaded] = useGetDataOnMount({
+  const [allCampers, setData, _, loaded] = useGetDataOnMount({
     url: `/api/camper-weeks?week=${weekNumber}&area=${area}`,
     initialState: [],
     useToken: true,
   });
 
-  const [unassignedCampers, setCampers] = useGetDataOnMount({
+  const [unassignedCampers, setCampers, updateUnassigned] = useGetDataOnMount({
     url: `/api/camper-weeks?week=${weekNumber}&area=${area}&cabin=unassigned`,
     useToken: true,
     initialState: [],
@@ -106,10 +108,11 @@ const CabinAssignment = ({ area, weekNumber }) => {
     )
   }
 
-  const assignCabin = async (camperSession, cabinNumber) => {
-    //get id from sessions
-    const cabinSession =
-      cabinSessions.find((cabin) => cabin.cabinName === cabinNumber) || null;
+  /** Send camper to cabin on the DB
+    * @param {camperSession} camperSession an object with a camperId and a session Id (id)
+    * @param {string} cabinNumber (a unique cabin identifier)
+    * @param {number} currentAmt the amount of campers in the cabin*/
+  const assignCabin = async (camperSession, cabinSession) => {
     const requestConfig = {
       method: "PUT",
       headers: {
@@ -126,24 +129,30 @@ const CabinAssignment = ({ area, weekNumber }) => {
     );
   };
 
-  const sendToCabin = async (cabinNumber) => {
-    for (let { camperId, id } of selectedCampers) {
-      try {
-        await assignCabin({ camperID: camperId, id }, cabinNumber);
-      } catch {
-        console.log(`ERROR ASSIGNING CABIN: ${cabinNumber} to ${id}`)
-      }
-
+  /** Send all campers from selected campers to a cabin
+    * @param {string} cabinNumber is a unique indentifier of a cabin
+    * @param {number} currentAmt number of campers in cabin
+    */
+  const sendAllToCabin = async (cabinSession, currentAmt) => {
+    if (currentAmt + selectedCampers.length > cabinSession.capacity) {
+      // handle this case
+      console.log("Handle this case: Not enough space for all selected campers");
+      return;
+    }
+    // check if cabin has space to fit all
+    let promises = selectedCampers.map(({ camperId, id }) => assignCabin({ camperID: camperId, id }, cabinSession));
+    try {
+      await Promise.all(promises);
+      setSelected(() => []);
+      refreshCabins();
+      updateUnassigned();
+    } catch {
+      console.log("Something went wrong sending all to cabin");
     }
   }
 
   const unassignCamper = (camperSession, camperIndex, cabinName) => {
-    dragOptions.cabinToCampers({
-      sourceList: cabinName,
-      destinationList: "campers",
-      destinationIndex: 0,
-      sourceIndex: camperIndex,
-    });
+    console.log("Not yet implemented: Unassign individual camper");
   };
 
   const unassignAll = async () => {
@@ -163,77 +172,6 @@ const CabinAssignment = ({ area, weekNumber }) => {
     setCabinList(updatedCabinList);
   };
 
-
-  const dragOptions = {
-    campersToCabin({
-      sourceList,
-      destinationList,
-      sourceIndex,
-      destinationIndex,
-    }) {
-      const destinationItems = [...unassignedCampers];
-      const sourceItems = [...cabinList[destinationList]];
-      const camper = destinationItems.splice(sourceIndex, 1)[0];
-      sourceItems.splice(destinationIndex, 0, camper);
-      assignCabin(camper, destinationList);
-      updateCabinList(destinationList, sourceItems);
-      setCampers([...destinationItems]);
-    },
-    cabinToCampers({ sourceList, sourceIndex, destinationIndex }) {
-      const destinationItems = [...unassignedCampers];
-      const sourceItems = [...cabinList[sourceList]];
-      const camper = sourceItems.splice(sourceIndex, 1)[0];
-      destinationItems.splice(destinationIndex, 0, camper);
-      assignCabin(camper, false);
-      updateCabinList(sourceList, sourceItems);
-      setCampers([...destinationItems]);
-    },
-    cabinToCabin({
-      sourceList,
-      destinationList,
-      sourceIndex,
-      destinationIndex,
-    }) {
-      const sourceItems = [...cabinList[sourceList]];
-      const destinationItems = [...cabinList[destinationList]];
-      const camper = sourceItems.splice(sourceIndex, 1)[0];
-      destinationItems.splice(destinationIndex, 0, camper);
-      assignCabin(camper, destinationList);
-      updateCabinList(
-        destinationList,
-        destinationItems,
-        sourceList,
-        sourceItems
-      );
-      return;
-    },
-  };
-
-  const dragCamper = ({ source, destination }) => {
-    // console.log({ source, destination });
-    if (!destination) {
-      return;
-    }
-    const dragData = {
-      sourceList: source.droppableId,
-      destinationList: destination.droppableId,
-      sourceIndex: source.index,
-      destinationIndex: destination.index,
-    };
-    if (dragData.sourceList === dragData.destinationList) {
-      return;
-    }
-    if (dragData.sourceList === "unassigned") {
-      dragOptions.campersToCabin(dragData);
-      return;
-    }
-    if (dragData.destinationList === "unassigned") {
-      dragOptions.cabinToCampers(dragData);
-      return;
-    }
-    dragOptions.cabinToCabin(dragData);
-  };
-
   const showAll = () => {
     return (
       <>
@@ -251,7 +189,7 @@ const CabinAssignment = ({ area, weekNumber }) => {
         <div tw="max-h-[45vh] lg:w-1/2 lg:max-h-screen flex lg:flex-col flex-wrap lg:flex-nowrap overflow-auto ">
           <Cabins
             unassignCamper={unassignCamper}
-            assign={sendToCabin}
+            assign={sendAllToCabin}
             toggleUnassignModal={() => {
               setShowUnassignModal((d) => !d);
             }}
@@ -325,39 +263,33 @@ const CabinAssignment = ({ area, weekNumber }) => {
         </PopOut>
       )}
       <div tw="relative">
-        <DragDropContext
-          onDragEnd={(drop) => {
-            dragCamper(drop);
-          }}
-        >
-          <AssignmentHeader>
-            <h1 tw="inline">
-              Cabin assignment{" "}
-              <p tw="font-bold italic inline">
-                {area.toUpperCase()}-Week {weekNumber}
-              </p>
-            </h1>
-            {!allAssigned() && (
-              <CabinsOnlyButton
-                onClick={() => {
-                  toggleCabinsOnly();
-                }}
-              >
-                {cabinsOnly && "Show Unassigned Campers"}
-                {!cabinsOnly && "Show Cabins Only"}
-              </CabinsOnlyButton>
-            )}
-          </AssignmentHeader>
-          <div tw="flex flex-col lg:flex-row">
-            {loaded === false &&
-              <div tw="my-2 py-8 text-center w-full ">
-                <PropagateLoader loading={true} />
-              </div>
-            }
-            {(cabinsOnly || allAssigned()) && showOnlyCabins()}
-            {!cabinsOnly && !allAssigned() && showAll()}
-          </div>
-        </DragDropContext>
+        <AssignmentHeader>
+          <h1 tw="inline">
+            Cabin assignment{" "}
+            <p tw="font-bold italic inline">
+              {area.toUpperCase()}-Week {weekNumber}
+            </p>
+          </h1>
+          {!allAssigned() && (
+            <CabinsOnlyButton
+              onClick={() => {
+                toggleCabinsOnly();
+              }}
+            >
+              {cabinsOnly && "Show Unassigned Campers"}
+              {!cabinsOnly && "Show Cabins Only"}
+            </CabinsOnlyButton>
+          )}
+        </AssignmentHeader>
+        <div tw="flex flex-col lg:flex-row">
+          {loaded === false &&
+            <div tw="my-2 py-8 text-center w-full ">
+              <PropagateLoader loading={true} />
+            </div>
+          }
+          {(cabinsOnly || allAssigned()) && showOnlyCabins()}
+          {!cabinsOnly && !allAssigned() && showAll()}
+        </div>
         <footer tw="h-1"></footer>
       </div>
     </>

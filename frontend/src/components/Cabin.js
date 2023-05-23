@@ -29,11 +29,12 @@ const Cabin = ({ assign, session, list, allOpenState, unassignCamper, cabinsOnly
     <CabinComponentFrame cabinsOnly={cabinsOnly}>
       <CabinWrapper
         disabled={list.length === session.capacity}
-        onClick={() => {
-          if (list.length !== session.capacity) {
-            assign(session.cabinName)
+        onClick={(e) => {
+          e.stopPropagation();
+          if (list.length === session.capacity) {
+            console.log("Cabin is full.");
           } else {
-            console.log("Cabin is full.")
+            assign(session, list.length);
           }
         }}
       >
@@ -45,7 +46,7 @@ const Cabin = ({ assign, session, list, allOpenState, unassignCamper, cabinsOnly
         </header>
         <div tw="flex justify-end">
           {list.length > 0 && !allOpenState && (
-            <button onClick={toggleOpen}>
+            <button onClick={(e) => { e.stopPropagation(); toggleOpen() }}>
               {isOpen ? "Hide List" : "View List"}
             </button>
           )}
@@ -62,6 +63,7 @@ const Cabin = ({ assign, session, list, allOpenState, unassignCamper, cabinsOnly
               return (
                 <Camper
                   cabinName={session.cabinName}
+                  selectable={false}
                   full
                   removable
                   unassignCamper={unassignCamper}

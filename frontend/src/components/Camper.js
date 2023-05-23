@@ -22,19 +22,23 @@ const Camper = ({
   unassignCamper,
   removable,
   select,
+  selectable,
   deselect
 }) => {
   const { firstName, lastName, age, id, dayCamp, camperID } = camper;
   const [isSelected, setIsSelected] = useState(false);
   return (
     <CamperItem
-      onClick={() => {
-        if (isSelected) {
-          deselect(id);
-          setIsSelected(false);
-        } else {
-          select(camperID, id);
-          setIsSelected(true);
+      onClick={(e) => {
+        e.stopPropagation();
+        if (selectable) {
+          if (isSelected) {
+            deselect(id);
+            setIsSelected(false);
+          } else {
+            select(camperID, id);
+            setIsSelected(true);
+          }
         }
       }}
       full={full}
@@ -44,7 +48,8 @@ const Camper = ({
     >
       {removable && (
         <RemoveButton
-          onClick={() => {
+          onClick={(e) => {
+            e.stopPropagation();
             unassignCamper(camper, index, cabinName);
           }}
         >
