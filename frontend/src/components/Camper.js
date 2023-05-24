@@ -6,12 +6,12 @@ import { faUserMinus } from "@fortawesome/free-solid-svg-icons";
 import { useState } from "react";
 
 const RemoveButton = tw.button`rounded bg-red-500 text-white p-1 m-0.5 hover:bg-red-700 mr-3`;
-const CamperItem = styled.li(({ full, isDragging, removable, isSelected }) => [
+const CamperItem = styled.li(({ full, removable, isSelected, dayCamp }) => [
   tw`p-1 bg-green-200 flex items-center`,
+  dayCamp && tw`bg-yellow-200`,
   !removable && tw`pl-4`,
-  // isDragging && tw`bg-green-500`,
   full && tw`w-full`,
-  isSelected && tw`bg-green-500`
+  isSelected && tw`bg-green-500`,
 ]);
 
 const Camper = ({
@@ -36,7 +36,7 @@ const Camper = ({
             deselect(id);
             setIsSelected(false);
           } else {
-            select(camperID, id);
+            select(camper);
             setIsSelected(true);
           }
         }
@@ -45,20 +45,21 @@ const Camper = ({
       removable={removable}
       select={select}
       isSelected={isSelected}
+      dayCamp={dayCamp}
     >
       {removable && (
         <RemoveButton
           onClick={(e) => {
             e.stopPropagation();
-            unassignCamper(camper, index, cabinName);
+            unassignCamper(cabinName, camper);
           }}
         >
           <FontAwesomeIcon icon={faUserMinus} />
         </RemoveButton>
       )}
       <p tw="text-lg">
-        <span tw="font-light"> {age}</span> {firstName} {lastName}
-        {dayCamp && <span tw="italic"> DAY</span>}
+        <span tw="font-light"> {age}</span>  {firstName} {lastName}
+        {dayCamp && <span tw="font-light text-xs">{" "}day</span>}
       </p>
     </CamperItem>
   );

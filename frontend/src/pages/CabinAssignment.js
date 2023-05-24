@@ -1,7 +1,6 @@
 import useGetDataOnMount from "../hooks/useGetData";
 import Campers from "../components/Campers";
 import Cabins from "../components/Cabins";
-import { DragDropContext } from "@react-forked/dnd";
 import { Route } from "react-router-dom";
 import { useState, useContext } from "react";
 import UserContext from "../components/UserContext";
@@ -65,6 +64,7 @@ const CabinAssignment = ({ area, weekNumber }) => {
   const [cabinsOnly, setCabinsOnly] = useState(false);
   const [selectedCampers, setSelected] = useState([]);
 
+  /** Toggle the visibility of campers / cabins */
   const toggleCabinsOnly = () => {
     setCabinsOnly((s) => !s);
   };
@@ -82,17 +82,32 @@ const CabinAssignment = ({ area, weekNumber }) => {
     url: `/api/camper-weeks?week=${weekNumber}&area=${area}&cabin=unassigned`,
     useToken: true,
     initialState: [],
-    optionalSortFunction: (camper1, camper2) => camper1.age - camper2.age,
+    // optionalSortFunction: (camper1, camper2) => camper1.age - camper2.age,
   });
 
+  /** Check if all campers are assigned **/
   const allAssigned = () => {
     return unassignedCampers.length === 0;
   };
 
-  const selectCamper = (camperId, sessionId) => {
-    setSelected((s) => [...s, { camperId, id: sessionId }]);
+  /** Add camper to selected campers
+    * @param {camperSession} camper The camper to add to the selection
+  */
+  const selectCamper = (camper) => {
+    setSelected((s) => [...s, camper]);
+  }
+  /** Remove all selected campers from the unassigned list */
+  const removeSelectedFromUnassigned = () => {
+    // filter unassigned
+    setCampers(campers => {
+      const updatedList = campers.filter(camper => !selectedCampers.some(selCamp => selCamp.id === camper.id));
+      return updatedList;
+    })
+    console.log("Eagerly removed Campers from unassigned UI");
   }
 
+  /** Remove a camper from the selected campers array 
+    * @param {number} sessionId The camper session id to remove from the list of selected campers*/
   const deselectCamper = (sessionId) => {
     setSelected((s) => {
       // remove id from array
@@ -108,10 +123,23 @@ const CabinAssignment = ({ area, weekNumber }) => {
     )
   }
 
+  /** Sort a list of campers by age IN PLACE
+    * @param {camperSession[]} camperSessions The list of campers to be sorted 
+  */
+  const sortByAge = (camperSessions) => {
+    // should sort alpha by last name first ??
+    camperSessions.sort((a, b) => {
+      if (a.lastName < b.lastName) { return -1; };
+      if (a.lastName > b.lastName) { return 1; };
+      return 0;
+    })
+    // sort by age
+    camperSessions.sort((a, b) => a.age - b.age)
+  }
   /** Send camper to cabin on the DB
     * @param {camperSession} camperSession an object with a camperId and a session Id (id)
     * @param {string} cabinNumber (a unique cabin identifier)
-    * @param {number} currentAmt the amount of campers in the cabin*/
+    */
   const assignCabin = async (camperSession, cabinSession) => {
     const requestConfig = {
       method: "PUT",
@@ -134,27 +162,84 @@ const CabinAssignment = ({ area, weekNumber }) => {
     * @param {number} currentAmt number of campers in cabin
     */
   const sendAllToCabin = async (cabinSession, currentAmt) => {
+    // Check cabin capacity
     if (currentAmt + selectedCampers.length > cabinSession.capacity) {
-      // handle this case
+      // TODO handle this case
       console.log("Handle this case: Not enough space for all selected campers");
       return;
     }
-    // check if cabin has space to fit all
+    // Eager UI State change
+    console.log("Eagerly updating UI");
+    removeSelectedFromUnassigned();
+    updateCabinUI(cabinSession.cabinName, [...selectedCampers]);
+
+    // Action
     let promises = selectedCampers.map(({ camperId, id }) => assignCabin({ camperID: camperId, id }, cabinSession));
     try {
+      console.log("Sending to DB")
       await Promise.all(promises);
+      console.log("DB Update successful")
       setSelected(() => []);
+
+
+      // Update state from DB
+      console.log("Updating UI from DB");
       refreshCabins();
       updateUnassigned();
-    } catch {
+    }
+    // Handle Unsucc. db update
+    catch {
       console.log("Something went wrong sending all to cabin");
     }
   }
 
-  const unassignCamper = (camperSession, camperIndex, cabinName) => {
+  /** Push selected campers into cabin selection (optimistic UI update)
+    * @param {string} cabinName Cabin name / number (the unique cabin identifier)
+    * @param {campers[]} campers List of campers to be added to cabin
+    */
+  const updateCabinUI = (cabinName, campers) => {
+    console.log("Updating Cabin UI");
+    let updatedCabinList = { ...cabinList };
+    updatedCabinList[cabinName] = [...updatedCabinList[cabinName], ...campers];
+    sortByAge(updatedCabinList[cabinName]);
+    setCabinList(updatedCabinList);
+  }
+
+  /** Unassign a single camper from a cabin
+    * @param {string} cabinName Unique identifier for cabin
+    * @param {camperSession} camperSession data about camper session
+  */
+  const unassignCamper = async (cabinName, camperSession) => {
     console.log("Not yet implemented: Unassign individual camper");
+    // Eager UI Update
+    setCampers(c => {
+      const updatedList = [...c, camperSession];
+      sortByAge(updatedList);
+      return updatedList;
+
+    });
+    setCabinList(c => {
+      const newCabinsList = { ...c };
+      const cabinList = [...newCabinsList[cabinName]];
+      const updatedList = cabinList.filter(c => c.id !== camperSession.id)
+      newCabinsList[cabinName] = updatedList;
+      return newCabinsList;
+    })
+
+    // DB Action
+    try {
+      await assignCabin(camperSession);
+      console.log("Update successful")
+    } catch {
+      console.log("Update Unsuccessful");
+    }
+    // Update from DB
+    refreshCabins();
+    updateUnassigned();
+
   };
 
+  /** Unassign all campers from cabins */
   const unassignAll = async () => {
     let campers = [...unassignedCampers];
     let newlyUnassignedCampers = [];
@@ -172,6 +257,7 @@ const CabinAssignment = ({ area, weekNumber }) => {
     setCabinList(updatedCabinList);
   };
 
+  /** Show Both Cabins and Campers **/
   const showAll = () => {
     return (
       <>
@@ -203,6 +289,8 @@ const CabinAssignment = ({ area, weekNumber }) => {
       </>
     );
   };
+
+  /** Display Cabins Only */
   const showOnlyCabins = () => {
     return (
       <div>
@@ -226,7 +314,6 @@ const CabinAssignment = ({ area, weekNumber }) => {
 
   return (
     <>
-      {" "}
       {showUnassignModal && (
         <PopOut
           onClick={() => {
@@ -270,6 +357,9 @@ const CabinAssignment = ({ area, weekNumber }) => {
               {area.toUpperCase()}-Week {weekNumber}
             </p>
           </h1>
+          <p>
+            {!allAssigned() && `${selectedCampers.length} campers selected`}
+          </p>
           {!allAssigned() && (
             <CabinsOnlyButton
               onClick={() => {

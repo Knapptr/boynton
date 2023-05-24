@@ -11,7 +11,7 @@ class CamperWeek {
         id,
         firstName,
         lastName,
-      dayCamp,
+        dayCamp,
         age,
         gender,
         weekNumber,
@@ -55,7 +55,7 @@ class CamperWeek {
         return {
             id: id,
             camperID: camper_id,
-          dayCamp: day_camp,
+            dayCamp: day_camp,
             firstName: first_name,
             lastName: last_name,
             age: age,
@@ -90,10 +90,12 @@ class CamperWeek {
 			LEFT JOIN camper_activities ca ON ca.camper_week_id = cw.id
 			LEFT JOIN activities a ON a.id = ca.activity_id
 
+                        ORDER BY c.age, c.last_name
+
 		`;
         const dbResult = await fetchMany(query);
-      console.log({dbResult});
-      if(!dbResult){return []}
+        console.log({ dbResult });
+        if (!dbResult) { return [] }
         const parsedResult = dbResult.map((oneResult) =>
             CamperWeek._parseResults(oneResult)
         );
@@ -111,7 +113,7 @@ class CamperWeek {
             fieldsToRemain: [
                 "id",
                 "camperID",
-              "dayCamp",
+                "dayCamp",
                 "firstName",
                 "lastName",
                 "age",

@@ -31,11 +31,11 @@ const Cabin = ({ assign, session, list, allOpenState, unassignCamper, cabinsOnly
         disabled={list.length === session.capacity}
         onClick={(e) => {
           e.stopPropagation();
-          if (list.length === session.capacity) {
-            console.log("Cabin is full.");
-          } else {
-            assign(session, list.length);
-          }
+          // if (list.length === session.capacity) {
+          //   console.log("Cabin is full.");
+          // } else {
+          assign(session, list.length);
+          //}
         }}
       >
         <header tw="flex justify-between">
@@ -59,7 +59,6 @@ const Cabin = ({ assign, session, list, allOpenState, unassignCamper, cabinsOnly
         <CamperList isOpen={isOpen} hasCampers={list.length > 0}>
           {isOpen &&
             list.map((camper, index) => {
-              console.log({ camprmap: camper })
               return (
                 <Camper
                   cabinName={session.cabinName}

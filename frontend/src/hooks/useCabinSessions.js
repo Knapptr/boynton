@@ -15,6 +15,9 @@ const getCampersForCabin = async (cabinSessionID, auth) => {
 		`/api/cabin-sessions/${cabinSessionID}/campers`, {}, auth
 	);
 	const campers = await data.json();
+	if (campers) {
+		campers.sort((a, b) => a.age - b.age);
+	}
 	return campers || [];
 };
 
@@ -39,7 +42,7 @@ const useCabinSessions = (weekNumber, area) => {
 			const campers = await getCampersForCabin(session.id, auth);
 			cabinsState[session.cabinName] = campers;
 		}
-		const cabinNames = Object.keys(cabinsState);
+		// const cabinNames = Object.keys(cabinsState);
 
 		return { cabinsState, cabinSessions }
 	}
