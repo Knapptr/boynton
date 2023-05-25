@@ -6,6 +6,7 @@ module.exports = {
   week_id integer NOT NULL,
   camper_id integer NOT NULL,
   day_camp boolean DEFAULT false,
+  fl boolean DEFAULT false,
   cabin_session_id integer,
   fl bool,
   CONSTRAINT camper_weeks_pkey PRIMARY KEY (id),

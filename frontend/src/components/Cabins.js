@@ -17,6 +17,7 @@ const UnassignButton = styled.button(({ anyAssignments }) => [
 ]);
 const Cabins = ({
   showAllLists,
+  assign,
   unassignAll,
   cabinSessions,
   toggleUnassignModal,
@@ -44,6 +45,7 @@ const Cabins = ({
       return (
         <Cabin
           cabinsOnly={cabinsOnly}
+          assign={assign}
           key={`cabin-${cabinSession.cabinName}`}
           unassignCamper={unassignCamper}
           allOpenState={showAllLists}

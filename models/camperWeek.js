@@ -11,7 +11,8 @@ class CamperWeek {
         id,
         firstName,
         lastName,
-      dayCamp,
+        dayCamp,
+        fl,
         age,
         gender,
         weekNumber,
@@ -24,6 +25,7 @@ class CamperWeek {
         this.weekNumber = weekNumber;
         this.gender = gender;
         this.dayCamp = dayCamp;
+        this.fl = fl;
         this.age = age;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -38,6 +40,7 @@ class CamperWeek {
         id,
         camper_id,
         day_camp,
+        fl,
         first_name,
         last_name,
         age,
@@ -55,7 +58,8 @@ class CamperWeek {
         return {
             id: id,
             camperID: camper_id,
-          dayCamp: day_camp,
+            dayCamp: day_camp,
+            fl: fl,
             firstName: first_name,
             lastName: last_name,
             age: age,
@@ -76,7 +80,7 @@ class CamperWeek {
 			SELECT 
 			cw.id,
       cw.day_camp,
-			cw.camper_id,c.first_name,c.last_name,c.age,c.gender,
+			cw.camper_id,c.first_name,c.last_name,c.age,c.gender,cw.fl,
 			w.number as week_number,w.title as week_title,
 			cw.cabin_session_id,cab.name as cabin_name,
 			ca.id as camper_activity_id,ca.activity_id as activity_id,ca.period_id,
@@ -90,10 +94,12 @@ class CamperWeek {
 			LEFT JOIN camper_activities ca ON ca.camper_week_id = cw.id
 			LEFT JOIN activities a ON a.id = ca.activity_id
 
+                        ORDER BY c.age, c.last_name
+
 		`;
         const dbResult = await fetchMany(query);
-      console.log({dbResult});
-      if(!dbResult){return []}
+        console.log({ dbResult });
+        if (!dbResult) { return [] }
         const parsedResult = dbResult.map((oneResult) =>
             CamperWeek._parseResults(oneResult)
         );
@@ -111,7 +117,8 @@ class CamperWeek {
             fieldsToRemain: [
                 "id",
                 "camperID",
-              "dayCamp",
+                "dayCamp",
+                "fl",
                 "firstName",
                 "lastName",
                 "age",
@@ -129,7 +136,7 @@ class CamperWeek {
         const query = `
 			SELECT 
 			cw.id,
-			cw.camper_id,c.first_name,c.last_name,c.age,c.gender,
+			cw.camper_id,c.first_name,c.last_name, cw.fl, c.age,c.gender,
 			w.number as week_number,w.title as week_title,
 			cw.cabin_session_id,cab.name as cabin_name,
 			ca.id as activity_id,ca.period_id,
@@ -164,6 +171,8 @@ class CamperWeek {
             fieldsToRemain: [
                 "id",
                 "camperID",
+                "dayCamp",
+                "fl",
                 "firstName",
                 "lastName",
                 "age",
