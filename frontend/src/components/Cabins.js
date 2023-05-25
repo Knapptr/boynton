@@ -85,9 +85,9 @@ const Cabins = ({
       </AssignmentHeader>
       <CabinsList>
         {cabinSessions.length === 0 &&
-        <div tw="my-2 py-8 text-center w-full ">
-          <PropagateLoader loading={true} />
-        </div>
+          <div tw="my-2 py-8 text-center w-full ">
+            <PropagateLoader loading={true} />
+          </div>
         }
         {displayCabins()}
       </CabinsList>
