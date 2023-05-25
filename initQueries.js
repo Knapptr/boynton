@@ -1,5 +1,5 @@
-module.exports = { 
-camperWeeks:`
+module.exports = {
+  camperWeeks: `
   CREATE TABLE IF NOT EXISTS camper_weeks
   (
   id serial NOT NULL  ,
@@ -7,6 +7,7 @@ camperWeeks:`
   camper_id integer NOT NULL,
   day_camp boolean DEFAULT false,
   cabin_session_id integer,
+  fl bool,
   CONSTRAINT camper_weeks_pkey PRIMARY KEY (id),
   CONSTRAINT one_week_per_camper UNIQUE (week_id, camper_id),
   CONSTRAINT cabin_assignment FOREIGN KEY (cabin_session_id)
@@ -21,7 +22,7 @@ camperWeeks:`
   NOT VALID
   )
 `,
-camperActivities:`
+  camperActivities: `
   CREATE TABLE IF NOT EXISTS camper_activities
   (
   id serial NOT NULL  ,
@@ -43,7 +44,7 @@ camperActivities:`
   NOT VALID
   )
 `,
-cabins: `
+  cabins: `
   CREATE TABLE IF NOT EXISTS cabins
   (
   name character varying(255) COLLATE pg_catalog."default" NOT NULL,
@@ -52,7 +53,7 @@ cabins: `
   CONSTRAINT cabins_pkey PRIMARY KEY (name)
   )
 `,
-activities:`
+  activities: `
   CREATE TABLE IF NOT EXISTS activities
   (
   name character varying(255) COLLATE pg_catalog."default" NOT NULL,
@@ -69,7 +70,7 @@ activities:`
   NOT VALID
   )
   `,
- cabinSessions:`
+  cabinSessions: `
   CREATE TABLE IF NOT EXISTS cabin_sessions
   (
   id serial NOT NULL  ,
