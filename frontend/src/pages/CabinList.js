@@ -7,22 +7,22 @@ import fetchWithToken from "../fetchWithToken";
 import UserContext from "../components/UserContext";
 import { useParams } from "react-router-dom";
 
-const CamperItem = styled.li(({ dayCamp, fl }) => [
+export const CamperItem = styled.li(({ dayCamp, fl }) => [
     tw`bg-green-100 flex justify-start `,
     dayCamp && tw`bg-yellow-200`,
     fl && tw`bg-orange-200`
 ]);
 
-const PronounBadge = styled.span(() => [
+export const PronounBadge = styled.span(() => [
     tw`rounded bg-red-100 px-2 mx-1`
 ])
 
 
-const CamperCol = styled.div(() => [
+export const CamperCol = styled.div(() => [
     tw`mx-1`
 ]);
 
-const CabinGrid = styled.ul(({ count }) => [
+export const CabinGrid = styled.ul(({ count }) => [
     tw`grid`,
     tw`grid-cols-1 sm:grid-cols-3 md:grid-cols-4`,
     count < 4 && tw`sm:grid-cols-1 md:grid-cols-2 `,
