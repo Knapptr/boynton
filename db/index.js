@@ -6,7 +6,10 @@ const pool = new Pool({
 	host: process.env.PG_HOST,
 	database: process.env.PG_DB,
 	password: process.env.PG_PW,
-	port: process.env.PG_PORT
+	port: process.env.PG_PORT,
+	// poolSize: 10
 });
+
+console.log({ pool });
 
 module.exports = pool;

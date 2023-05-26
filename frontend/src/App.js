@@ -14,6 +14,7 @@ import "styled-components/macro";
 import CabinListIndex from "./pages/CabinListIndex";
 import Scoreboard from "./pages/Scoreboard";
 import Score from "./components/Score"
+import ProgrammingSchedule from "./pages/ProgrammingSchedule";
 
 function App() {
   const userState = useUserData();
@@ -57,10 +58,12 @@ function App() {
                     ></Route>
                   </Route>
                 </Route>
-                <Route path="scoreboard" element={<Scoreboard/>}>
-                  <Route path=":weekNumber" element={<Score/>}/>
+                <Route path="scoreboard" element={<Scoreboard />}>
+                  <Route path=":weekNumber" element={<Score />} />
                 </Route>
                 <Route path="cabins/*">{CabinAssignmentRoutes()}</Route>
+                <Route path="programming-schedule/*" element={<ProgrammingSchedule />}>
+                </Route>
                 <Route
                   path="schedule/*"
                   element={
@@ -71,10 +74,10 @@ function App() {
                 />
                 <Route path="*" element={<NotFound />} />
               </Route>
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </UserContext.Provider></div>
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </UserContext.Provider></div>
     </div>
   );
 }
