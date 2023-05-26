@@ -25,7 +25,8 @@ const CamperCol = styled.div(() => [
 const CabinGrid = styled.ul(({ count }) => [
     tw`grid`,
     tw`grid-cols-1 sm:grid-cols-3 md:grid-cols-4`,
-    count < 4 && tw`sm:grid-cols-1 md:grid-cols-1 `,
+    count < 4 && tw`sm:grid-cols-1 md:grid-cols-2 `,
+    count == 1 && tw`sm:grid-cols-1 md:grid-cols-1`
 
 ])
 
