@@ -14,12 +14,12 @@ const pick = (obj, mapModel) => {
   return subObj;
 };
 
-//Map to groups aggregates data into objects
-// key is the unique identifier to group
-// groupAs is the new property name,
-//insideProps is an object with keys representing the properties desired to be grouped
-// and props representing the name of the property when grouped
-
+/**Map to groups aggregates data into objects
+@param {any[]} array the array to aggregate
+@param {any} key the unique identifier to group
+@param {string} groupAs the new property name,
+@param {{string:any}} insideProps an object with keys representing the properties desired to be grouped and props representing the name of the property when grouped
+*/
 const mapToGroups = (array, key, groupAs, insideProps) => {
   const groupedKeys = Object.keys(insideProps);
   const outsideKeys = Object.keys(array[0]).filter(

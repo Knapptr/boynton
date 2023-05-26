@@ -14,6 +14,7 @@ const init = (query) => {
   };
 };
 const activityRepo = { init: init(queries.activities) };
+const activitySessionsRepo = { init: init(queries.activitySessions) };
 const cabinSessionRepo = { init: init(queries.cabinSessions) };
 const cabinRepo = { init: init(queries.cabins) };
 const camperActivityRepo = { init: init(queries.camperActivities) };
@@ -31,6 +32,7 @@ const repos = [
   dayRepo,
   periodRepo,
   activityRepo,
+  activitySessionsRepo,
   cabinRepo,
   cabinSessionRepo,
   camperRepo,

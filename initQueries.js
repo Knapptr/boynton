@@ -28,7 +28,7 @@ module.exports = {
   (
   id serial NOT NULL  ,
   camper_week_id integer NOT NULL ,
-  activity_id varchar(8) NOT NULL,
+  activity_id integer NOT NULL,
   period_id integer NOT NULL,
   is_present boolean NOT NULL DEFAULT false,
   CONSTRAINT camper_periods_pkey PRIMARY KEY (id),
@@ -38,8 +38,10 @@ module.exports = {
   ON UPDATE CASCADE
   ON DELETE CASCADE
   NOT VALID,
+  CONSTRAINT act_session_id FOREIGN KEY (activity_id)
+  REFERENCES activity_sessions (id),
   CONSTRAINT "same" FOREIGN KEY (activity_id, period_id)
-  REFERENCES activities (id, period_id) MATCH SIMPLE
+  REFERENCES activity_sessions (id, period_id) MATCH SIMPLE
   ON UPDATE CASCADE
   ON DELETE CASCADE
   NOT VALID
@@ -54,15 +56,18 @@ module.exports = {
   CONSTRAINT cabins_pkey PRIMARY KEY (name)
   )
 `,
-  activities: `
-  CREATE TABLE IF NOT EXISTS activities
+  activitySessions: `
+  CREATE TABLE IF NOT EXISTS activity_sessions
   (
-  name character varying(255) COLLATE pg_catalog."default" NOT NULL,
-  description character varying(255) COLLATE pg_catalog."default",
-  id varchar(6) NOT NULL ,
+  id serial NOT NULL ,
   period_id integer NOT NULL ,
-  CONSTRAINT activities_pkey PRIMARY KEY (id),
-  CONSTRAINT no_duplicates UNIQUE (name, period_id),
+  activity_id integer NOT NULL,
+  CONSTRAINT act_sess_p_key PRIMARY KEY (id),
+  CONSTRAINT activity_id FOREIGN KEY (activity_id) REFERENCES activities (id)
+  ON UPDATE CASCADE
+  ON DELETE CASCADE
+  NOT VALID,
+  CONSTRAINT no_duplicates UNIQUE (period_id, activity_id),
   CONSTRAINT p UNIQUE (period_id, id),
   CONSTRAINT period_id FOREIGN KEY (period_id)
   REFERENCES periods (id) MATCH SIMPLE
@@ -70,6 +75,15 @@ module.exports = {
   ON DELETE CASCADE
   NOT VALID
   )
+  `,
+  activities: `
+  CREATE TABLE IF NOT EXISTS activities (
+  id serial NOT NULL UNIQUE,
+  name character varying(255),
+  description character varying(255) COLLATE pg_catalog."default",
+  CONSTRAINT act_pkey PRIMARY KEY (id)
+  )
+
   `,
   cabinSessions: `
   CREATE TABLE IF NOT EXISTS cabin_sessions
