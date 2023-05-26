@@ -9,10 +9,12 @@ const camperWeekRouter = require("./camperWeeks");
 const weekRouter = require("./weeks");
 const scoreRouter = require('./scores');
 const passport = require("passport");
+const activitySessionRouter = require("./activitySession");
 
-router.use('/scores',scoreRouter);
+router.use('/scores', scoreRouter);
 router.use(passport.authenticate("jwt", { session: false }));
 router.use("/activities", activityRouter);
+router.use("/activity-sessions", activitySessionRouter);
 router.use("/campers", camperRouter);
 router.use("/periods", periodRouter);
 router.use("/days", daysRouter);

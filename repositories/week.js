@@ -25,7 +25,6 @@ const weekRepository = {
   * @param {any[]} dbResponse */
   _mapResponse(dbResponse) {
     const camelCased = dbResponse.map((w) => camelCaseProps(w));
-    console.log({ camelCased });
     const asWeeks = camelCased.reduce((acc, weekRes) => {
       if (acc.at(-1) === undefined) {
         const initialData = {
@@ -70,7 +69,7 @@ const weekRepository = {
           }]
         }
         if (weekRes.activityId !== null) {
-          initialData.days.at(-1).periods.at(-1).push(
+          initialData.days.at(-1).periods.at(-1).activities.push(
             {
               activityId: weekRes.activityId,
               sessionId: weekRes.activitySessionId,
@@ -158,7 +157,7 @@ const weekRepository = {
     JOIN days d ON d.week_id = w.number
     JOIN periods p ON p.day_id = d.id  
     FULL JOIN activity_sessions ases ON ases.period_id = p.id
-    FULL JOIN activities act ON ases.activity_id = act.id
+    LEFT JOIN activities act ON ases.activity_id = act.id
     ORDER BY w.number,d.id,p.period_number
     `;
     const responseData = await fetchMany(query);

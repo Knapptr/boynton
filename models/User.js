@@ -12,7 +12,7 @@ module.exports = class User {
     this.userRepository = userRepository;
   }
 
-  static async get(username, userRepository=defaultUserRepository) {
+  static async get(username, userRepository = defaultUserRepository) {
     const userData = await userRepository.get(username);
     if (!userData) {
       return false
@@ -40,9 +40,10 @@ module.exports = class User {
     }
   }
 
-  static async authenticate({ username, password }, userRepository=defaultUserRepository) {
+  static async authenticate({ username, password }, userRepository = defaultUserRepository) {
+    console.log(`Authenticating: ${username}`)
     const user = await User.get(username, userRepository);
-    if(!user){return false}
+    if (!user) { return false }
     const isAuthenticated = await compare(password, user.password);
     return { user, isAuthenticated };
   }

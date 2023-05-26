@@ -7,25 +7,16 @@ const {
 const Camper = require("./camper");
 
 class Activity {
-    constructor({ name, description, campers, id, periodID }) {
+    constructor({ name, description, id }) {
         this.name = name;
         this.id = id;
         this.description = description || "none";
-        this.periodID = periodID;
-        this.campers = campers;
     }
     static _parseResults(dbr) {
         return {
-            sessionID: dbr.camper_session_id,
-            camperID: dbr.camper_id,
-            firstName: dbr.first_name,
-            camperActivityId: dbr.camper_activity_id,
-            isPresent: dbr.is_present,
-            lastName: dbr.last_name,
-            name: dbr.name,
             id: dbr.id,
-            periodID: dbr.period_id,
-            description: dbr.description,
+            name: dbr.name,
+            description: dbr.description
         };
     }
     static async getAll() {
@@ -33,33 +24,15 @@ class Activity {
 SELECT
 act.name AS name,
 act.id,
-act.period_id,
-act.description,
-cw.id AS camper_session_id,
-cw.camper_id AS camper_id,
-ca.id AS camper_activity_id,
-ca.is_present,
-c.first_name,
-c.last_name
+act.description
 FROM activities act
-LEFT JOIN camper_activities ca ON ca.activity_id = act.id
-LEFT JOIN camper_weeks cw ON cw.id = ca.camper_week_id
-LEFT JOIN campers c ON cw.camper_id = c.id
-
 		`;
         const results = await fetchMany(query);
         if (results) {
             const parsedResults = results.map((result) =>
                 Activity._parseResults(result)
             );
-            const mappedResults = mapManyToOne({
-                array: parsedResults,
-                identifier: "id",
-                newField: "campers",
-                fieldsToMap: ["sessionID","isPresent", "camperID", "firstName", "lastName"],
-                fieldsToRemain: ["name", "id", "periodID", "description"],
-            });
-            const activities = mappedResults.map((act) => new Activity(act));
+            const activities = parsedResults.map((act) => new Activity(act));
             return activities;
         }
         return [];
@@ -104,7 +77,7 @@ WHERE act.id = $1 `;
             });
             const activities = mappedResults.map((act) => new Activity(act));
 
-          console.log(activities[0].campers);
+            console.log(activities[0].campers);
             return activities[0];
         }
         return [];
