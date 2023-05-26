@@ -12,6 +12,7 @@ class CamperWeek {
         firstName,
         lastName,
         dayCamp,
+        pronouns,
         fl,
         age,
         gender,
@@ -24,6 +25,7 @@ class CamperWeek {
     }) {
         this.weekNumber = weekNumber;
         this.gender = gender;
+        this.pronouns = pronouns
         this.dayCamp = dayCamp;
         this.fl = fl;
         this.age = age;
@@ -53,12 +55,14 @@ class CamperWeek {
         activity_id,
         period_id,
         activity_name,
+        pronouns,
         activity_description,
     }) {
         return {
             id: id,
             camperID: camper_id,
             dayCamp: day_camp,
+            pronouns: pronouns,
             fl: fl,
             firstName: first_name,
             lastName: last_name,
@@ -80,7 +84,7 @@ class CamperWeek {
 			SELECT 
 			cw.id,
       cw.day_camp,
-			cw.camper_id,c.first_name,c.last_name,c.age,c.gender,cw.fl,
+			cw.camper_id,c.first_name,c.last_name,c.pronouns, c.age,c.gender,cw.fl,
 			w.number as week_number,w.title as week_title,
 			cw.cabin_session_id,cab.name as cabin_name,
 			ca.id as camper_activity_id,ca.activity_id as activity_id,ca.period_id,
@@ -119,6 +123,7 @@ class CamperWeek {
                 "camperID",
                 "dayCamp",
                 "fl",
+                "pronouns",
                 "firstName",
                 "lastName",
                 "age",
@@ -136,7 +141,7 @@ class CamperWeek {
         const query = `
 			SELECT 
 			cw.id,
-			cw.camper_id,c.first_name,c.last_name, cw.fl, c.age,c.gender,
+			cw.camper_id,c.first_name,c.last_name, cw.fl, c.age,c.gender, c.pronouns,
 			w.number as week_number,w.title as week_title,
 			cw.cabin_session_id,cab.name as cabin_name,
 			ca.id as activity_id,ca.period_id,
@@ -174,6 +179,7 @@ class CamperWeek {
                 "dayCamp",
                 "fl",
                 "firstName",
+                "pronouns",
                 "lastName",
                 "age",
                 "gender",
