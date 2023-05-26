@@ -10,12 +10,11 @@ const HeaderBar = () => {
   const user = useContext(UserContext);
   return (
     <>
-    // remove this for production
       <h1 tw="text-white bg-red-600 font-bold"> DEV FRONTEND</h1>
       <div tw="flex items-center px-4 py-2">
-        <div tw="w-1/6">
-          <Link to="/">
-            <img tw="" src={logo} alt="Camp Leslie" />
+        <div tw="w-1/6  rounded font-bold">
+          <Link to="/" >
+            <h1>boynton</h1>
           </Link>
         </div>
         <button
@@ -26,7 +25,7 @@ const HeaderBar = () => {
         >
           Logout
         </button>
-        <span tw="rounded-full bg-green-800 px-4 py-2 text-white font-bold">{user.userData.user.userName[0].toUpperCase()}</span>
+        <span tw="rounded-full bg-green-800 px-3 py-1 text-white font-bold">{user.userData.user.userName[0].toUpperCase()}</span>
       </div>
     </>
   );
