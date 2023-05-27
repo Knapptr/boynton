@@ -12,7 +12,7 @@ module.exports = {
 		if (area) {
 			area = area.toUpperCase();
 			cabinSessions = cabinSessions.filter(
-				(session) => session.cabinArea === area
+				(session) => session.area === area
 			);
 		}
 		res.json(cabinSessions);

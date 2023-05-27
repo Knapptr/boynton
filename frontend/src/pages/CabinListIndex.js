@@ -7,6 +7,16 @@ import 'styled-components/macro';
 import { MenuSelector } from "../components/styled";
 import fetchWithToken from "../fetchWithToken";
 import { CabinGrid, CamperCol, CamperItem, PronounBadge } from "./CabinList";
+import sortCabins from "../sortCabins";
+
+/** A helper to deal with the cabin list */
+const cabinSelections = {
+  all: (cabinSessions) => ({ selectionName: "ALL", cabins: cabinSessions }),
+  ba: (cabinSessions) => ({ selectionName: "BA", cabins: cabinSessions.filter(c => c.area === "BA").sort(sortCabins) }),
+  ga: (cabinSessions) => ({ selectionName: "GA", cabins: cabinSessions.filter(c => c.area === "GA").sort(sortCabins) }),
+  single: (cabin) => ({ selectionName: cabin.name, cabins: [cabin] }),
+  none: () => ({ selectionName: "NONE", cabins: [] })
+}
 
 const CabinListIndex = () => {
   const [weeks] = useGetDataOnMount({
@@ -15,83 +25,67 @@ const CabinListIndex = () => {
     initialState: [],
   });
 
-  const [selectedWeek, setSelectedWeek] = useState(undefined);
+  const [selectedWeek, setSelectedWeek] = useState(null);
 
-  const [selected, setSelected] = useState({ cabin: "all" });
+  const [cabinSessions, setCabinSessions] = useState([]);
 
-  const [campersByCabin, setCampersByCabin] = useState({});
 
-  const [displayedCabins, setDisplayedCabins] = useState([]);
+  const [selected, setSelected] = useState(cabinSelections.none());
+
+  const [unassignedCampers, setUnassignedCampers] = useState([]);
 
   const auth = useContext(UserContext);
   /** Select a week */
   const selectWeek = (week) => {
+    setCabinSessions([]);
+    setSelected(cabinSelections.none());
     setSelectedWeek(week);
   }
 
-
   /** Select cabin */
-  const selectCabin = (cabinName) => {
-    setSelected(s => ({ ...s, cabin: cabinName }));
+  const selectCabin = (selection) => {
+    setSelected(s => (selection));
   }
 
-  useEffect(() => {
-    // Handle display of selected cabin
-    const cabins = Object.keys(campersByCabin);
-    if (cabins === undefined) {
-      return;
+  /**Get amount of current cabins */
+  const getCabinDisplayCount = () => {
+    // This weird conditional handles the "Has no campers assigned" text. It's a quick fix.
+    if ((selected.selectionName === "GA" || selected.selectionName === "BA") && selected.cabins.every(c => c.campers.length === 0)) {
+      return 1
     }
-    if (selected.cabin === "all") {
-      const cabinsToDisplay = cabins.reduce((acc, cv) => {
-        acc = [
-          ...acc,
-          { cabinName: cv, campers: campersByCabin[cv] },
-        ];
-        console.log({ acc })
-        return acc;
-      }, []);
-      setDisplayedCabins(cabinsToDisplay);
-      return
-    }
-    setDisplayedCabins([
-      { cabinName: selected.cabin, campers: campersByCabin[selected.cabin] },
-    ]);
-  }, [selected, campersByCabin]);
-
-
+    return selected.cabins.length;
+  }
+  /** Handle the selection of a week  */
   useEffect(() => {
-    /** Take list of campers in session, group into object with cabins as keys 
-      * @param {campers[]} campers array of camper sessions**/
-    console.log("EFFECT")
-    if (selectedWeek !== undefined) {
-      const groupCampersByCabin = (campers) => {
-        const campersByCabin = campers.reduce((acc, cv) => {
-          if (acc[cv.cabinName] === undefined) {
-            acc[cv.cabinName] = [];
-          }
-          acc[cv.cabinName].push(cv);
-          return acc;
-        }, {})
-        return campersByCabin;
-      };
+    if (selectedWeek !== null) {
+      /** Fetch cabin-sessions from api Defined here because of useEffect dependencies */
+      const getCabinSessions = async () => {
 
-      /** Fetch camper-weeks from api */
-      const getCampersByCabin = async () => {
-
-        const camperResponse = await fetchWithToken(
-          `/api/camper-weeks?week=${selectedWeek.number}`,
+        const csResponse = await fetchWithToken(
+          `/api/cabin-sessions?week=${selectedWeek.number}`,
           {},
           auth
         );
-        const campers = await camperResponse.json();
-        const sorted = groupCampersByCabin(campers);
-        setCampersByCabin(sorted);
-        // do it
+        const cabinSessionsResponse = await csResponse.json();
+        // group by area
+        cabinSessionsResponse.sort((a, _) => a === "GA" ? 1 : -1);
+        setSelected(cabinSelections.all(cabinSessionsResponse));
+        setCabinSessions(cabinSessionsResponse);
       };
-      setDisplayedCabins(undefined);
-      getCampersByCabin();
+
+      /** Fetch unassigned Campers. Defined here because of useEffect dependencies */
+      const getUnassignedCampers = async () => {
+        // unpopulatel list to avoid display conflicts
+        setUnassignedCampers([]);
+        const ucResponse = await fetchWithToken(`/api/camper-weeks?week=${selectedWeek.number}&cabin=unassigned`, {}, auth)
+        const unassigned = await ucResponse.json();
+        setUnassignedCampers(unassigned);
+      }
+      getCabinSessions();
+      getUnassignedCampers();
     }
   }, [selectedWeek, auth]);
+
   return (
     <>
       <ul tw="flex justify-center sm:justify-evenly gap-2">
@@ -108,69 +102,141 @@ const CabinListIndex = () => {
       {selectedWeek && <h1>Week {selectedWeek.number}</h1>}
       {selectedWeek && <h2 tw="font-thin">{selectedWeek.title}</h2>}
 
-      <ul tw="flex justify-center gap-1 flex-wrap">
-        <MenuSelector
-          tw="px-2"
-          onClick={() => selectCabin("all")}
-          isSelected={selected.cabin === "all"}
-        >
-          All
-        </MenuSelector>
-        {Object.keys(campersByCabin).map(cabinName =>
-          <MenuSelector
+      <ul tw="flex justify-center gap-1 flex-wrap mb-4">
+        {cabinSessions.length > 0 &&
+          <><MenuSelector
             tw="px-2"
-            onClick={() => selectCabin(cabinName)}
-            isSelected={selected.cabin === cabinName}
+            onClick={() => selectCabin(cabinSelections.all(cabinSessions))}
+            isSelected={selected.selectionName === "ALL"}
           >
-            <button>{cabinName}</button>
+            All
           </MenuSelector>
-        )}
-      </ul>
-      {displayedCabins &&
-        <CabinGrid count={displayedCabins.length}>
-          {displayedCabins.length > 0 &&
-            displayedCabins.map((cabin) => {
-              console.log({ displayedCabins, cabin })
-              return (
-                <li tw="mx-1" key={`cabin-${cabin.cabinName}`}>
-                  <header tw="bg-green-200 sticky top-0">
-                    <h3 tw="font-bold text-xl">
-                      {cabin.cabinName}
-                    </h3>
-                  </header>
-                  <ul tw="flex flex-col gap-1 w-11/12 m-1">
-                    {console.log(cabin.campers)}
-                    {cabin.campers.map((camper) => (
-                      < CamperItem dayCamp={camper.dayCamp} key={`camper-${camper.id}`} fl={camper.fl} >
-                        <CamperCol>
-                          <span tw="text-sm">{camper.firstName} {camper.lastName} </span>
-                        </CamperCol>
-                        {camper.dayCamp &&
-                          <CamperCol>
-                            <span tw="text-sm">{" "}day</span>
-                          </CamperCol>}
-                        {camper.fl &&
-                          <CamperCol>
-                            <span tw="text-sm">{" "}fl</span>
-                          </CamperCol>
-                        }
-                        <CamperCol>
-                          < span tw="italic font-light" > {camper.age}</span>
-                        </CamperCol>
-                        <CamperCol>
-                          {camper.pronouns && <PronounBadge tw="text-sm">{camper.pronouns.toLowerCase()}</PronounBadge>}
-                        </CamperCol>
+            <MenuSelector
+              tw="px-2"
+              onClick={() => selectCabin(cabinSelections.ba(cabinSessions))}
+              isSelected={selected.selectionName === "BA"}
+            >
+              BA
+            </MenuSelector>
+            <MenuSelector
+              tw="px-2"
+              onClick={() => selectCabin(cabinSelections.ga(cabinSessions))}
+              isSelected={selected.selectionName === "GA"}
+            >
+              GA
+            </MenuSelector>
 
-                      </CamperItem>
-                    ))}
-                  </ul>
-                </li>
-              );
-            })}
-        </CabinGrid>
-      }
+
+            {cabinSessions.map(cabin =>
+              <MenuSelector
+                tw="px-2"
+                onClick={() => selectCabin(cabinSelections.single(cabin))}
+                isSelected={selected.selectionName === cabin.name}
+                key={`selector-cabin-${cabin.name}`}
+              >
+                <button>{cabin.name}</button>
+              </MenuSelector>
+            )} </>
+        }
+      </ul>
+      <CabinGrid count={getCabinDisplayCount()}>
+        {selected.selectionName !== "ALL"
+          && selected.selectionName !== "NONE"
+          && selected.cabins.every(c => c.campers.length === 0)
+          && <span> {selected.selectionName} has no assigned Campers. Either cabins have not been assigned, or it is empty this week.</span>}
+        {
+          selected.cabins.filter(c => c.campers.length > 0).map((cabin) => {
+            return (
+              <li tw="mx-1" key={`cabin-${cabin.name}`}>
+                <header tw="bg-green-200 sticky top-0">
+                  <h3 tw="font-bold text-xl">
+                    {cabin.name}
+                  </h3>
+                </header>
+                <ul tw="flex flex-col gap-1 w-11/12 m-1">
+                  {cabin.campers.map((camper) => (
+                    < CamperItem dayCamp={camper.dayCamp} key={`camper-${camper.sessionId}`} fl={camper.fl} >
+                      <CamperCol>
+                        <span tw="text-sm">{camper.firstName} {camper.lastName} </span>
+                        <span > {camper.age}</span>
+                      </CamperCol>
+                      {camper.dayCamp &&
+                        <CamperCol>
+                          <span tw="text-sm">{" "}day</span>
+                        </CamperCol>}
+                      {camper.fl &&
+                        <CamperCol>
+                          <span tw="text-sm">{" "}fl</span>
+                        </CamperCol>
+                      }
+                      <CamperCol>
+                        {camper.pronouns && <PronounBadge tw="text-sm">{camper.pronouns.toLowerCase()}</PronounBadge>}
+                      </CamperCol>
+
+                    </CamperItem>
+                  ))}
+                </ul>
+              </li>
+            );
+          })}
+        {/* UNASSIGNED CAMPERS */}
+        {selected.selectionName === "ALL" && unassignedCampers.length > 0 &&
+
+          <li tw="mx-1" key={`cabin-unassigned`}>
+            <header tw="bg-green-200 sticky top-0">
+              <h3 tw="font-bold text-xl">
+                Unassigned
+              </h3>
+            </header>
+            <ul tw="flex flex-col gap-1 w-11/12 m-1">
+              {unassignedCampers.map((camper) => (
+                < CamperItem dayCamp={camper.dayCamp} key={`camper-${camper.sessionId}`} fl={camper.fl} >
+                  <CamperCol>
+                    <span tw="text-sm">{camper.firstName} {camper.lastName} </span>
+                    <span > {camper.age}</span>
+                  </CamperCol>
+                  {camper.dayCamp &&
+                    <CamperCol>
+                      <span tw="text-sm">{" "}day</span>
+                    </CamperCol>}
+                  {camper.fl &&
+                    <CamperCol>
+                      <span tw="text-sm">{" "}fl</span>
+                    </CamperCol>
+                  }
+                  <CamperCol>
+                    {camper.pronouns && <PronounBadge tw="text-sm">{camper.pronouns.toLowerCase()}</PronounBadge>}
+                  </CamperCol>
+
+                </CamperItem>
+              ))}
+            </ul>
+          </li>
+        }
+      </CabinGrid>
     </>
   )
 }
 
 export default CabinListIndex
+            // {unassignedCampers.map(camper => (
+            //   < CamperItem dayCamp={camper.dayCamp} key={`camper-${camper.sessionId}`} fl={camper.fl} >
+            //     <CamperCol>
+            //       <span tw="text-sm">{camper.firstName} {camper.lastName} </span>
+            //       <span > {camper.age}</span>
+            //     </CamperCol>
+            //     {camper.dayCamp &&
+            //       <CamperCol>
+            //         <span tw="text-sm">{" "}day</span>
+            //       </CamperCol>}
+            //     {camper.fl &&
+            //       <CamperCol>
+            //         <span tw="text-sm">{" "}fl</span>
+            //       </CamperCol>
+            //     }
+            //     <CamperCol>
+            //       {camper.pronouns && <PronounBadge tw="text-sm">{camper.pronouns.toLowerCase()}</PronounBadge>}
+            //     </CamperCol>
+
+            //   </CamperItem>
+            // ))}
