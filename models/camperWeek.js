@@ -18,7 +18,7 @@ class CamperWeek {
         gender,
         weekNumber,
         weekTitle,
-        camperID,
+        camperId,
         cabinSessionID,
         cabinName,
         activities,
@@ -32,7 +32,7 @@ class CamperWeek {
         this.firstName = firstName;
         this.lastName = lastName;
         this.weekTitle = weekTitle;
-        this.camperID = camperID;
+        this.camperId = camperId;
         this.id = id;
         this.cabinSessionID = cabinSessionID;
         this.cabinName = cabinName || "unassigned";
@@ -60,7 +60,7 @@ class CamperWeek {
     }) {
         return {
             id: id,
-            camperID: camper_id,
+            camperId: camper_id,
             dayCamp: day_camp,
             pronouns: pronouns,
             fl: fl,
@@ -120,7 +120,7 @@ class CamperWeek {
             ],
             fieldsToRemain: [
                 "id",
-                "camperID",
+                "camperId",
                 "dayCamp",
                 "fl",
                 "pronouns",
@@ -175,7 +175,7 @@ class CamperWeek {
             ],
             fieldsToRemain: [
                 "id",
-                "camperID",
+                "camperId",
                 "dayCamp",
                 "fl",
                 "firstName",

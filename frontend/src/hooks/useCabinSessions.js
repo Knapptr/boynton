@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext, useCallback } from "react";
 import fetchWithToken from "../fetchWithToken";
 import UserContext from '../components/UserContext';
 
@@ -35,7 +35,7 @@ const useCabinSessions = (weekNumber, area) => {
 		setCabinList(update);
 	};
 
-	const getData = async () => {
+	const getData = useCallback(async () => {
 		const cabinsState = {};
 		const cabinSessions = await getAllSessionsForWeek(weekNumber, area, auth);
 		for (let session of cabinSessions) {
@@ -45,7 +45,7 @@ const useCabinSessions = (weekNumber, area) => {
 		// const cabinNames = Object.keys(cabinsState);
 
 		return { cabinsState, cabinSessions }
-	}
+	}, [weekNumber, area, auth])
 
 	const refresh = async () => {
 		const setState = async (auth) => {
@@ -64,9 +64,9 @@ const useCabinSessions = (weekNumber, area) => {
 			setCabinSessions(cabinSessions);
 		};
 		setState(auth);
-	}, [auth, area, weekNumber]);
+	}, [auth, area, weekNumber, getData]);
 
-	return { setCabinList, cabinList, cabinSessions, updateCabinList, refreshCabins: refresh };
+	return { setCabinList, cabinList, cabinSessions, updateCabinList, refreshCabins: refresh, setCabinSessions };
 };
 
 export default useCabinSessions;

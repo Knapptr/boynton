@@ -18,41 +18,37 @@ const UnassignButton = styled.button(({ anyAssignments }) => [
 const Cabins = ({
   showAllLists,
   assign,
-  unassignAll,
   cabinSessions,
   toggleUnassignModal,
   cabinsOnly,
   lists,
   unassignCamper,
 }) => {
+
   const [hideFull, setHideFull] = useState(false);
+
   const areEmpty = () => {
-    if (Object.keys(lists).length === 0 || cabinSessions.length === 0) {
+    console.log({ cabinSessions });
+    if (cabinSessions.every(cabin => cabin.campers.length === 0) || cabinSessions.length === 0) {
       return true;
     }
-    return cabinSessions.every((cabin) =>
-      lists[cabin.cabinName].every((list) => list.length === 0)
-    );
   };
   const displayCabins = () => {
     let list = cabinSessions;
     if (hideFull) {
       list = cabinSessions.filter(
-        (cabin) => cabin.capacity > lists[cabin.cabinName].length
+        (cabin) => cabin.capacity > cabin.campers.length
       );
     }
-    return list.map((cabinSession) => {
+    return list.map((cabinSession, index) => {
       return (
         <Cabin
           cabinsOnly={cabinsOnly}
           assign={assign}
-          key={`cabin-${cabinSession.cabinName}`}
-          unassignCamper={unassignCamper}
+          key={`cabin-${cabinSession.name}`}
+          unassignCamper={(camperIndex) => unassignCamper(index, camperIndex)}
           allOpenState={showAllLists}
           session={cabinSession}
-          list={lists[cabinSession.cabinName].sort(
-            (camper1, camper2) => camper1.age > camper2.age
-          )}
         />
       );
     });

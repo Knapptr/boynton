@@ -4,7 +4,7 @@ const sortCabins = require('../utils/sortCabins');
 
 
 module.exports = class CabinSession {
-	constructor({ weekNumber, weekTitle, cabinName, capacity, area, id, campers }) {
+	constructor({ weekNumber, weekTitle, cabinName, capacity, area, id, campers, camperId }) {
 		this.weekNumber = weekNumber;
 		this.id = id;
 		this.weekName = weekTitle;
@@ -12,8 +12,9 @@ module.exports = class CabinSession {
 		this.capacity = capacity;
 		this.area = area;
 		this.campers = campers;
+		this.camperId = camperId
 	}
-	static _parseResults({ week_number, cabin_name, capacity, week_title, area, id }) {
+	static _parseResults({ week_number, cabin_name, capacity, week_title, area, id, camper_id }) {
 		return {
 			weekNumber: week_number,
 			id: id,
@@ -21,6 +22,7 @@ module.exports = class CabinSession {
 			capacity: capacity,
 			weekTitle: week_title,
 			cabinArea: area,
+			camperId: camper_id
 		};
 	}
 	static async get(cabinSessionID) {
@@ -55,6 +57,7 @@ module.exports = class CabinSession {
 			camp.last_name as camper_last,
 			camp.pronouns as camper_pronouns,
 			camp.age as camper_age,
+			camp.id as camper_id,
 			cw.day_camp as camper_day_camp,
 			cw.fl as camper_fl,
 			cw.id as camper_session_id
@@ -63,7 +66,7 @@ module.exports = class CabinSession {
 			LEFT JOIN camper_weeks cw ON cw.cabin_session_id = cs.id
 			left JOIN campers camp ON camp.id = cw.camper_id
 			JOIN weeks ON cs.week_id = weeks.number
-			ORDER BY cs.id
+			ORDER BY cs.id, camp.age, camp.last_name
 		`
 			;
 		const response = await fetchMany(query)
@@ -98,7 +101,8 @@ module.exports = class CabinSession {
 					pronouns: response.camper_pronouns,
 					dayCamp: response.camper_day_camp,
 					fl: response.camper_fl,
-					sessionId: response.camper_session_id
+					id: response.camper_session_id,
+					camperId: response.camper_id
 				};
 				currentCabin.campers.push(camper);
 			}

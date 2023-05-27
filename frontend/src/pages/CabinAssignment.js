@@ -2,7 +2,7 @@ import useGetDataOnMount from "../hooks/useGetData";
 import Campers from "../components/Campers";
 import Cabins from "../components/Cabins";
 import { Route } from "react-router-dom";
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import UserContext from "../components/UserContext";
 import tw from "twin.macro";
 import "styled-components/macro";
@@ -12,6 +12,7 @@ import UnitHeadAccess from "../components/ProtectedUnitHead";
 import { PropagateLoader } from "react-spinners";
 import { PopOut } from "../components/styled";
 import NotFound from "./NotFound";
+import fetchWithToken from "../fetchWithToken";
 
 const CabinsOnlyButton = tw.button`bg-green-400 rounded p-3 text-white font-bold`;
 const AssignmentHeader = tw.header`flex justify-around items-center bg-violet-500 gap-4 rounded-t text-white mb-2`;
@@ -68,26 +69,36 @@ const CabinAssignment = ({ area, weekNumber }) => {
   const toggleCabinsOnly = () => {
     setCabinsOnly((s) => !s);
   };
-  const { cabinSessions, refreshCabins, cabinList, updateCabinList, setCabinList } =
+  const { cabinSessions, refreshCabins, cabinList, updateCabinList, setCabinSessions, setCabinList } =
     useCabinSessions(weekNumber, area);
 
 
-  const [allCampers, setData, _, loaded] = useGetDataOnMount({
-    url: `/api/camper-weeks?week=${weekNumber}&area=${area}`,
-    initialState: [],
-    useToken: true,
-  });
+  const [allCampers, setAllCampers] = useState({ unassigned: [], all: [] })
 
-  const [unassignedCampers, setCampers, updateUnassigned] = useGetDataOnMount({
-    url: `/api/camper-weeks?week=${weekNumber}&area=${area}&cabin=unassigned`,
-    useToken: true,
-    initialState: [],
-    // optionalSortFunction: (camper1, camper2) => camper1.age - camper2.age,
-  });
+  useEffect(() => {
+    const getCampers = async () => {
+      const response = await fetchWithToken(`/api/camper-weeks?week=${weekNumber}&area=${area}`, {}, auth);
+      const ungroupedCampers = await response.json();
+      const unassigned = [];
+      const all = [];
+
+      for (const camper of ungroupedCampers) {
+        all.push(camper);
+        if (camper.cabinSessionID === null) {
+          unassigned.push(camper);
+        }
+      }
+
+      setAllCampers({ unassigned, all });
+    }
+    getCampers();
+  }, [weekNumber, area, auth])
+
 
   /** Check if all campers are assigned **/
   const allAssigned = () => {
-    return unassignedCampers.length === 0;
+    console.log({ allCampers });
+    return allCampers.all.length > 0 && allCampers.unassigned.length === 0;
   };
 
   /** Add camper to selected campers
@@ -99,11 +110,10 @@ const CabinAssignment = ({ area, weekNumber }) => {
   /** Remove all selected campers from the unassigned list */
   const removeSelectedFromUnassigned = () => {
     // filter unassigned
-    setCampers(campers => {
-      const updatedList = campers.filter(camper => !selectedCampers.some(selCamp => selCamp.id === camper.id));
-      return updatedList;
+    setAllCampers(campers => {
+      const updatedList = campers.unassigned.filter(camper => !selectedCampers.some(selCamp => selCamp.id === camper.id));
+      return { all: campers.all, unassigned: updatedList };
     })
-    console.log("Eagerly removed Campers from unassigned UI");
   }
 
   /** Remove a camper from the selected campers array 
@@ -112,7 +122,7 @@ const CabinAssignment = ({ area, weekNumber }) => {
     setSelected((s) => {
       // remove id from array
       // maybe just use a set here?
-      const index = s.findIndex((v) => v.id == sessionId);
+      const index = s.findIndex((v) => v.id === sessionId);
       if (index == -1) { console.log(`Cannot deselect camper: ${sessionId}. They are not currently selected.`) } else {
         // set state to updated array
         const newState = [...s]
@@ -128,19 +138,15 @@ const CabinAssignment = ({ area, weekNumber }) => {
   */
   const sortByAge = (camperSessions) => {
     // should sort alpha by last name first ??
-    camperSessions.sort((a, b) => {
-      if (a.lastName < b.lastName) { return -1; };
-      if (a.lastName > b.lastName) { return 1; };
-      return 0;
-    })
     // sort by age
-    camperSessions.sort((a, b) => a.age - b.age)
+    camperSessions.sort((a, b) => a.age - b.age || a.lastName.localeCompare((b.lastName)))
   }
   /** Send camper to cabin on the DB
     * @param {camperSession} camperSession an object with a camperId and a session Id (id)
     * @param {string} cabinNumber (a unique cabin identifier)
     */
   const assignCabin = async (camperSession, cabinSession) => {
+    console.log("Assigning", { camperSession, cabinSession });
     const requestConfig = {
       method: "PUT",
       headers: {
@@ -152,7 +158,7 @@ const CabinAssignment = ({ area, weekNumber }) => {
       }),
     };
     const results = await fetch(
-      `/api/campers/${camperSession.camperID}/${camperSession.id}/cabin`,
+      `/api/campers/${camperSession.camperId}/${camperSession.id}/cabin`,
       requestConfig
     );
   };
@@ -171,25 +177,28 @@ const CabinAssignment = ({ area, weekNumber }) => {
     // Eager UI State change
     console.log("Eagerly updating UI");
     removeSelectedFromUnassigned();
-    updateCabinUI(cabinSession.cabinName, [...selectedCampers]);
+    updateCabinUI(cabinSession.name, [...selectedCampers]);
 
     // Action
-    let promises = selectedCampers.map(({ camperId, id }) => assignCabin({ camperID: camperId, id }, cabinSession));
+    let promises = selectedCampers.map(({ camperId, id }) => assignCabin({ camperId, id }, cabinSession));
     try {
       console.log("Sending to DB")
       await Promise.all(promises);
       console.log("DB Update successful")
-      setSelected(() => []);
+      setSelected([]);
 
 
       // Update state from DB
       console.log("Updating UI from DB");
       refreshCabins();
-      updateUnassigned();
+      // updateCamperList();
     }
     // Handle Unsucc. db update
     catch {
       console.log("Something went wrong sending all to cabin");
+      setSelected([]);
+      refreshCabins();
+      // updateCamperList()
     }
   }
 
@@ -198,63 +207,68 @@ const CabinAssignment = ({ area, weekNumber }) => {
     * @param {campers[]} campers List of campers to be added to cabin
     */
   const updateCabinUI = (cabinName, campers) => {
-    console.log("Updating Cabin UI");
-    let updatedCabinList = { ...cabinList };
-    updatedCabinList[cabinName] = [...updatedCabinList[cabinName], ...campers];
-    sortByAge(updatedCabinList[cabinName]);
-    setCabinList(updatedCabinList);
+    let targetIndex = cabinSessions.findIndex(c => c.name === cabinName);
+    const updatedList = [...cabinSessions]
+    let targetCabin = updatedList.splice(targetIndex, 1)[0];
+    if (targetCabin === undefined) { throw new Error("Something went wrong in Eager UI update") }
+    targetCabin.campers = targetCabin.campers.concat(campers);
+    sortByAge(targetCabin.campers);
+    updatedList.splice(targetIndex, 0, targetCabin);
+    setCabinSessions(updatedList);
   }
 
   /** Unassign a single camper from a cabin
     * @param {string} cabinName Unique identifier for cabin
-    * @param {camperSession} camperSession data about camper session
+    * @param {camperSession} camper data about camper session
   */
-  const unassignCamper = async (cabinName, camperSession) => {
-    console.log("Not yet implemented: Unassign individual camper");
+  const unassignCamper = async (cabinIndex, camperIndex) => {
     // Eager UI Update
-    setCampers(c => {
-      const updatedList = [...c, camperSession];
+    const camper = { ...cabinSessions[cabinIndex].campers[camperIndex] };
+    console.log({ camper });
+    setAllCampers(c => {
+      const updatedList = [...c.unassigned, camper];
       sortByAge(updatedList);
-      return updatedList;
+      return { unassigned: updatedList, all: c.all };
 
     });
-    setCabinList(c => {
-      const newCabinsList = { ...c };
-      const cabinList = [...newCabinsList[cabinName]];
-      const updatedList = cabinList.filter(c => c.id !== camperSession.id)
-      newCabinsList[cabinName] = updatedList;
+
+    setCabinSessions(c => {
+      const newCabinsList = [...c];
+      newCabinsList[cabinIndex].campers.splice(camperIndex, 1);
       return newCabinsList;
     })
 
     // DB Action
     try {
-      await assignCabin(camperSession);
+      await assignCabin(camper);
       console.log("Update successful")
     } catch {
       console.log("Update Unsuccessful");
     }
     // Update from DB
     refreshCabins();
-    updateUnassigned();
+    // updateCampers();
 
   };
 
   /** Unassign all campers from cabins */
   const unassignAll = async () => {
-    let campers = [...unassignedCampers];
+    let campers = [...allCampers.unassigned];
     let newlyUnassignedCampers = [];
-    let updatedCabinList = { ...cabinList };
-    for (let cabin of cabinSessions) {
-      newlyUnassignedCampers = [
-        ...newlyUnassignedCampers,
-        ...cabinList[cabin.cabinName],
-      ];
-      updatedCabinList[cabin.cabinName] = [];
+    let updatedCabinList = [...cabinSessions];
+    for (let cabin of updatedCabinList) {
+      const camperCopy = [...cabin.campers];
+      newlyUnassignedCampers = newlyUnassignedCampers.concat(camperCopy);
+      cabin.campers = [];
     }
     await Promise.all(newlyUnassignedCampers.map((c) => assignCabin(c, false)));
-    campers = [...campers, ...newlyUnassignedCampers];
-    setCampers(campers);
-    setCabinList(updatedCabinList);
+    const newUnassigned = [...campers, ...newlyUnassignedCampers];
+    newUnassigned.sort((a, b) => a.age - b.age || a.lastName.localeCompare(b.name));
+    setAllCampers(ac => ({ all: ac.all, unassigned: newUnassigned }));
+    setCabinSessions(updatedCabinList);
+    // Update from DB
+    refreshCabins();
+    // updateCampers();
   };
 
   /** Show Both Cabins and Campers **/
@@ -265,8 +279,8 @@ const CabinAssignment = ({ area, weekNumber }) => {
           <Campers
             select={selectCamper}
             deselect={deselectCamper}
-            list={unassignedCampers}
-            allCampers={allCampers}
+            list={allCampers.unassigned}
+            allCampers={allCampers.all}
             weekNumber={weekNumber}
             area={area}
           />
@@ -281,7 +295,6 @@ const CabinAssignment = ({ area, weekNumber }) => {
             }}
             cabinsOnly={false}
             cabinSessions={cabinSessions}
-            lists={cabinList}
             weekNumber={weekNumber}
             area={area}
           />
@@ -314,74 +327,76 @@ const CabinAssignment = ({ area, weekNumber }) => {
 
   return (
     <>
-      {showUnassignModal && (
-        <PopOut
-          onClick={() => {
-            setShowUnassignModal(false);
-          }}
-          shouldDisplay={true}
-        >
-          <div
-            tw="bg-coolGray-200 p-4 rounded shadow"
-            onClick={(e) => {
-              e.stopPropagation();
+      <>
+        {showUnassignModal && (
+          <PopOut
+            onClick={() => {
+              setShowUnassignModal(false);
             }}
+            shouldDisplay={true}
           >
-            <header>
-              <h4 tw="font-bold text-lg">Unassign All Campers</h4>
-              <p>Are you sure?</p>
-              <button
-                onClick={() => setShowUnassignModal(false)}
-                tw="rounded bg-green-400 p-2 m-2"
-              >
-                Nevermind
-              </button>{" "}
-              <button
-                tw=" rounded bg-red-400 m-2 p-2"
-                onClick={async () => {
-                  await unassignAll();
-                  setShowUnassignModal(false);
-                }}
-              >
-                Get rid of 'em
-              </button>
-            </header>
-          </div>{" "}
-        </PopOut>
-      )}
-      <div tw="relative">
-        <AssignmentHeader>
-          <h1 tw="inline">
-            Cabin assignment{" "}
-            <p tw="font-bold italic inline">
-              {area.toUpperCase()}-Week {weekNumber}
-            </p>
-          </h1>
-          <p>
-            {!allAssigned() && `${selectedCampers.length} campers selected`}
-          </p>
-          {!allAssigned() && (
-            <CabinsOnlyButton
-              onClick={() => {
-                toggleCabinsOnly();
+            <div
+              tw="bg-coolGray-200 p-4 rounded shadow"
+              onClick={(e) => {
+                e.stopPropagation();
               }}
             >
-              {cabinsOnly && "Show Unassigned Campers"}
-              {!cabinsOnly && "Show Cabins Only"}
-            </CabinsOnlyButton>
-          )}
-        </AssignmentHeader>
-        <div tw="flex flex-col lg:flex-row">
-          {loaded === false &&
-            <div tw="my-2 py-8 text-center w-full ">
-              <PropagateLoader loading={true} />
-            </div>
-          }
-          {(cabinsOnly || allAssigned()) && showOnlyCabins()}
-          {!cabinsOnly && !allAssigned() && showAll()}
+              <header>
+                <h4 tw="font-bold text-lg">Unassign All Campers</h4>
+                <p>Are you sure?</p>
+                <button
+                  onClick={() => setShowUnassignModal(false)}
+                  tw="rounded bg-green-400 p-2 m-2"
+                >
+                  Nevermind
+                </button>{" "}
+                <button
+                  tw=" rounded bg-red-400 m-2 p-2"
+                  onClick={async () => {
+                    await unassignAll();
+                    setShowUnassignModal(false);
+                  }}
+                >
+                  Get rid of 'em
+                </button>
+              </header>
+            </div>{" "}
+          </PopOut>
+        )}
+        <div tw="relative">
+          <AssignmentHeader>
+            <h1 tw="inline">
+              Cabin assignment{" "}
+              <p tw="font-bold italic inline">
+                {area.toUpperCase()}-Week {weekNumber}
+              </p>
+            </h1>
+            <p>
+              {!allAssigned() && `${selectedCampers.length} campers selected`}
+            </p>
+            {!allAssigned() && (
+              <CabinsOnlyButton
+                onClick={() => {
+                  toggleCabinsOnly();
+                }}
+              >
+                {cabinsOnly && "Show Unassigned Campers"}
+                {!cabinsOnly && "Show Cabins Only"}
+              </CabinsOnlyButton>
+            )}
+          </AssignmentHeader>
+          <div tw="flex flex-col lg:flex-row">
+            {allCampers.all.length === 0 && allCampers.unassigned.length === 0 &&
+              <div tw="my-2 py-8 text-center w-full ">
+                <PropagateLoader loading={true} />
+              </div>
+            }
+            {(cabinsOnly || allAssigned()) && showOnlyCabins()}
+            {!cabinsOnly && !allAssigned() && showAll()}
+          </div>
+          <footer tw="h-1"></footer>
         </div>
-        <footer tw="h-1"></footer>
-      </div>
+      </>
     </>
   );
 };

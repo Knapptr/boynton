@@ -53,7 +53,7 @@ const Camper = ({
                 <RemoveButton
                     onClick={(e) => {
                         e.stopPropagation();
-                        unassignCamper(cabinName, camper);
+                        unassignCamper(index);
                     }}
                 >
                     <FontAwesomeIcon icon={faUserMinus} />

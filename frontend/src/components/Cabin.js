@@ -16,7 +16,7 @@ const CamperList = styled.ul(({ isOpen, hasCampers }) => [
   tw`p-1 rounded flex-grow flex flex-col gap-1`,
   hasCampers && isOpen && tw`bg-sky-800`,
 ]);
-const Cabin = ({ assign, session, list, allOpenState, unassignCamper, cabinsOnly }) => {
+const Cabin = ({ assign, session, allOpenState, unassignCamper, cabinsOnly }) => {
   const [isOpen, setIsOpen] = useState(false);
   const toggleOpen = () => {
     setIsOpen((o) => !o);
@@ -25,43 +25,57 @@ const Cabin = ({ assign, session, list, allOpenState, unassignCamper, cabinsOnly
     setIsOpen(allOpenState);
   }, [allOpenState]);
 
+  /** Get min and max ages in cabin, ignoring FLs */
+  const getMinMaxAge = () => {
+    // Cabins are sorted by age in the response, so iterate through until a non FL is found on each end
+    let i = 0;
+    let j = session.campers.length - 1;
+
+    while (i < session.campers.length && session.campers[i].fl) { i++ }
+    while (j > 0 && session.campers[j].fl) { j-- }
+    if (j < 0) {
+      return { min: session.campers[0].age, max: session.campers[0].age }
+    }
+    return { min: session.campers[i].age, max: session.campers[j].age };
+  }
+
   return (
     <CabinComponentFrame cabinsOnly={cabinsOnly}>
       <CabinWrapper
-        disabled={list.length === session.capacity}
+        disabled={session.campers.length === session.capacity}
         onClick={(e) => {
           e.stopPropagation();
           // if (list.length === session.capacity) {
           //   console.log("Cabin is full.");
           // } else {
-          assign(session, list.length);
+          assign(session, session.campers.length);
           //}
         }}
       >
         <header tw="flex justify-between">
-          <h4 tw="font-bold text-xl">{session.cabinName}</h4>
+          <h4 tw="font-bold text-xl">{session.name}</h4>
           <h4 tw="font-bold text-2xl">
-            {list.length}/{session.capacity}
+            {session.campers.length}/{session.capacity}
           </h4>
         </header>
         <div tw="flex justify-end">
-          {list.length > 0 && !allOpenState && (
+          {session.campers.length > 0 && !allOpenState && (
             <button onClick={(e) => { e.stopPropagation(); toggleOpen() }}>
               {isOpen ? "Hide List" : "View List"}
             </button>
           )}
           <h4 tw="ml-auto">
-            {list.length <= 0
+            {session.campers.length <= 0
               ? "Empty"
-              : `Ages: ${list[0].age} - ${list[list.length - 1].age}`}
+              : `Ages: ${getMinMaxAge().min} - ${getMinMaxAge().max}`}
           </h4>
         </div>
-        <CamperList isOpen={isOpen} hasCampers={list.length > 0}>
+        <CamperList isOpen={isOpen} hasCampers={session.campers.length > 0}>
           {isOpen &&
-            list.map((camper, index) => {
+            session.campers.map((camper, index) => {
               return (
                 <Camper
-                  cabinName={session.cabinName}
+                  cabinName={session.name}
                   selectable={false}
                   full
                   removable
