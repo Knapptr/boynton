@@ -25,6 +25,7 @@ const weekRepository = {
   * @param {any[]} dbResponse */
   _mapResponse(dbResponse) {
     const camelCased = dbResponse.map((w) => camelCaseProps(w));
+    console.log({ camelCased });
     const asWeeks = camelCased.reduce((acc, weekRes) => {
       if (acc.at(-1) === undefined) {
         const initialData = {
@@ -91,8 +92,9 @@ const weekRepository = {
             activities: []
           }]
         })
+        // console.log({ debug: lastItem.days.at(-1).periods });
         if (weekRes.activityId !== null) {
-          lastItem.days.at(-1).periods.at(-1).push(
+          lastItem.days.at(-1).periods.at(-1).activities.push(
             {
               activityId: weekRes.activityId,
               sessionId: weekRes.activitySessionId,
@@ -166,17 +168,25 @@ const weekRepository = {
     return mappedData;
   },
   async get(weekNumber) {
-    const query = `SELECT 
+    const query = `
+    SELECT 
     w.title AS title,
       w.number AS number,
       d.id AS day_id,
       d.name AS day_name,
       p.id AS period_id,
-      p.period_number AS period_number
+      p.period_number AS period_number,
+      act.id AS activity_id,
+      act.name AS activity_name,
+      ases.id AS activity_session_id,
+      act.description AS activity_description
     FROM weeks w
     JOIN days d ON d.week_id = w.number
     JOIN periods p ON p.day_id = d.id  
-    WHERE w.number = $1
+    FULL JOIN activity_sessions ases ON ases.period_id = p.id
+    LEFT JOIN activities act ON ases.activity_id = act.id
+    WHERE w.number = $1 
+    ORDER BY w.number,d.id,p.period_number
     `;
     const values = [weekNumber];
     const responseData = await fetchMany(query, values);

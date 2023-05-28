@@ -16,19 +16,20 @@ module.exports = {
 		let activities = await period.getActivities();
 		res.json(activities);
 	},
-  async getOne(req,res,next){
-    const {periodId} = req.params;
-    const period = await Period.get(periodId);
-    console.log({periodBeforeCampers:period})
-    await period.getCampers();
-    res.json(period);
-  },
+	async getOne(req, res, next) {
+		const { periodId } = req.params;
+		const period = await Period.get(periodId);
+		// console.log({ periodBeforeCampers: period })
+		// Get Campers populates an activity in the activities list: {name:unassigned, id:unassigned} and lists campers not assigned activities there
+		await period.getCampers();
+		res.json(period);
+	},
 	async getCampers(req, res, next) {
 		const { cabin, assigned } = req.query;
 		const { periodId } = req.params;
 		const period = await Period.get(periodId);
 		let campers = await period.getCampers();
-    console.log({campers})
+		// console.log({campers})
 		if (cabin) {
 			campers = campers.filter((c) => c.cabinName === cabin);
 		}

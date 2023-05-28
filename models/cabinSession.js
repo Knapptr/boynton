@@ -109,7 +109,7 @@ module.exports = class CabinSession {
 			results.push(currentCabin);
 		}
 		const deserResults = results.map(c => new CabinSession(c));
-		console.log({ deserResults });
+		// console.log({ deserResults });
 		return deserResults;
 	}
 

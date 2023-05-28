@@ -1,11 +1,11 @@
-import { useState, useEffect,useContext, useCallback } from "react";
+import { useState, useEffect, useContext, useCallback } from "react";
 import fetchWithToken from "../fetchWithToken";
 import UserContext from '../components/UserContext';
 
 const useActivityAttendance = (period, cabin) => {
 	const [lists, setLists] = useState({});
 	const [loading, setLoading] = useState(true);
-    const auth = useContext(UserContext);
+	const auth = useContext(UserContext);
 
 	const update = (
 		sourceId,
@@ -26,9 +26,9 @@ const useActivityAttendance = (period, cabin) => {
 	const getCampers = useCallback(async (periodID, cabinName) => {
 		setLoading(true);
 		const camperUrl = `/api/periods/${periodID}/campers?cabin=${cabinName}`;
-		const activityUrl = `/api/activities?period=${periodID}`;
-		const camperResult = await fetchWithToken(camperUrl,{},auth);
-		const activityResult = await fetchWithToken(activityUrl,{},auth);
+		const activityUrl = `/api/activity-sessions?period=${periodID}`;
+		const camperResult = await fetchWithToken(camperUrl, {}, auth);
+		const activityResult = await fetchWithToken(activityUrl, {}, auth);
 		const activities = await activityResult.json();
 		const campers = await camperResult.json();
 
@@ -52,10 +52,10 @@ const useActivityAttendance = (period, cabin) => {
 		setLoading(false);
 	},
 
- [auth])
-  useEffect(() => {
+		[auth])
+	useEffect(() => {
 		getCampers(period, cabin);
-	}, [period, cabin,getCampers]);
+	}, [period, cabin, getCampers]);
 
 	return { activityLists: lists, updateActivityAttendance: update, loading };
 };

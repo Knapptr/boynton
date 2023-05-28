@@ -48,6 +48,7 @@ class ActivitySession {
         const query = `
             SELECT 
             act_s.id as id, 
+            act_s.period_id as period_id,
             act.name as activity_name ,
             act.description as description,
             act.id as activity_id,

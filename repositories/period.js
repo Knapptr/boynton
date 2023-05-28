@@ -61,13 +61,18 @@ module.exports = {
     return mapped;
   },
   async get(id) {
-    const query = `SELECT 
-  day_id,period_number,p.id, 
-    a.name as activity_name,a.description as activity_description,a.id as activity_id
-  FROM periods p 
-  LEFT JOIN activities a ON a.period_id = p.id
-  WHERE p.id = $1
-`;
+    const query = `
+        SELECT 
+        day_id,period_number,p.id, 
+        a.name as activity_name,
+        a.description as activity_description,
+        a.id as activity_id, 
+        act_s.id as activity_session_Id
+        FROM periods p 
+        LEFT JOIN activity_sessions act_s ON  act_s.period_id = p.id
+        LEFT JOIN activities a ON act_s.activity_id = a.id
+        WHERE p.id = $1
+    `;
     const values = [id];
     const results = await fetchMany(query, values);
     if (!results) {
