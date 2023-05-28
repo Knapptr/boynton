@@ -62,12 +62,12 @@ class Period {
 		SELECT  
 	        c.first_name,
 	        c.last_name,
-		c.age,
+			c.age,
 	        ca.activity_id,
 	        cw.id as camper_session_id, 
 	        ca.is_present,
 	        act.name as activity_name,
-	        ca.id,
+	        ca.id as camper_activity_id,
 		cab.name 
 	        from camper_weeks cw
 	            JOIN days d ON d.week_id = cw.week_id
@@ -84,7 +84,8 @@ class Period {
 		const queryResult = (await fetchMany(query, values)) || [];
 		const parsedQuery = queryResult.map((res) => {
 			return {
-				id: res.id,
+				camperActivityId: res.camper_activity_id,
+				camperSessionId: res.camper_session_id,
 				weekId: res.week_id,
 				firstName: res.first_name,
 				lastName: res.last_name,

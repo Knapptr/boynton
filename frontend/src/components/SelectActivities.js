@@ -7,12 +7,13 @@ import "styled-components/macro";
 import toTitleCase from "../toTitleCase";
 import UserContext from "./UserContext";
 
-const CamperItem = styled.li(({ isDragging }) => [
-  tw`border p-1 bg-green-50`,
+const CamperItem = styled.li(({ isDragging, isSelected }) => [
+  tw`border p-1 bg-green-50 cursor-pointer select-none`,
   isDragging && tw`bg-green-400`,
+  isSelected && tw`bg-green-600`
 ]);
 const ActivityList = styled.ul(({ blue, isDraggingOver }) => [
-  tw`p-3 bg-purple-200 justify-center flex flex-col items-center gap-1`,
+  tw`p-3 bg-purple-200 justify-center flex flex-col items-center gap-1 cursor-pointer select-none`,
   blue && tw`bg-blue-200`,
   isDraggingOver && tw`bg-purple-600`,
   isDraggingOver && blue && tw`bg-blue-500`,
@@ -20,6 +21,8 @@ const ActivityList = styled.ul(({ blue, isDraggingOver }) => [
 const SelectActivities = ({
   periodId,
   cabinName,
+  selectedCampers,
+  handleSelectCamper,
   dayName,
   periodNumber,
   isTheLastPeriod,
@@ -31,6 +34,7 @@ const SelectActivities = ({
     updateActivityAttendance,
   } = useActivityAttendance(periodId, cabinName);
   const auth = useContext(UserContext)
+
   const addCamperActivityToDB = async (camperWeekId, activityId, periodId) => {
     const camper = {
       camperWeekId,
@@ -49,30 +53,7 @@ const SelectActivities = ({
     );
     const data = await result.json();
   };
-  const handleListMovement = async (
-    sourceListId,
-    sourceIndex,
-    destinationListId,
-    destinationIndex
-  ) => {
-    if (sourceListId === destinationListId) {
-      return;
-    }
-    const newDestination = [...activityLists[destinationListId].campers];
-    const newSource = [...activityLists[sourceListId].campers];
-    const camper = newSource.splice(sourceIndex, 1)[0];
-    newDestination.splice(destinationIndex, 0, camper);
-    updateActivityAttendance(
-      sourceListId,
-      destinationListId,
-      newSource,
-      newDestination
-    );
-    if (destinationListId === "unassigned") {
-      return;
-    }
-    await addCamperActivityToDB(camper.weekId, destinationListId, periodId);
-  };
+
   return (
     <div tw="flex flex-col max-w-3xl mx-auto">
       {activitiesLoading ? (
@@ -94,7 +75,10 @@ const SelectActivities = ({
                       activityLists.unassigned.campers.map((c, index) => (
                         <CamperItem
                           // ref={provided.innerRef}
+                          key={`unassigned-camper-${c.camperSessionId}`}
                           isDragging={false}
+                          isSelected={selectedCampers.some(sc => sc.camperSessionId === c.camperSessionId)}
+                          onClick={() => handleSelectCamper(c)}
                         >
                           {c.firstName} {c.lastName}
                         </CamperItem>
@@ -107,8 +91,19 @@ const SelectActivities = ({
               {activityLists.activityIds &&
                 activityLists.activityIds.map((aid, index) => (
                   <ActivityList
+                    key={`activity-list-${aid}`}
                     tw="flex-grow"
                     isDraggingOver={false}
+                    onClick={() => {
+                      console.log("Assign campers to DB");
+                      console.log("Assigning", selectedCampers);
+                      const campersToAdd = [...selectedCampers];
+                      while (campersToAdd.length > 0) {
+                        const addedCamper = campersToAdd.pop();
+                        addCamperActivityToDB(addedCamper.camperSessionId, aid, periodId)
+                      }
+
+                    }}
                   >
                     <header>
                       <h2 tw="font-bold">
@@ -117,6 +112,7 @@ const SelectActivities = ({
                     </header>
                     {activityLists[aid].campers.map((c, index) => (
                       <CamperItem
+                        key={`camper-assingment-${c.camperSessionId}`}
                       // isDragging={snapshot.isDragging}
                       // {...provided.dragHandleProps}
                       // {...provided.draggableProps}

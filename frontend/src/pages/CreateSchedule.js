@@ -34,9 +34,23 @@ const Controls = styled.nav(({ showControls }) => [
 
 const CreateSchedulePage = () => {
 	const [selectedDay, setSelectedDay] = useState(0);
+
 	const [selectedPeriod, setSelectedPeriod] = useState(0);
+
 	const { weekNumber, cabin } = useParams();
+
 	const [showControls, setShowControls] = useState(false);
+
+	const [selectedCampers, setSelectedCampers] = useState([]);
+
+	const handleSelectCamper = (camper) => {
+		// check if is currently Selected
+		if (selectedCampers.some(c => c.camperSessionId === camper.camperSessionId)) {
+			setSelectedCampers(sc => sc.filter(slc => slc.camperSessionId !== camper.camperSessionId))
+			return;
+		}
+		setSelectedCampers(s => [...s, camper]);
+	}
 
 	const [week, setWeek] = useGetDataOnMount({
 		url: `/api/weeks/${weekNumber}`,
@@ -131,6 +145,8 @@ const CreateSchedulePage = () => {
 				<div tw="flex-grow ">
 					<SelectActivities
 						selectNext={selectNext}
+						handleSelectCamper={handleSelectCamper}
+						selectedCampers={selectedCampers}
 						isTheLastPeriod={isTheLastPeriod}
 						dayName={week.days[selectedDay].name}
 						periodNumber={
