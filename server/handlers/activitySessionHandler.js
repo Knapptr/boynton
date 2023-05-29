@@ -8,6 +8,21 @@ const activitySessionHandler = {
       results = results.filter(a => a.periodId === Number.parseInt(period))
     }
     res.json(results);
+  },
+
+  async getOneSession(req, res, next) {
+    const { activitySessionId } = req.params;
+    const activitySession = await ActivitySession.get(activitySessionId);
+    res.json(activitySession);
+  },
+
+  async addCamperToActivity(req, res, next) {
+    const { camperWeekId } = req.body;
+    const activitySessionId = req.params.activitySessionId
+    const activitySession = await ActivitySession.get(activitySessionId);
+    const camperActivityId = await activitySession.addCamper(camperWeekId);
+    res.json({ camperActivityId });
+
   }
 }
 

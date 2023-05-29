@@ -35,7 +35,7 @@ const SelectActivities = ({
   } = useActivityAttendance(periodId, cabinName);
   const auth = useContext(UserContext)
 
-  const addCamperActivityToDB = async (camperWeekId, activityId, periodId) => {
+  const addCamperActivityToDB = async (camperWeekId, activitySessionId, periodId) => {
     const camper = {
       camperWeekId,
       periodId,
@@ -47,7 +47,7 @@ const SelectActivities = ({
     };
     // console.log(reqConfig);
     const result = await fetchWithToken(
-      `/api/activities/${activityId}/campers`,
+      `/api/activity-sessions/${activitySessionId}/campers`,
       reqConfig,
       auth
     );

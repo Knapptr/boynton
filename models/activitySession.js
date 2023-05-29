@@ -15,7 +15,7 @@ class ActivitySession {
         const results = [];
         for (const response of dbr) {
             let activitySession;
-            if (results.at(-1) && results.at(-1).id === dbr.id) {
+            if (results.at(-1) && results.at(-1).id === response.id) {
                 activitySession = results.pop();
             } else {
                 activitySession = {
@@ -65,10 +65,58 @@ class ActivitySession {
             LEFT JOIN campers c ON cw.camper_id = c.id
         `
         const results = await fetchMany(query);
-        if (results) {
+        if (results && results.length > 0) {
             const deserResults = ActivitySession._parseResults(results).map(as => new ActivitySession(as));
             return deserResults
+        } else {
+            return []
         }
+    }
+
+    static async get(activitySessionId) {
+        const query = `
+            SELECT 
+            act_s.id as id, 
+            act_s.period_id as period_id,
+            act.name as activity_name ,
+            act.description as description,
+            act.id as activity_id,
+            c.first_name,
+            c.last_name,
+            c.age,
+            c.id as camper_id,
+            cw.id as session_id,
+            c.pronouns as pronouns
+            from activity_sessions as act_s
+            JOIN activities act ON act.id = act_s.activity_id
+            FULL JOIN camper_activities ca ON ca.activity_id = act_s.id
+            LEFT JOIN camper_weeks  cw ON cw.id = ca.camper_week_id
+            LEFT JOIN campers c ON cw.camper_id = c.id
+            WHERE act_s.id = $1
+        `
+        const values = [activitySessionId];
+
+        const results = await fetchMany(query, values);
+
+        if (results && results.length > 0) {
+            const deserResults = ActivitySession._parseResults(results).map(as => new ActivitySession(as));
+            // there should only be one result, so return it instead of an array
+            return deserResults[0];
+        } else {
+            return []
+        }
+    }
+    async addCamper(camperID) {
+        const query = `
+         INSERT INTO camper_activities (camper_week_id,activity_id,period_id) 
+            VALUES ($1,$2,$3) 
+            ON CONFLICT ON CONSTRAINT one_activity_per_camper 
+            DO UPDATE set activity_id = $1 ,period_id = $3, is_present = false 
+            RETURNING id, period_id,activity_id`
+        const values = [camperID, this.id, this.periodId];
+        const result = await fetchOne(query, values);
+        const camperActivityID = result.id;
+        return camperActivityID;
     }
 }
 
