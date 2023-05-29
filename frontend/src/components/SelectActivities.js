@@ -1,6 +1,7 @@
 import useActivityAttendance from "../hooks/useActivityAttendance";
 import { useContext } from 'react'
 import { DragDropContext, Droppable, Draggable } from "@react-forked/dnd";
+import lodash from "lodash";
 import fetchWithToken from "../fetchWithToken";
 import tw, { styled } from "twin.macro";
 import "styled-components/macro";
@@ -23,22 +24,19 @@ const SelectActivities = ({
   cabinName,
   selectedCampers,
   handleSelectCamper,
-  dayName,
-  periodNumber,
-  isTheLastPeriod,
-  selectNext,
+  clearSelection
 }) => {
   const {
     loading: activitiesLoading,
     activityLists,
-    updateActivityAttendance,
+    setLists,
+    refresh
   } = useActivityAttendance(periodId, cabinName);
   const auth = useContext(UserContext)
 
-  const addCamperActivityToDB = async (camperWeekId, activitySessionId, periodId) => {
+  const addCamperActivityToDB = async (camperWeekId, activitySessionId) => {
     const camper = {
       camperWeekId,
-      periodId,
     };
     const reqConfig = {
       method: "POST",
@@ -53,6 +51,7 @@ const SelectActivities = ({
     );
     const data = await result.json();
   };
+
 
   return (
     <div tw="flex flex-col max-w-3xl mx-auto">
@@ -72,15 +71,15 @@ const SelectActivities = ({
                       <h2>Unassigned</h2>
                     </header>
                     {activityLists.unassigned &&
-                      activityLists.unassigned.campers.map((c, index) => (
+                      [...activityLists.unassigned.campers].sort((a, b) => a.lastName.localeCompare(b.lastName)).map((c, index) => (
                         <CamperItem
                           // ref={provided.innerRef}
                           key={`unassigned-camper-${c.camperSessionId}`}
                           isDragging={false}
-                          isSelected={selectedCampers.some(sc => sc.camperSessionId === c.camperSessionId)}
-                          onClick={() => handleSelectCamper(c)}
+                          isSelected={selectedCampers.some(sc => sc.camper.camperSessionId === c.camperSessionId)}
+                          onClick={() => handleSelectCamper(c, "unassigned")}
                         >
-                          {c.firstName} {c.lastName}
+                          {toTitleCase(c.firstName)} {toTitleCase(c.lastName)} <span tw="text-xs">{c.age}</span>
                         </CamperItem>
                       ))}
                   </ActivityList>
@@ -95,12 +94,29 @@ const SelectActivities = ({
                     tw="flex-grow"
                     isDraggingOver={false}
                     onClick={() => {
-                      console.log("Assign campers to DB");
-                      console.log("Assigning", selectedCampers);
-                      const campersToAdd = [...selectedCampers];
-                      while (campersToAdd.length > 0) {
-                        const addedCamper = campersToAdd.pop();
-                        addCamperActivityToDB(addedCamper.camperSessionId, aid, periodId)
+                      if (selectedCampers.length > 0) {
+                        /// Refactor this into its own function
+                        const campersToAdd = [...selectedCampers];
+                        // Use Promise.all to Update UI from DB after all campers have been processed
+                        const requests = campersToAdd.map(c => addCamperActivityToDB(c.camper.camperSessionId, aid))
+                        Promise.all(requests).catch(rej => {
+                          console.log("Something went wrong assigning campers to db", rej); refresh();
+                        }).then((res) => {
+                          console.log("Succesfully added campers to db")
+                          refresh();
+                        })
+                        // Eagerly update UI
+                        let newState = lodash.cloneDeep(activityLists)
+                        for (const selectedCamper of campersToAdd) {
+                          // Remove camper from source
+                          newState[selectedCamper.sourceId].campers = newState[selectedCamper.sourceId].campers.filter(c => c.camperSessionId !== selectedCamper.camper.camperSessionId);
+                          // Add camper to destination
+                          newState[aid].campers.push(selectedCamper.camper);
+                        }
+                        // update state
+                        clearSelection();
+                        setLists(newState);
+
                       }
 
                     }}
@@ -110,16 +126,17 @@ const SelectActivities = ({
                         {toTitleCase(activityLists[aid].name)}
                       </h2>
                     </header>
-                    {activityLists[aid].campers.map((c, index) => (
+                    {/* Alphabetize here, so that ui updates are consistant*/}
+                    {[...activityLists[aid].campers].sort((a, b) => a.lastName.localeCompare(b.lastName)).map((c, index) => (
                       <CamperItem
+                        isSelected={selectedCampers.some(sc => sc.camper.camperSessionId === c.camperSessionId)}
                         key={`camper-assingment-${c.camperSessionId}`}
-                      // isDragging={snapshot.isDragging}
-                      // {...provided.dragHandleProps}
-                      // {...provided.draggableProps}
-                      // ref={provided.innerRef}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleSelectCamper(c, aid);
+                        }}
                       >
-                        {toTitleCase(c.firstName)}{" "}
-                        {toTitleCase(c.lastName)}
+                        {toTitleCase(c.firstName)} {toTitleCase(c.lastName)} <span tw="text-xs">{c.age}</span>
                       </CamperItem>
                     ))}
                   </ActivityList>
@@ -127,8 +144,9 @@ const SelectActivities = ({
             </div>
           </div>
         </>
-      )}
-    </div>
+      )
+      }
+    </div >
   );
 };
 

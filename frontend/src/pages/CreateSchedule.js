@@ -43,13 +43,22 @@ const CreateSchedulePage = () => {
 
 	const [selectedCampers, setSelectedCampers] = useState([]);
 
-	const handleSelectCamper = (camper) => {
+	/** Add / remove selected camper and source id  to selected list. 
+	* @param {camperSession} camper The camper to add/remove from the selection list
+	* @param {any} sourceId the source of the camper (unassigned, or activitySessionId)
+	*/
+	const handleSelectCamper = (camper, sourceId) => {
 		// check if is currently Selected
-		if (selectedCampers.some(c => c.camperSessionId === camper.camperSessionId)) {
-			setSelectedCampers(sc => sc.filter(slc => slc.camperSessionId !== camper.camperSessionId))
+		if (selectedCampers.some(c => c.camper.camperSessionId === camper.camperSessionId)) {
+			setSelectedCampers(sc => sc.filter(slc => slc.camper.camperSessionId !== camper.camperSessionId))
 			return;
 		}
-		setSelectedCampers(s => [...s, camper]);
+		setSelectedCampers(s => [...s, { camper, sourceId }]);
+	}
+
+	/** Clear the list of selectedCampers */
+	const clearSelection = () => {
+		setSelectedCampers([]);
 	}
 
 	const [week, setWeek] = useGetDataOnMount({
@@ -147,6 +156,7 @@ const CreateSchedulePage = () => {
 						selectNext={selectNext}
 						handleSelectCamper={handleSelectCamper}
 						selectedCampers={selectedCampers}
+						clearSelection={clearSelection}
 						isTheLastPeriod={isTheLastPeriod}
 						dayName={week.days[selectedDay].name}
 						periodNumber={

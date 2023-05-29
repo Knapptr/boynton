@@ -22,9 +22,7 @@ const useActivityAttendance = (period, cabin) => {
 			},
 		});
 	};
-
 	const getCampers = useCallback(async (periodID, cabinName) => {
-		setLoading(true);
 		const camperUrl = `/api/periods/${periodID}/campers?cabin=${cabinName}`;
 		const activityUrl = `/api/activity-sessions?period=${periodID}`;
 		const camperResult = await fetchWithToken(camperUrl, {}, auth);
@@ -33,6 +31,7 @@ const useActivityAttendance = (period, cabin) => {
 		const campers = await camperResult.json();
 
 		const listing = { activityIds: [], unassigned: { campers: [] } };
+		console.log({ activitiesResponse: activities });
 		activities.forEach((act) => {
 			listing.activityIds.push(act.id);
 			listing[act.id] = {
@@ -49,15 +48,23 @@ const useActivityAttendance = (period, cabin) => {
 			}
 		});
 		setLists(listing);
-		setLoading(false);
 	},
 
 		[auth])
-	useEffect(() => {
+	const initialLoad = useCallback(() => {
+		setLoading(true);
 		getCampers(period, cabin);
-	}, [period, cabin, getCampers]);
+		setLoading(false);
+	}, [period, cabin, getCampers])
 
-	return { activityLists: lists, updateActivityAttendance: update, loading };
+	const refresh = () => {
+		getCampers(period, cabin)
+	}
+	useEffect(() => {
+		initialLoad();
+	}, [period, cabin, initialLoad]);
+
+	return { activityLists: lists, updateActivityAttendance: update, loading, setLists, refresh };
 };
 
 export default useActivityAttendance;

@@ -63,6 +63,7 @@ class ActivitySession {
             FULL JOIN camper_activities ca ON ca.activity_id = act_s.id
             LEFT JOIN camper_weeks  cw ON cw.id = ca.camper_week_id
             LEFT JOIN campers c ON cw.camper_id = c.id
+            ORDER BY act_s.id,c.last_name
         `
         const results = await fetchMany(query);
         if (results && results.length > 0) {
@@ -93,6 +94,7 @@ class ActivitySession {
             LEFT JOIN camper_weeks  cw ON cw.id = ca.camper_week_id
             LEFT JOIN campers c ON cw.camper_id = c.id
             WHERE act_s.id = $1
+            ORDER BY act_s.id,c.last_name
         `
         const values = [activitySessionId];
 
@@ -111,7 +113,7 @@ class ActivitySession {
          INSERT INTO camper_activities (camper_week_id,activity_id,period_id) 
             VALUES ($1,$2,$3) 
             ON CONFLICT ON CONSTRAINT one_activity_per_camper 
-            DO UPDATE set activity_id = $1 ,period_id = $3, is_present = false 
+            DO UPDATE set activity_id = $2 ,period_id = $3, is_present = false 
             RETURNING id, period_id,activity_id`
         const values = [camperID, this.id, this.periodId];
         const result = await fetchOne(query, values);
