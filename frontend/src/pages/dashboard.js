@@ -38,6 +38,9 @@ const Dashboard = () => {
               Cabin Assignment
             </NavBarLink></Link>
           )}
+          {user.role === "admin" && (
+            <Link to="users"><NavBarLink color="brown">Users</NavBarLink></Link>
+          )}
           {(user.role === "admin") && (
             <Link to="programming-schedule"><NavBarLink color="yellow">
               Programming

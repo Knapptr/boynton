@@ -15,6 +15,8 @@ import CabinListIndex from "./pages/CabinListIndex";
 import Scoreboard from "./pages/Scoreboard";
 import Score from "./components/Score"
 import ProgrammingSchedule from "./pages/ProgrammingSchedule";
+import AdminAccess from "./components/ProtectedAdminAccess";
+import UsersPage from "./pages/UsersPage";
 
 function App() {
   const userState = useUserData();
@@ -52,12 +54,9 @@ function App() {
                         </Protected>
                       }
                     ></Route>
-                    <Route
-                      path=":weekNumber"
-                      element={<CabinListPage />}
-                    ></Route>
                   </Route>
                 </Route>
+                <Route path="users" element={<AdminAccess><UsersPage /></AdminAccess>} />
                 <Route path="scoreboard" element={<Scoreboard />}>
                   <Route path=":weekNumber" element={<Score />} />
                 </Route>
@@ -78,7 +77,7 @@ function App() {
             </Routes>
           </BrowserRouter>
         </UserContext.Provider></div>
-    </div>
+    </div >
   );
 }
 

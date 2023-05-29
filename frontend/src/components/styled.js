@@ -10,7 +10,8 @@ const NavBarLinkColors = {
   red: tw`bg-red-300`,
   purple: tw`bg-purple-300`,
   orange: tw`bg-orange-300`,
-  yellow: tw`bg-yellow-300`
+  yellow: tw`bg-yellow-300`,
+  brown: tw`bg-yellow-600`
 };
 export const NavBarLink = styled.li(({ color }) => [
   tw` rounded border bg-stone-200 p-2`,
