@@ -1,5 +1,7 @@
 //raw queries should be refactored into the repo model for each table-but I'm in a rush
 //they are 'mocked' into repos here for the init funciton
+const env = require("dotenv");
+env.config();
 
 const queries = require("./initQueries");
 const { fetchOne } = require("./utils/pgWrapper");
@@ -28,6 +30,7 @@ const weekRepo = require("./repositories/week");
 
 //order matters here
 const repos = [
+  userRepo,
   weekRepo,
   dayRepo,
   periodRepo,
@@ -38,7 +41,6 @@ const repos = [
   camperRepo,
   camperWeekRepo,
   camperActivityRepo,
-  userRepo,
   scoreRepo,
 ];
 

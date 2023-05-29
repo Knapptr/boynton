@@ -14,7 +14,7 @@ const UnitHeadAccess = ({ children }) => {
 	if (!hasToken()) {
 		return <Navigate to="/login" state={{ cameFrom: location.pathname }} />;
 	} else {
-		if (auth.userData.user.role !== "admin" && auth.userData.user.role !== "unitHead") {
+		if (auth.userData.user.role !== "admin" && auth.userData.user.role !== "unit_head") {
 			return <Navigate to="/" />;
 		}
 		return children;

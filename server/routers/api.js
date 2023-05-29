@@ -11,6 +11,8 @@ const scoreRouter = require('./scores');
 const passport = require("passport");
 const activitySessionRouter = require("./activitySession");
 const camperActivityRouter = require("./camperActivity");
+const usersRouter = require("./users");
+const { adminOnly } = require("../middleware/authRole");
 
 //log all api requs
 router.use((req, res, next) => {
@@ -29,5 +31,6 @@ router.use("/cabin-sessions", cabinSessionRouter);
 router.use("/cabins", cabinRouter);
 router.use("/camper-weeks", camperWeekRouter);
 router.use("/weeks", weekRouter);
-
+router.use(adminOnly);
+router.use("/users", usersRouter);
 module.exports = router;

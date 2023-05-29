@@ -33,7 +33,7 @@ const Dashboard = () => {
           <Link to="cabins/list"><NavBarLink color="red">
             Cabin Lists
           </NavBarLink></Link>
-          {(user.role === "admin" || user.role === "unitHead") && (
+          {(user.role === "admin" || user.role === "unit_head") && (
             <Link to="cabins/assignment"><NavBarLink color="purple">
               Cabin Assignment
             </NavBarLink></Link>
@@ -41,7 +41,7 @@ const Dashboard = () => {
           {user.role === "admin" && (
             <Link to="users"><NavBarLink color="brown">Users</NavBarLink></Link>
           )}
-          {(user.role === "admin") && (
+          {(user.role === "admin" || user.role === "unit_head" || user.role === "programming") && (
             <Link to="programming-schedule"><NavBarLink color="yellow">
               Programming
             </NavBarLink></Link>
