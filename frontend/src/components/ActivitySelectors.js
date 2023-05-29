@@ -15,7 +15,7 @@ const ActivitySelectors = ({
       return false;
     }
     const selectedAct = period.activities[selected];
-    return selectedAct.id === activity.id;
+    return selectedAct.sessionId === activity.sessionId;
   };
   return (
     <ul tw="flex justify-center gap-2 flex-wrap">
@@ -28,7 +28,7 @@ const ActivitySelectors = ({
             selectSpecific(index);
           }}
           isSelected={isSelected(act)}
-          key={`act-select-${index}`}
+          key={`act-select-${act.sessionId}`}
         >
           <button>{act.name}</button>
         </MenuSelector>

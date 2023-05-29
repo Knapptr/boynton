@@ -63,14 +63,15 @@ class Period {
 	        c.first_name,
 	        c.last_name,
 			c.age,
+			c.pronouns,
 	        ca.activity_id,
 	        cw.id as camper_session_id, 
 	        ca.is_present,
 	        act.name as activity_name,
 	        ca.id as camper_activity_id,
-		cab.name 
+			cab.name 
 	        from camper_weeks cw
-	            JOIN days d ON d.week_id = cw.week_id
+			JOIN days d ON d.week_id = cw.week_id
 	        JOIN periods p ON p.day_id = d.id
 	        JOIN campers c ON cw.camper_id = c.id
 	        LEFT JOIN camper_activities ca ON ca.period_id = p.id AND ca.camper_week_id = cw.id

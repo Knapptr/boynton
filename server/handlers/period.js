@@ -21,7 +21,6 @@ module.exports = {
 		const period = await Period.get(periodId);
 		// console.log({ periodBeforeCampers: period })
 		// Get Campers populates an activity in the activities list: {name:unassigned, id:unassigned} and lists campers not assigned activities there
-		await period.getCampers();
 		res.json(period);
 	},
 	async getCampers(req, res, next) {

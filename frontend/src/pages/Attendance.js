@@ -10,7 +10,7 @@ import ReassignmentSelectionDialog from "../components/AttendanceReassignDialog"
 import fetchWithToken from "../fetchWithToken";
 import AttendanceSearch from "../components/AttendanceSearch";
 
-const refreshRate = 1000 * 10;
+const refreshRate = 1000 * 2;
 const cancelIntervalTime = 1000 * 60 * 8;
 
 const AttendanceDisplay = () => {
@@ -32,19 +32,41 @@ const AttendanceDisplay = () => {
     setPeriod(periodJson);
   }, [periodId, auth]);
 
-  useEffect(() => {
-    getPeriod();
-    intervalRef.current = setInterval(() => {
-      getPeriod();
-    }, refreshRate);
-    timeoutRef.current = setTimeout(() => {
+  // User input boolean value meaans nothing, in is just a switch to indicate that input has happened
+  const [userInput, setUserInput] = useState(false);
+  // track user input and reset timer on every attendance change
+
+  const startTimer = useCallback(() => {
+    // cancel old timer
+    if (intervalRef.current !== null && timeoutRef.current !== null) {
       clearInterval(intervalRef.current);
-    }, cancelIntervalTime);
+      clearTimeout(timeoutRef.current);
+      // start new timer
+      intervalRef.current = setInterval(() => {
+        getPeriod();
+      }, refreshRate);
+
+      timeoutRef.current = setTimeout(() => {
+        clearInterval(intervalRef.current);
+      }, cancelIntervalTime)
+    } else {
+      intervalRef.current = setInterval(() => {
+        getPeriod();
+      }, refreshRate)
+
+      timeoutRef.current = setTimeout(() => {
+        clearInterval(intervalRef.current);
+      }, cancelIntervalTime)
+    }
+  }, [getPeriod])
+
+  useEffect(() => {
+    startTimer()
     return () => {
       clearInterval(intervalRef.current);
       clearTimeout(timeoutRef.current);
-    };
-  }, [periodId, getPeriod]);
+    }
+  }, [startTimer, userInput]);
 
   const openSearchModal = () => {
     setShowSearchModal(true);
@@ -71,13 +93,13 @@ const AttendanceDisplay = () => {
       setSelectedCampers(updatedCampers);
     },
     isSelected(camper) {
-      return selectedCampers.find((c) => c.weekId === camper.weekId);
+      return selectedCampers.find((c) => c.sessionId === camper.sessionId);
     },
     clear() {
       setSelectedCampers([]);
     },
     async reassign(camper, activity) {
-      console.log({camper,activity})
+      console.log({ camper, activity })
       const url = `/api/activities/${activity.id}/campers`;
       const options = {
         method: "POST",
@@ -90,25 +112,29 @@ const AttendanceDisplay = () => {
       await fetchWithToken(url, options, auth);
     },
   };
-  const toggleHere = (activityId, camperIndex) => {
+  const toggleHere = (sessionId, camperSessionId) => {
+    setUserInput(i => !i);
     const updatedActivities = [...period.activities];
     const activityIndex = updatedActivities.findIndex(
-      (a) => a.id === activityId
+      (a) => a.sessionId === sessionId
     );
     const updatedActivity = { ...updatedActivities[activityIndex] };
     const updatedCampers = [...updatedActivity.campers];
-    const updatedCamper = { ...updatedCampers[camperIndex] };
+    const updatedCamperIndex = updatedCampers.findIndex(c => c.sessionId === camperSessionId);
+    const updatedCamper = { ...updatedCampers[updatedCamperIndex] };
+    console.log({ updatedCamper });
     updatedCamper.isPresent = !updatedCamper.isPresent;
-    updatedCampers.splice(camperIndex, 1, updatedCamper);
+    updatedCampers.splice(updatedCamperIndex, 1, updatedCamper);
     updatedActivity.campers = updatedCampers;
     updatedActivities.splice(activityIndex, 1, updatedActivity);
+    console.log({ updatedActivities });
     setPeriod((p) => ({ ...p, activities: updatedActivities }));
   };
 
   const renderAllActivities = () => {
     return period.activities.map((a, aIndex) => (
       <ActivityAttendance
-        key={`act-atten-${aIndex}`}
+        key={`act-atten-${a.sessionId}`}
         camperSelection={camperSelection}
         activity={a}
         activityIndex={aIndex}

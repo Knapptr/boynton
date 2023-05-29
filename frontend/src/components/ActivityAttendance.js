@@ -33,7 +33,7 @@ const CamperAttendant = ({
   camperSelection,
 }) => {
   const assignHere = async () => {
-    toggleIsPresent(activity.id, camperIndex);
+    toggleIsPresent(activity.sessionId, camper.sessionId);
     const options = {
       method: "PUT",
       headers: {
@@ -42,7 +42,7 @@ const CamperAttendant = ({
       },
       body: JSON.stringify({ isPresent: !camper.isPresent }),
     };
-    await fetch(`/api/activities/${activity.id}/campers/${camper.id}`, options);
+    await fetch(`/api/camper-activities/${camper.activityId}`, options);
   };
 
   return (
@@ -70,18 +70,16 @@ const CamperAttendant = ({
         </div>
         <AttendanceName isPresent={camper.isPresent}>
           <p>
-          {camper.firstName} {camper.lastName}
+            {camper.firstName} {camper.lastName}
           </p>
           <span tw="font-light ml-3">{camper.cabinName}</span>
         </AttendanceName>
-        {camper.activityName &&
-          <AttendanceButton isPresent={camper.isPresent} onClick={assignHere}>
-            {camper.isPresent && (
-              <FontAwesomeIcon size="xl" icon={faSquareCheck} />
+        <AttendanceButton isPresent={camper.isPresent} onClick={assignHere}>
+          {camper.isPresent && (
+            <FontAwesomeIcon size="xl" icon={faSquareCheck} />
           )}
           {!camper.isPresent && <FontAwesomeIcon size="xl" icon={faSquare} />}
-          </AttendanceButton>
-      }
+        </AttendanceButton>
       </div>
     </AttendantWrapper>
   );
@@ -121,14 +119,13 @@ const ActivityAttendance = ({
           {activity.campers.length === 0 ? (
             <li>no campers</li>
           ) : (
-            activity.campers
-              .sort((camper1, camper2) => {
-                return camper1.lastName > camper2.lastName ? 1 : -1;
-              })
+            [...activity.campers]
+              .sort((camper1, camper2) => camper1.lastName.localeCompare(camper2.lastName)
+              )
               .map((camper, camperIndex) => (
                 <CamperAttendant
                   camperSelection={camperSelection}
-                  key={`camper-${activity.name}-${camperIndex}`}
+                  key={`camper-${activity.name}-${camper.sessionId}`}
                   toggleIsPresent={toggleHere}
                   camperIndex={camperIndex}
                   camper={camper}

@@ -120,6 +120,7 @@ class ActivitySession {
         const camperActivityID = result.id;
         return camperActivityID;
     }
+
 }
 
 module.exports = ActivitySession;

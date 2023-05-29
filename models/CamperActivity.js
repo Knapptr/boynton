@@ -29,7 +29,6 @@ class CamperActivity {
             "UPDATE camper_activities SET is_present = $1 WHERE id = $2 RETURNING *";
         const values = [trueOrFalse, this.id];
         const result = await fetchOne(query, values);
-        console.log({ modelResult: result });
         if (!result) {
             throw new Error("Could not update present value");
         }
