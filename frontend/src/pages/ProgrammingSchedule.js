@@ -1,11 +1,13 @@
-import { useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import fetchWithToken from "../fetchWithToken";
 import useGetDataOnMount from "../hooks/useGetData";
 import tw, { styled } from "twin.macro";
 import "styled-components/macro";
 import { MenuSelector, PopOut } from "../components/styled";
+import UserContext from "../components/UserContext";
 
 const ProgrammingSchedule = () => {
+  const auth = useContext(UserContext);
   // get the list of weeks
   const [weeks] = useGetDataOnMount({
     url: "api/weeks",
@@ -13,12 +15,15 @@ const ProgrammingSchedule = () => {
     useToken: true
   })
 
+  const [activities, setActivities] = useState([])
   // get list of activities
-  const [activities] = useGetDataOnMount({
-    url: "api/activities",
-    initialState: [],
-    useToken: true
-  })
+  const getActivities = useCallback(async () => {
+    const response = await fetchWithToken("/api/activities", {}, auth)
+    const activities = await response.json();
+    setActivities(activities);
+  }, [auth])
+
+  useEffect(() => { getActivities() }, [getActivities])
 
 
   const [selectedWeek, setSelectedWeek] = useState(undefined);
