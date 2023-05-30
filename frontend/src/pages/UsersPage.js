@@ -12,6 +12,7 @@ const EditUserBox = ({ user, edits, editType, handleChange, closePopOut, onConfi
     <DialogBox close={closePopOut} >
       {user !== null && <>
         <header><h1>Editing {user.username}</h1></header>
+        <span> Hey, Note that if you change the name of the currently logged in user, you will have to log in again</span>
         <div tw="flex flex-col items-center justify-center h-full py-8">
           <div tw="">
             <label htmlFor={`usernameField-${editType}`}>Username</label>
