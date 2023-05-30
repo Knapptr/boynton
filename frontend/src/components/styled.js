@@ -1,5 +1,7 @@
 import tw, { styled } from "twin.macro";
 import "styled-components/macro";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCircleXmark } from "@fortawesome/free-regular-svg-icons";
 export const AssignmentHeader = styled.header(() => [
   tw`sticky top-0 items-center flex justify-between flex-grow md:flex-grow-0 rounded p-2 text-white align-baseline bg-sky-500`,
 ]);
@@ -47,3 +49,10 @@ export const PopOut = styled.div(({ shouldDisplay }) => [
   tw`hidden h-full flex-col justify-center items-center fixed top-0 left-0 right-0 z-50 bg-opacity-60 bg-gray-400 `,
   shouldDisplay && tw`flex`,
 ]);
+
+const DialogBoxBox = styled.div(({ scrollable, full }) => [tw`bg-coolGray-100 p-5 w-11/12 lg:w-1/2 my-4 rounded shadow-lg  relative flex flex-col py-8 `, scrollable && tw`overflow-auto`, full && tw`flex-grow`])
+
+export const DialogBox = ({ close, children, scrollable, full }) => <DialogBoxBox scrollable={scrollable} full={full} onClick={(e) => { e.stopPropagation() }}>
+
+  <button tw="absolute top-1 right-3" onClick={close}><FontAwesomeIcon size="xl" icon={faCircleXmark} /></button>
+  {children}</DialogBoxBox>
