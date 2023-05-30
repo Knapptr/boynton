@@ -21,11 +21,28 @@ const UsersPage = () => {
   return (
     <>
       <h1>Users</h1>
-      <ul tw="">
-        {users.map(u => (
-          <li tw="even:bg-green-300 odd:bg-green-100 flex my-2 "><p tw="font-bold mx-1">{u.username}</p><p>({u.firstName} {u.lastName})</p><p tw="mx-1">{u.role}</p></li>
-        ))}
-      </ul>
+      <table tw="table-auto w-full">
+        <thead>
+          <tr>
+            <td>Username</td>
+            <td>First Name</td>
+            <td>Last Name</td>
+            <td>Role</td>
+            <td></td>
+          </tr>
+        </thead>
+        <tbody>
+          {users.map(u => (
+            <tr tw="even:bg-green-300 odd:bg-green-100">
+              <td tw="font-bold">{u.username}</td>
+              <td>{u.firstName}</td>
+              <td>{u.lastName}</td>
+              <td >{u.role}</td>
+              <td><button>Edit</button></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </>
   )
 }
