@@ -1,6 +1,5 @@
 import useActivityAttendance from "../hooks/useActivityAttendance";
 import { useContext } from 'react'
-import { DragDropContext, Droppable, Draggable } from "@react-forked/dnd";
 import lodash from "lodash";
 import fetchWithToken from "../fetchWithToken";
 import tw, { styled } from "twin.macro";

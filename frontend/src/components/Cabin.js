@@ -1,4 +1,3 @@
-import { Droppable } from "@react-forked/dnd";
 import Camper from "./Camper";
 import { useState, useEffect } from "react";
 import tw, { styled } from "twin.macro";
