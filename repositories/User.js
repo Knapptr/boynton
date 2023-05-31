@@ -50,16 +50,41 @@ const UserRepository = {
 		}
 		return user;
 	},
-	async create({ username, password: unhashedPassword, role, firstName, lastName }) {
+	async create({ username, password: unhashedPassword, role, firstName, lastName, staffable }) {
 		try {
 			const encryptedPassword = await encrypt(unhashedPassword);
 			const query =
 				"INSERT INTO users (username,password,role,first_name,last_name) VALUES ($1,$2,$3,$4,$5) RETURNING * ";
 			const values = [username, encryptedPassword, role, firstName, lastName];
 			const createdUser = await fetchOne(query, values);
-			const user = { username: createdUser.username, password: createdUser.password, firstName: createdUser.first_name, lastName: createdUser.last_name, role: createdUser.role }
-			return new User(user);
+			const user = { username: createdUser.username, password: createdUser.password, firstName: createdUser.first_name, lastName: createdUser.last_name, role: createdUser.role, staffable: false }
+
+			if (staffable) {
+				const { lifeguard, archery, senior, firstYear, ropes } = staffable;
+				console.log({ lifeguard, archery, senior, firstYear, ropes });
+				const staffableQuery = `
+					INSERT INTO staffable_users (
+						username,
+						lifeguard,
+						archery,
+						senior,
+						first_year,
+						ropes)
+					VALUES ($1, $2, $3, $4, $5, $6)
+					RETURNING *
+				`
+				const staffableValues = [user.username, lifeguard || false, archery || false, senior || false, firstYear || false, ropes || false]
+				console.log("Querying");
+				const createdStaffable = await fetchOne(staffableQuery, staffableValues);
+				console.log({ createdStaffable })
+				const staffableUser = {
+					lifeguard, archery, senior, firstYear: createdStaffable.first_year, ropes
+				}
+				user.staffable = staffableUser;
+			}
+			return user;
 		} catch (error) {
+			console.log(error);
 			return false;
 		}
 	},

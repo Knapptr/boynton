@@ -11,7 +11,9 @@ const init = (query) => {
       await fetchOne(query);
       return true;
     } catch (e) {
-      throw new Error(`can not init with query: ${query}`)
+      console.log({ query });
+      console.log(e.stack)
+      process.exit(1);
     }
   };
 };
@@ -21,7 +23,9 @@ const cabinSessionRepo = { init: init(queries.cabinSessions) };
 const cabinRepo = { init: init(queries.cabins) };
 const camperActivityRepo = { init: init(queries.camperActivities) };
 const camperWeekRepo = { init: init(queries.camperWeeks) };
-const userActivityRepo = { init: init(queries.userActivities) };
+const staffActivities = { init: init(queries.staffActivities) };
+const staffableUser = { init: init(queries.staffableUser) };
+const staffableSession = { init: init(queries.staffableSession) };
 const userRepo = require("./repositories/User");
 const camperRepo = require("./repositories/camper");
 const dayRepo = require("./repositories/day");
@@ -37,7 +41,9 @@ const repos = [
   periodRepo,
   activityRepo,
   activitySessionsRepo,
-  userActivityRepo,
+  staffableUser,
+  staffableSession,
+  staffActivities,
   cabinRepo,
   cabinSessionRepo,
   camperRepo,

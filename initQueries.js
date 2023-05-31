@@ -105,24 +105,51 @@ module.exports = {
   NOT VALID
   )`,
 
-  userActivities: `
-  CREATE TABLE IF NOT EXISTS user_activities
+  staffActivities: `
+  CREATE TABLE IF NOT EXISTS staff_activities
   (
   id serial NOT NULL,
-  user_id integer NOT NULL,
-  activity_session_id integer NOT NULL,
+  staffable_session_id integer NOT NULL,
   period_id integer NOT NULL,
-  CONSTRAINT pkey PRIMARY KEY (id),
-  CONSTRAINT "one staff assignment per period" UNIQUE (period_id, user_id),
+  CONSTRAINT staffAct_pkey PRIMARY KEY (id),
+  CONSTRAINT "one staff assignment per period" UNIQUE (period_id, staffable_session_id),
   CONSTRAINT period_id FOREIGN KEY (period_id) REFERENCES periods (id)
   ON UPDATE CASCADE
   ON DELETE CASCADE
   NOT VALID,
-  CONSTRAINT activity_session_id FOREIGN KEY (activity_session_id) REFERENCES activity_sessions (id)
+  CONSTRAINT staffable_relation FOREIGN KEY (staffable_session_id) REFERENCES staffable_sessions (id)
   ON UPDATE CASCADE
   ON DELETE CASCADE
   NOT VALID
   )
-  `
+  `,
+
+  staffableUser: `
+  CREATE TABLE IF NOT EXISTS staffable_users(
+    id serial NOT NULL,
+    username CHARACTER VARYING NOT NULL,
+    lifeguard bool NOT NULL DEFAULT false,
+    archery bool NOT NULL DEFAULT false,
+    senior bool NOT NULL DEFAULT false,
+    first_year bool NOT NULL DEFAULT false,
+    ropes bool NOT NULL DEFAULT false,
+    CONSTRAINT staffable_pkey PRIMARY KEY (id),
+    CONSTRAINT user_key FOREIGN KEY (username) REFERENCES users (username)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE
+  )
+  `,
+
+  staffableSession: `
+  CREATE TABLE IF NOT EXISTS staffable_sessions(
+    id serial NOT NULL,
+    week_number integer NOT NULL,
+    CONSTRAINT pkey_staffable_session PRIMARY KEY (id),
+    CONSTRAINT staffable_relation FOREIGN KEY (week_number) REFERENCES weeks (number)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE
+  )
+`
+
 }
 
