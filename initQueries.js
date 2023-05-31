@@ -103,5 +103,26 @@ module.exports = {
   ON UPDATE CASCADE
   ON DELETE CASCADE
   NOT VALID
+  )`,
+
+  userActivities: `
+  CREATE TABLE IF NOT EXISTS user_activities
+  (
+  id serial NOT NULL,
+  user_id integer NOT NULL,
+  activity_session_id integer NOT NULL,
+  period_id integer NOT NULL,
+  CONSTRAINT pkey PRIMARY KEY (id),
+  CONSTRAINT "one staff assignment per period" UNIQUE (period_id, user_id),
+  CONSTRAINT period_id FOREIGN KEY (period_id) REFERENCES periods (id)
+  ON UPDATE CASCADE
+  ON DELETE CASCADE
+  NOT VALID,
+  CONSTRAINT activity_session_id FOREIGN KEY (activity_session_id) REFERENCES activity_sessions (id)
+  ON UPDATE CASCADE
+  ON DELETE CASCADE
+  NOT VALID
   )
-    `}
+  `
+}
+

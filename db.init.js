@@ -21,6 +21,7 @@ const cabinSessionRepo = { init: init(queries.cabinSessions) };
 const cabinRepo = { init: init(queries.cabins) };
 const camperActivityRepo = { init: init(queries.camperActivities) };
 const camperWeekRepo = { init: init(queries.camperWeeks) };
+const userActivityRepo = { init: init(queries.userActivities) };
 const userRepo = require("./repositories/User");
 const camperRepo = require("./repositories/camper");
 const dayRepo = require("./repositories/day");
@@ -36,6 +37,7 @@ const repos = [
   periodRepo,
   activityRepo,
   activitySessionsRepo,
+  userActivityRepo,
   cabinRepo,
   cabinSessionRepo,
   camperRepo,

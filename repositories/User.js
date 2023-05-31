@@ -57,21 +57,37 @@ const UserRepository = {
 				"INSERT INTO users (username,password,role,first_name,last_name) VALUES ($1,$2,$3,$4,$5) RETURNING * ";
 			const values = [username, encryptedPassword, role, firstName, lastName];
 			const createdUser = await fetchOne(query, values);
-			return createdUser;
+			const user = { username: createdUser.username, password: createdUser.password, firstName: createdUser.first_name, lastName: createdUser.last_name, role: createdUser.role }
+			return new User(user);
 		} catch (error) {
 			return false;
 		}
 	},
-	async delete(username) {
+	async delete() {
 		try {
 			const query =
 				"DELETE FROM users WHERE username = $1 RETURNING username,role";
-			const values = [username];
+			const values = [this.username];
 			const deletedUser = await fetchOne(query, values);
 			return deletedUser;
 		} catch (error) {
 			return false;
 		}
 	},
+
+	/** Assign a user to an activity
+	* @param activitySession the activity session to schedule the staff member */
+	async assignToActivity(activitySession) {
+		const query = "INSERT INTO user_activities (username, activity_session_id) VALUES ($1,$2) RETURNING *"
+		const values = [this.username, activitySession.id];
+		try {
+			const result = await fetchOne(query, values);
+			if (!result) { return false }
+		} catch (e) {
+			console.log("Error");
+			console.log(e);
+			return false
+		}
+	}
 };
 module.exports = UserRepository;

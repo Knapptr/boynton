@@ -5,6 +5,7 @@ const Awarder = require("./features/Awards/Awarder");
 const receiver = require("./server/index");
 const dbInit = require('./db.init');
 const port = process.env.PORT || 3000
+
 const app = new App({
 	token: process.env.BOT_TOKEN,
 	receiver: receiver,
