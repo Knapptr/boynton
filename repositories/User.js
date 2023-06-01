@@ -50,7 +50,7 @@ const UserRepository = {
 		}
 		return user;
 	},
-	async create({ username, password: unhashedPassword, role, firstName, lastName, staffable }) {
+	async create({ username, password: unhashedPassword, role, firstName, lastName, staffing }) {
 		try {
 			const encryptedPassword = await encrypt(unhashedPassword);
 			const query =
@@ -59,8 +59,8 @@ const UserRepository = {
 			const createdUser = await fetchOne(query, values);
 			const user = { username: createdUser.username, password: createdUser.password, firstName: createdUser.first_name, lastName: createdUser.last_name, role: createdUser.role, staffable: false }
 
-			if (staffable) {
-				const { lifeguard, archery, senior, firstYear, ropes } = staffable;
+			if (staffing) {
+				const { lifeguard, archery, senior, firstYear, ropes } = staffing;
 				console.log({ lifeguard, archery, senior, firstYear, ropes });
 				const staffableQuery = `
 					INSERT INTO staffable_users (

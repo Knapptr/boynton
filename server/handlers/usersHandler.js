@@ -6,9 +6,9 @@ const usersHandler = {
   },
   async create(req, res, next) {
     console.log("User Create Body:", { body: req.body });
-    const { username, password, role, firstName, lastName, staffable } = req.body;
+    const { username, password, role, firstName, lastName, staffing } = req.body;
     try {
-      const user = await User.create({ username, password, role, firstName, lastName, staffable });
+      const user = await User.create({ username, password, role, firstName, lastName, staffing });
       res.sendStatus(200);
 
     } catch (e) {

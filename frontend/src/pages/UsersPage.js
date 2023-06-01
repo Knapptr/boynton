@@ -5,8 +5,8 @@ import { DialogBox, PopOut } from "../components/styled";
 import tw from "twin.macro";
 import "styled-components/macro";
 
-const EditUserBox = ({ user, edits, editType, handleChange, closePopOut, onConfirm }) => {
-
+const EditUserBox = ({ user, edits, editType, handleChange, closePopOut, onConfirm, staffing, handleStaffingChange }) => {
+  const [showStaffing, setShowStaffing] = useState(false);
   return (
 
     <DialogBox close={closePopOut} >
@@ -41,6 +41,21 @@ const EditUserBox = ({ user, edits, editType, handleChange, closePopOut, onConfi
               <input name="password" id="passwordField" type="password" value={edits.password} onChange={handleChange} />
             </div>
           }
+          <div>
+            <button onClick={() => { setShowStaffing(s => !s) }}>Staffable 🔽</button>
+          </div>
+          {showStaffing && <div>
+            <label htmlFor="lifeguardField">Lifeguard</label>
+            <input type="checkbox" id="lifeguardField" name="lifeguard" onChange={handleStaffingChange} checked={staffing.lifeguard || false} />
+            <label htmlFor="archeryField">Archery</label>
+            <input type="checkbox" id="archeryField" name="archery" onChange={handleStaffingChange} checked={staffing.archery || false} />
+            <label htmlFor="seniorField">Senior Staff</label>
+            <input type="checkbox" id="seniorField" name="senior" onChange={handleStaffingChange} checked={staffing.senior || false} />
+            <label htmlFor="ropesField">Ropes</label>
+            <input type="checkbox" id="ropesField" name="ropes" onChange={handleStaffingChange} checked={staffing.ropes || false} />
+            <label htmlFor="firstYearField">First Year</label>
+            <input type="checkbox" id="firstYearField" name="firstYear" onChange={handleStaffingChange} checked={staffing.firstYear || false} />
+          </div>}
           <footer tw="py-4"> </footer>
           <div tw="absolute bottom-4 flex justify-center flex-wrap gap-4">
             <button tw="bg-red-400 py-2 px-4 rounded" onClick={closePopOut}>Cancel</button>
@@ -67,6 +82,12 @@ const UsersPage = () => {
 
   const [edit, setEdit] = useState({ type: editTypes.NONE, user: null, edits: null })
 
+  const [staffingOptions, setStaffingOptions] = useState({ lifeguard: false, archery: false, ropes: false, senior: false, firstYear: false, })
+
+  const handleStaffingChange = (event) => {
+    setStaffingOptions((old) => ({ ...old, [event.target.name]: event.target.checked }))
+  }
+
   const handleChange = (event) => {
     setEdit((oldEdit) => ({ ...oldEdit, edits: { ...oldEdit.edits, [event.target.name]: event.target.value } }))
   }
@@ -91,10 +112,11 @@ const UsersPage = () => {
   */
   const submitNew = async () => {
     const url = "/api/users"
+    const user = { ...edit.edits, staffing: { ...staffingOptions } }
     const opts = {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify(edit.edits)
+      body: JSON.stringify(user)
     }
     try {
       const response = await fetchWithToken(url, opts, auth);
@@ -162,12 +184,12 @@ const UsersPage = () => {
       <h1>Users</h1>
       {edit.type === editTypes.UPDATE &&
         <PopOut shouldDisplay={true} onClick={closePopOut}>
-          <EditUserBox user={edit.user} edits={edit.edits} closePopOut={closePopOut} handleChange={handleChange} onConfirm={updateUser} />
+          <EditUserBox user={edit.user} edits={edit.edits} closePopOut={closePopOut} handleChange={handleChange} onConfirm={updateUser} handleStaffingChange={handleStaffingChange} staffing={staffingOptions} />
         </PopOut>
       }
       {edit.type === editTypes.CREATE &&
         <PopOut shouldDisplay={true} onClick={closePopOut}>
-          <EditUserBox editType={editTypes.CREATE} user={edit.user} edits={edit.edits} closePopOut={closePopOut} handleChange={handleChange} onConfirm={submitNew} />
+          <EditUserBox editType={editTypes.CREATE} user={edit.user} edits={edit.edits} closePopOut={closePopOut} handleChange={handleChange} onConfirm={submitNew} staffing={staffingOptions} handleStaffingChange={handleStaffingChange} />
         </PopOut>
       }
       {edit.type === editTypes.DELETE &&

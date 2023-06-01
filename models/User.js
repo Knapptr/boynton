@@ -7,7 +7,7 @@ const VALID_ROLES = ["admin", "unit_head", "programming", "counselor"];
 
 module.exports = class User {
   constructor(
-    { username, password, role, firstName, lastName, staffable = false },
+    { username, password, role, firstName, lastName, staffing = false },
     userRepository = defaultUserRepository
   ) {
     this.username = username;
@@ -16,7 +16,7 @@ module.exports = class User {
     this.userRepository = userRepository;
     this.firstName = firstName;
     this.lastName = lastName
-    this.staffable = staffable
+    this.staffing = staffing
   }
 
   static async get(username, userRepository = defaultUserRepository) {
@@ -41,7 +41,7 @@ module.exports = class User {
     return results.map(r => new User({ username: r.username, password: r.password, role: r.role, firstName: r.first_name, lastName: r.last_name }), UserRepository);
   }
   static async create(
-    { username, firstName, lastName, password, role = "counselor", staffable = false },
+    { username, firstName, lastName, password, role = "counselor", staffing = false },
     userRepository = defaultUserRepository
   ) {
     if (!VALID_ROLES.includes(role)) {
@@ -58,7 +58,7 @@ module.exports = class User {
         firstName,
         lastName,
         role,
-        staffable
+        staffing
       });
       return new User(createdData)
     } else {
