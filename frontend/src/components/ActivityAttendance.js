@@ -42,7 +42,7 @@ const CamperAttendant = ({
       },
       body: JSON.stringify({ isPresent: !camper.isPresent }),
     };
-    await fetch(`/api/camper-activities/${camper.activityId}`, options);
+    await fetch(`/api/camper-activities/${camper.activityId}/attendance`, options);
   };
 
   return (

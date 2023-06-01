@@ -10,7 +10,9 @@ import ReassignmentSelectionDialog from "../components/AttendanceReassignDialog"
 import fetchWithToken from "../fetchWithToken";
 import AttendanceSearch from "../components/AttendanceSearch";
 
+// rate at which to update
 const refreshRate = 1000 * 2;
+// 8 Minutes after last user input, cancel updates
 const cancelIntervalTime = 1000 * 60 * 8;
 
 const AttendanceDisplay = () => {
@@ -87,7 +89,7 @@ const AttendanceDisplay = () => {
       setSelectedCampers((c) => [...c, camper]);
     },
     deselect(camper) {
-      const camperIndex = selectedCampers.findIndex((c) => c.id === camper.id);
+      const camperIndex = selectedCampers.findIndex((c) => c.sessionId === camper.sessionId);
       const updatedCampers = [...selectedCampers];
       updatedCampers.splice(camperIndex, 1);
       setSelectedCampers(updatedCampers);
@@ -98,15 +100,15 @@ const AttendanceDisplay = () => {
     clear() {
       setSelectedCampers([]);
     },
-    async reassign(camper, activity) {
-      console.log({ camper, activity })
-      const url = `/api/activities/${activity.id}/campers`;
+    async reassign(camperActivityId, destinationActivitySessionId) {
+      setUserInput(i => !i);
+      const url = `/api/camper-activities/${camperActivityId}`;
       const options = {
-        method: "POST",
+        method: "Put",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
-          camperWeekId: camper.weekId,
-          periodId: period.id,
+          activitySessionId: destinationActivitySessionId
+
         }),
       };
       await fetchWithToken(url, options, auth);
@@ -122,12 +124,12 @@ const AttendanceDisplay = () => {
     const updatedCampers = [...updatedActivity.campers];
     const updatedCamperIndex = updatedCampers.findIndex(c => c.sessionId === camperSessionId);
     const updatedCamper = { ...updatedCampers[updatedCamperIndex] };
-    console.log({ updatedCamper });
+    // console.log({ updatedCamper });
     updatedCamper.isPresent = !updatedCamper.isPresent;
     updatedCampers.splice(updatedCamperIndex, 1, updatedCamper);
     updatedActivity.campers = updatedCampers;
     updatedActivities.splice(activityIndex, 1, updatedActivity);
-    console.log({ updatedActivities });
+    // console.log({ updatedActivities });
     setPeriod((p) => ({ ...p, activities: updatedActivities }));
   };
 

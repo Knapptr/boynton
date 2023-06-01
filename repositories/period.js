@@ -97,7 +97,7 @@ module.exports = {
     `;
     const values = [id];
     const results = await fetchMany(query, values);
-    console.log({ results });
+    // console.log({ results });
     if (!results) {
       return false;
     }
