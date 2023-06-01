@@ -6,9 +6,9 @@ const usersHandler = {
   },
   async create(req, res, next) {
     console.log("User Create Body:", { body: req.body });
-    const { username, password, role, firstName, lastName, staffing } = req.body;
+    const { username, password, role, firstName, lastName, lifeguard, senior, firstYear, archery, ropes } = req.body;
     try {
-      const user = await User.create({ username, password, role, firstName, lastName, staffing });
+      const user = await User.create({ username, password, role, firstName, lastName, lifeguard, archery, senior, firstYear, ropes });
       res.sendStatus(200);
 
     } catch (e) {
@@ -32,6 +32,7 @@ const usersHandler = {
 
   async update(req, res, next) {
     const { username } = req.params;
+    console.log({ body: req.body });
     const user = await User.get(username);
     if (!user) { next(new Error("Cannot Delete: User does not exist")) }
     try {

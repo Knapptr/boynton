@@ -124,28 +124,17 @@ module.exports = {
   )
   `,
 
-  staffableUser: `
-  CREATE TABLE IF NOT EXISTS staffable_users(
-    id serial NOT NULL,
-    username CHARACTER VARYING NOT NULL,
-    lifeguard bool NOT NULL DEFAULT false,
-    archery bool NOT NULL DEFAULT false,
-    senior bool NOT NULL DEFAULT false,
-    first_year bool NOT NULL DEFAULT false,
-    ropes bool NOT NULL DEFAULT false,
-    CONSTRAINT staffable_pkey PRIMARY KEY (id),
-    CONSTRAINT user_key FOREIGN KEY (username) REFERENCES users (username)
-    ON UPDATE CASCADE
-    ON DELETE CASCADE
-  )
-  `,
 
   staffableSession: `
   CREATE TABLE IF NOT EXISTS staffable_sessions(
     id serial NOT NULL,
     week_number integer NOT NULL,
+    username CHARACTER VARYING NOT NULL,
     CONSTRAINT pkey_staffable_session PRIMARY KEY (id),
-    CONSTRAINT staffable_relation FOREIGN KEY (week_number) REFERENCES weeks (number)
+    CONSTRAINT week_relation FOREIGN KEY (week_number) REFERENCES weeks (number)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE,
+    CONSTRAINT user_relation FOREIGN KEY (username) REFERENCES users (username)
     ON UPDATE CASCADE
     ON DELETE CASCADE
   )

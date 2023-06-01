@@ -12,6 +12,11 @@ const UserRepository = {
 					first_name character varying(255) NOT NULL,
 					last_name character varying(255) NOT NULL,
 					role character varying(255) NOT NULL DEFAULT 'counselor'::character varying,
+					lifeguard bool NOT NULL DEFAULT false,
+					archery bool NOT NULL DEFAULT false,
+					senior bool NOT NULL DEFAULT false,
+					first_year bool NOT NULL DEFAULT false,
+					ropes bool NOT NULL DEFAULT false,
 					CONSTRAINT users_pkey PRIMARY KEY (username)
 			)`;
 
@@ -50,38 +55,28 @@ const UserRepository = {
 		}
 		return user;
 	},
-	async create({ username, password: unhashedPassword, role, firstName, lastName, staffing }) {
+	async create({ username, password: unhashedPassword, role, firstName, lastName, lifeguard = false, archery = false, ropes = false, firstYear = false, senior = false }) {
 		try {
 			const encryptedPassword = await encrypt(unhashedPassword);
 			const query =
-				"INSERT INTO users (username,password,role,first_name,last_name) VALUES ($1,$2,$3,$4,$5) RETURNING * ";
-			const values = [username, encryptedPassword, role, firstName, lastName];
+				"INSERT INTO users (username,password,role,first_name,last_name,lifeguard,archery,ropes,first_year,senior) VALUES ($1,$2,$3,$4,$5, $6, $7, $8, $9, $10) RETURNING * ";
+			const values = [
+				username,
+				encryptedPassword,
+				role,
+				firstName,
+				lastName,
+				lifeguard,
+				archery,
+				ropes,
+				firstYear,
+				senior
+			];
 			const createdUser = await fetchOne(query, values);
-			const user = { username: createdUser.username, password: createdUser.password, firstName: createdUser.first_name, lastName: createdUser.last_name, role: createdUser.role, staffable: false }
+			const user = { username: createdUser.username, password: createdUser.password, firstName: createdUser.first_name, lastName: createdUser.last_name, role: createdUser.role }
+			const staffing = { lifeguard: createdUser.lifeguard, archery: createdUser.archery, ropes: createdUser.archery, firstYear: createdUser.first_year, senior: createdUser.senior }
+			user.staffing = staffing;
 
-			if (staffing) {
-				const { lifeguard, archery, senior, firstYear, ropes } = staffing;
-				console.log({ lifeguard, archery, senior, firstYear, ropes });
-				const staffableQuery = `
-					INSERT INTO staffable_users (
-						username,
-						lifeguard,
-						archery,
-						senior,
-						first_year,
-						ropes)
-					VALUES ($1, $2, $3, $4, $5, $6)
-					RETURNING *
-				`
-				const staffableValues = [user.username, lifeguard || false, archery || false, senior || false, firstYear || false, ropes || false]
-				console.log("Querying");
-				const createdStaffable = await fetchOne(staffableQuery, staffableValues);
-				console.log({ createdStaffable })
-				const staffableUser = {
-					lifeguard, archery, senior, firstYear: createdStaffable.first_year, ropes
-				}
-				user.staffable = staffableUser;
-			}
 			return user;
 		} catch (error) {
 			console.log(error);

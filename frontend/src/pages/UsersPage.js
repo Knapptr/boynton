@@ -5,7 +5,7 @@ import { DialogBox, PopOut } from "../components/styled";
 import tw from "twin.macro";
 import "styled-components/macro";
 
-const EditUserBox = ({ user, edits, editType, handleChange, closePopOut, onConfirm, staffing, handleStaffingChange }) => {
+const EditUserBox = ({ user, edits, editType, handleChange, closePopOut, onConfirm }) => {
   const [showStaffing, setShowStaffing] = useState(false);
   return (
 
@@ -42,19 +42,19 @@ const EditUserBox = ({ user, edits, editType, handleChange, closePopOut, onConfi
             </div>
           }
           <div>
-            <button onClick={() => { setShowStaffing(s => !s) }}>Staffable 🔽</button>
+            <button onClick={() => { setShowStaffing(s => !s) }}>Staffing 🔽</button>
           </div>
           {showStaffing && <div>
             <label htmlFor="lifeguardField">Lifeguard</label>
-            <input type="checkbox" id="lifeguardField" name="lifeguard" onChange={handleStaffingChange} checked={staffing.lifeguard || false} />
+            <input type="checkbox" id="lifeguardField" name="lifeguard" onChange={handleChange} checked={edits.lifeguard || false} />
             <label htmlFor="archeryField">Archery</label>
-            <input type="checkbox" id="archeryField" name="archery" onChange={handleStaffingChange} checked={staffing.archery || false} />
+            <input type="checkbox" id="archeryField" name="archery" onChange={handleChange} checked={edits.archery || false} />
             <label htmlFor="seniorField">Senior Staff</label>
-            <input type="checkbox" id="seniorField" name="senior" onChange={handleStaffingChange} checked={staffing.senior || false} />
+            <input type="checkbox" id="seniorField" name="senior" onChange={handleChange} checked={edits.senior || false} />
             <label htmlFor="ropesField">Ropes</label>
-            <input type="checkbox" id="ropesField" name="ropes" onChange={handleStaffingChange} checked={staffing.ropes || false} />
+            <input type="checkbox" id="ropesField" name="ropes" onChange={handleChange} checked={edits.ropes || false} />
             <label htmlFor="firstYearField">First Year</label>
-            <input type="checkbox" id="firstYearField" name="firstYear" onChange={handleStaffingChange} checked={staffing.firstYear || false} />
+            <input type="checkbox" id="firstYearField" name="firstYear" onChange={handleChange} checked={edits.firstYear || false} />
           </div>}
           <footer tw="py-4"> </footer>
           <div tw="absolute bottom-4 flex justify-center flex-wrap gap-4">
@@ -82,17 +82,25 @@ const UsersPage = () => {
 
   const [edit, setEdit] = useState({ type: editTypes.NONE, user: null, edits: null })
 
-  const [staffingOptions, setStaffingOptions] = useState({ lifeguard: false, archery: false, ropes: false, senior: false, firstYear: false, })
-
-  const handleStaffingChange = (event) => {
-    setStaffingOptions((old) => ({ ...old, [event.target.name]: event.target.checked }))
-  }
-
   const handleChange = (event) => {
-    setEdit((oldEdit) => ({ ...oldEdit, edits: { ...oldEdit.edits, [event.target.name]: event.target.value } }))
+    // parse if checkbox and map data appropriately
+    const value = event.target.type === "checkbox" ? event.target.checked : event.target.value
+
+    setEdit((oldEdit) => ({ ...oldEdit, edits: { ...oldEdit.edits, [event.target.name]: value } }))
   }
   const toggleUpdatePopOut = (user) => {
-    setEdit(e => ({ edits: user, user, type: editTypes.UPDATE }));
+    const edits = {
+      username: user.username,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      role: user.role,
+      lifeguard: user.staffing.lifeguard,
+      archery: user.staffing.archery,
+      ropes: user.staffing.ropes,
+      firstYear: user.staffing.firstYear,
+      senior: user.staffing.senior
+    }
+    setEdit(e => ({ edits: edits, user, type: editTypes.UPDATE }));
   }
   const closePopOut = () => {
     setEdit(e => ({ edits: null, user: null, type: editTypes.NONE }))
@@ -103,7 +111,7 @@ const UsersPage = () => {
   }
 
   const toggleCreateNew = () => {
-    const initEdits = { username: "", firstName: "", lastName: "", role: "counselor", password: "" }
+    const initEdits = { username: "", firstName: "", lastName: "", role: "counselor", password: "", lifeguard: false, archery: false, firstYear: false, ropes: false, ropes: false }
     const initUser = { ...initEdits, username: "New User" };
     setEdit({ type: editTypes.CREATE, edits: initEdits, user: initUser });
   }
@@ -112,7 +120,7 @@ const UsersPage = () => {
   */
   const submitNew = async () => {
     const url = "/api/users"
-    const user = { ...edit.edits, staffing: { ...staffingOptions } }
+    const user = { ...edit.edits }
     const opts = {
       method: "POST",
       headers: { "content-type": "application/json" },
@@ -184,12 +192,12 @@ const UsersPage = () => {
       <h1>Users</h1>
       {edit.type === editTypes.UPDATE &&
         <PopOut shouldDisplay={true} onClick={closePopOut}>
-          <EditUserBox user={edit.user} edits={edit.edits} closePopOut={closePopOut} handleChange={handleChange} onConfirm={updateUser} handleStaffingChange={handleStaffingChange} staffing={staffingOptions} />
+          <EditUserBox user={edit.user} edits={edit.edits} closePopOut={closePopOut} handleChange={handleChange} onConfirm={updateUser} />
         </PopOut>
       }
       {edit.type === editTypes.CREATE &&
         <PopOut shouldDisplay={true} onClick={closePopOut}>
-          <EditUserBox editType={editTypes.CREATE} user={edit.user} edits={edit.edits} closePopOut={closePopOut} handleChange={handleChange} onConfirm={submitNew} staffing={staffingOptions} handleStaffingChange={handleStaffingChange} />
+          <EditUserBox editType={editTypes.CREATE} user={edit.user} edits={edit.edits} closePopOut={closePopOut} handleChange={handleChange} onConfirm={submitNew} />
         </PopOut>
       }
       {edit.type === editTypes.DELETE &&
