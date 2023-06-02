@@ -22,13 +22,13 @@ class Week {
 		}
 		return false
 	}
-	static async get(weekNumber, weekRepository = defaultWeekRepository) {
-		const week = await weekRepository.get(weekNumber)
+	static async get(weekNumber, getStaff = false, weekRepository = defaultWeekRepository) {
+		const week = await weekRepository.get(weekNumber, getStaff);
 		return new Week(week)
 
 	}
-	static async getAll(weekRepository = defaultWeekRepository) {
-		const weeks = await weekRepository.getAll();
+	static async getAll(getStaff = false, weekRepository = defaultWeekRepository) {
+		const weeks = await weekRepository.getAll(getStaff);
 		return weeks.map(weekData => new Week(weekData));
 	}
 	static async create({ title, number }, weekRepository = defaultWeekRepository) {

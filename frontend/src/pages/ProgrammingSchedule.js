@@ -8,14 +8,14 @@ import { MenuSelector, PopOut } from "../components/styled";
 const ProgrammingSchedule = () => {
   // get the list of weeks
   const [weeks] = useGetDataOnMount({
-    url: "api/weeks",
+    url: "/api/weeks",
     initialState: [],
     useToken: true
   })
 
   // get list of activities
   const [activities] = useGetDataOnMount({
-    url: "api/activities",
+    url: "/api/activities",
     initialState: [],
     useToken: true
   })

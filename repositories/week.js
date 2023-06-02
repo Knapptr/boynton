@@ -23,128 +23,55 @@ const weekRepository = {
   },
   /** map response to an array 
   * @param {any[]} dbResponse */
-  _mapResponse(dbResponse) {
-    const camelCased = dbResponse.map((w) => camelCaseProps(w));
-    console.log({ camelCased });
-    const asWeeks = camelCased.reduce((acc, weekRes) => {
-      if (acc.at(-1) === undefined) {
-        const initialData = {
-          title: weekRes.title,
-          number: weekRes.number,
-          days: [{
-            name: weekRes.dayName,
-            id: weekRes.dayId,
-            periods: [{
-              id: weekRes.periodId,
-              number: weekRes.periodNumber,
-              activities: []
-            }]
-          }]
-        }
-        if (weekRes.activityId !== null) {
-          initialData.days.at(-1).periods.at(-1).activities.push(
-            {
-              activityId: weekRes.activityId,
-              sessionId: weekRes.activitySessionId,
-              name: weekRes.activityName,
-              description: weekRes.activityDescription
-            })
-        }
-        acc.push(initialData);
-        return acc;
+  _mapResponse(dbResponse, getStaff = false) {
+    const weeks = [];
+    for (const response of dbResponse) {
+      //check if the last entry is the same week
+      const currentWeek = weeks.at(-1) && weeks.at(-1).number === response.number ? weeks.pop() : {
+        title: response.title,
+        number: response.number,
+        days: []
       }
-      const lastItem = acc.at(-1);
-      // check if it is a new week
-      if (weekRes.number !== lastItem.number) {
-        const initialData = {
-          title: weekRes.title,
-          number: weekRes.number,
-          days: [{
-            name: weekRes.dayName,
-            id: weekRes.dayId,
-            periods: [{
-              id: weekRes.periodId,
-              number: weekRes.periodNumber,
-              activities: []
-            }]
-          }]
-        }
-        if (weekRes.activityId !== null) {
-          initialData.days.at(-1).periods.at(-1).activities.push(
-            {
-              activityId: weekRes.activityId,
-              sessionId: weekRes.activitySessionId,
-              name: weekRes.activityName,
-              description: weekRes.activityDescription
-            })
-        }
-        acc.push(initialData);
-        return acc;
+      //check if current respose is a new day
+      const currentDay = currentWeek.days.at(-1) && currentWeek.days.at(-1).id === response.day_id ? currentWeek.days.pop() : {
+        id: response.day_id,
+        name: response.day_name,
+        periods: []
+      };
+      // check if current response is a new period
+      const currentPeriod = currentDay.periods.at(-1) && currentDay.periods.at(-1).id === response.period_id ? currentDay.periods.pop() : {
+        id: response.period_id,
+        number: response.period_number,
+        activities: []
       }
-      // check if it is a new day
-      if (weekRes.dayId !== lastItem.days.at(-1).id) {
-        lastItem.days.push({
-          name: weekRes.dayName,
-          id: weekRes.dayId,
-          periods: [{
-            id: weekRes.periodId,
-            number: weekRes.periodNumber,
-            activities: []
-          }]
-        })
-        // console.log({ debug: lastItem.days.at(-1).periods });
-        if (weekRes.activityId !== null) {
-          lastItem.days.at(-1).periods.at(-1).activities.push(
-            {
-              activityId: weekRes.activityId,
-              sessionId: weekRes.activitySessionId,
-              name: weekRes.activityName,
-              description: weekRes.activityDescription
-            })
+      // check if is activity, check if is staff
+      if (response.activity_session_id !== null) {
+        const activity = {
+          id: response.activity_id,
+          sessionId: response.activity_session_id,
+          name: response.activity_name,
+          description: response.activity_description
         }
-        return acc;
-      }
-
-      // check if it is a new period
-      if (weekRes.periodId !== lastItem.days.at(-1).periods.at(-1).id) {
-        lastItem.days.at(-1).periods.push({
-          id: weekRes.periodId,
-          number: weekRes.periodNumber,
-          activities: []
-        })
-        if (weekRes.activityId !== null) {
-          lastItem.days.at(-1).periods.at(-1).activities.push(
-            {
-              activityId: weekRes.activityId,
-              sessionId: weekRes.activitySessionId,
-              name: weekRes.activityName,
-              description: weekRes.activityDescription
-            })
+        if (getStaff) {
+          if (activity.staff === undefined) { activity.staff = [] }
+          if (response.staff_activity_id) {
+            const staff = {
+              staffActivityId: response.staff_activity_id,
+              username: response.staff_username
+            }
+            activity.staff.push(staff)
+          }
         }
-        return acc;
+        currentPeriod.activities.push(activity)
       }
-
-      // add activity to old period
-      if (weekRes.activityId !== null) {
-        lastItem.days.at(-1).periods.at(-1).activities.push(
-          {
-            activityId: weekRes.activityId,
-            sessionId: weekRes.activitySessionId,
-            name: weekRes.activityName,
-            description: weekRes.activityDescription
-          })
-      }
-
-      return acc;
-    }, [])
-
-
-    // console.log(JSON.stringify(asWeeks, null, 2));
-    // return remapped;
-    return asWeeks;
+      currentDay.periods.push(currentPeriod);
+      currentWeek.days.push(currentDay);
+      weeks.push(currentWeek);
+    }
+    return weeks
   },
-  async getAll() {
-    const query = `SELECT 
+  async getAll(getStaff = false) {
+    const query = !getStaff ? `SELECT 
     w.title AS title,
       w.number AS number,
       d.id AS day_id,
@@ -161,14 +88,7 @@ const weekRepository = {
     FULL JOIN activity_sessions ases ON ases.period_id = p.id
     LEFT JOIN activities act ON ases.activity_id = act.id
     ORDER BY w.number,d.id,p.period_number
-    `;
-    const responseData = await fetchMany(query);
-    if (!responseData) { return [] }
-    const mappedData = this._mapResponse(responseData);
-    return mappedData;
-  },
-  async get(weekNumber) {
-    const query = `
+    `: `
     SELECT 
     w.title AS title,
       w.number AS number,
@@ -177,6 +97,35 @@ const weekRepository = {
       p.id AS period_id,
       p.period_number AS period_number,
       act.id AS activity_id,
+      sta.id AS staff_activity_id,
+      act.name AS activity_name,
+      ases.id AS activity_session_id,
+      act.description AS activity_description,
+      us.username AS staff_username
+    FROM weeks w
+    JOIN days d ON d.week_id = w.number
+    JOIN periods p ON p.day_id = d.id  
+    FULL JOIN activity_sessions ases ON ases.period_id = p.id
+    LEFT JOIN activities act ON ases.activity_id = act.id
+    LEFT JOIN staff_activities sta ON sta.activity_session_id = ases.id
+    LEFT JOIN staffable_sessions ss ON ss.id = sta.staffable_session_id
+    LEFT JOIN users us ON ss.username = us.username
+    ORDER BY w.number,d.id,p.period_number,ases.id `;
+    const responseData = await fetchMany(query);
+    if (!responseData) { return [] }
+
+    const mappedData = this._mapResponse(responseData, getStaff);
+    return mappedData;
+  },
+  async get(weekNumber, getStaff) {
+    const query = !getStaff ? `SELECT 
+    w.title AS title,
+      w.number AS number,
+      d.id AS day_id,
+      d.name AS day_name,
+      p.id AS period_id,
+      p.period_number AS period_number,
+      act.id AS activity_id,
       act.name AS activity_name,
       ases.id AS activity_session_id,
       act.description AS activity_description
@@ -185,15 +134,38 @@ const weekRepository = {
     JOIN periods p ON p.day_id = d.id  
     FULL JOIN activity_sessions ases ON ases.period_id = p.id
     LEFT JOIN activities act ON ases.activity_id = act.id
-    WHERE w.number = $1 
+    WHERE w.number = $1
     ORDER BY w.number,d.id,p.period_number
-    `;
+    `: `
+    SELECT 
+    w.title AS title,
+      w.number AS number,
+      d.id AS day_id,
+      d.name AS day_name,
+      p.id AS period_id,
+      p.period_number AS period_number,
+      act.id AS activity_id,
+      sta.id AS staff_activity_id,
+      act.name AS activity_name,
+      ases.id AS activity_session_id,
+      act.description AS activity_description,
+      us.username AS staff_username
+    FROM weeks w
+    JOIN days d ON d.week_id = w.number
+    JOIN periods p ON p.day_id = d.id  
+    FULL JOIN activity_sessions ases ON ases.period_id = p.id
+    LEFT JOIN activities act ON ases.activity_id = act.id
+    LEFT JOIN staff_activities sta ON sta.activity_session_id = ases.id
+    LEFT JOIN staffable_sessions ss ON ss.id = sta.staffable_session_id
+    LEFT JOIN users us ON ss.username = us.username
+    WHERE w.number = $1
+    ORDER BY w.number,d.id,p.period_number,ases.id `;
     const values = [weekNumber];
     const responseData = await fetchMany(query, values);
     if (!responseData) {
       return false;
     }
-    const mappedData = this._mapResponse(responseData);
+    const mappedData = this._mapResponse(responseData, getStaff);
     return mappedData[0];
   },
 

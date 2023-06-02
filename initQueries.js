@@ -111,8 +111,13 @@ module.exports = {
   id serial NOT NULL,
   staffable_session_id integer NOT NULL,
   period_id integer NOT NULL,
+  activity_session_id integer NOT NULL,
   CONSTRAINT staffAct_pkey PRIMARY KEY (id),
   CONSTRAINT "one staff assignment per period" UNIQUE (period_id, staffable_session_id),
+  CONSTRAINT f_act_s FOREIGN KEY (activity_session_id) REFERENCES activity_sessions (id)
+  ON UPDATE CASCADE
+  ON DELETE CASCADE
+  NOT VALID,
   CONSTRAINT period_id FOREIGN KEY (period_id) REFERENCES periods (id)
   ON UPDATE CASCADE
   ON DELETE CASCADE

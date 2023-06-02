@@ -42,10 +42,13 @@ const Dashboard = () => {
             <Link to="users"><NavBarLink color="brown">Users</NavBarLink></Link>
           )}
           {(user.role === "admin" || user.role === "unit_head" || user.role === "programming") && (
-            <Link to="programming-schedule"><NavBarLink color="yellow">
+            <Link to="programming-schedule/activities"><NavBarLink color="yellow">
               Programming
             </NavBarLink></Link>
           )}
+          <Link to="programming-schedule/staff"><NavBarLink color="blue">
+            Staff Scheduling
+          </NavBarLink></Link>
           <NavBarLink
             tw="mt-8"
             onClick={() => {
