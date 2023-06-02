@@ -102,6 +102,7 @@ module.exports = {
       LEFT JOIN camper_activities ca ON ca.activity_id = act_s.id
       LEFT JOIN camper_weeks cw ON cw.id = ca.camper_week_id
       LEFT JOIN campers camp ON camp.id = cw.camper_id
+      WHERE p.id = $1
 
       
       UNION ALL
@@ -136,15 +137,13 @@ module.exports = {
       LEFT JOIN staff_activities stafact ON  stafact.activity_session_id = act_s.id
       LEFT JOIN staff_sessions stafsess ON stafsess.id = stafact.staff_session_id
       LEFT JOIN users u ON u.username = stafsess.username) un
-      
-  
       WHERE period_id = $1
+
       ORDER BY activity_session_id
   
     `;
     const values = [id];
     const results = await fetchMany(query, values);
-    console.log({ results });
     if (!results) {
       return false;
     }
@@ -161,9 +160,11 @@ module.exports = {
     // campers {firstName,lastName,age,pronouns,sessionId}[]
     // }[]}
     const oneRes = results[0];
-    const period = { id: oneRes.id, dayId: oneRes.day_id, periodNumber: oneRes.periodNumber, activities: [] }
+    const period = { id: oneRes.period_id, dayId: oneRes.day_id, number: oneRes.period_number, activities: [] }
+    console.log({ period });
     for (const data of results) {
       //check if current activity is == to last activity
+      if (data.activity_id === null) { continue; }
       let activity = { name: data.activity_name, description: data.activity_description, activityId: data.activity_id, sessionId: data.activity_session_id, campers: [], staff: [] }
 
       if (period.activities.at(-1) && period.activities.at(-1).sessionId === data.activity_session_id) {

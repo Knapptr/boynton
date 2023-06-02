@@ -18,6 +18,8 @@ const StaffSchedule = () => {
 
 
   const selectWeek = (week) => {
+    setSelectedPeriod(null);
+    setSelectedDay(null);
     setSelectedWeek(week);
   }
 
@@ -76,12 +78,15 @@ const ActivityStaffList = ({ selectedPeriod }) => {
 
 
   const [activities, setActivities] = useState([]);
+  const [loading, setLoading] = useState(true);
   //
   //** Get staff for selected period
   const fetchActivities = useCallback(async () => {
+    setLoading(true);
     const result = await fetchWithToken(`/api/periods/${selectedPeriod.id}`, {}, auth)
     const periodData = await result.json();
     setActivities(periodData.activities);
+    setLoading(false)
   }, [selectedPeriod, auth])
 
   /** Set staff on mount */
@@ -90,9 +95,24 @@ const ActivityStaffList = ({ selectedPeriod }) => {
   }, [fetchActivities])
 
   return (
-    <ul>
-      {activities.map(activity => <li>{activity.name}</li>)}
+    <ul tw="flex  flex-wrap justify-center gap-4">
+      {!loading && activities.map(activity => <li tw="p-4 bg-blue-50 flex flex-col">{activity.name}
+        <span> {activity.campers.length} campers</span>
+        <ul>
+          <header><h2>{activity.staff.length === 0 && "No staff assigned" || "Assigned"}</h2></header>
+          {activity.staff.map(staffer => <li><StaffBadge staffer={staffer} /></li>)}
+        </ul>
+
+      </li>)}
     </ul>
+  )
+}
+
+const StaffBadge = ({ staffer }) => {
+  return (
+    <div>
+      <h3>{staffer.firstName} {staffer.lastName}</h3>
+    </div>
   )
 }
 
