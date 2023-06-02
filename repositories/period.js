@@ -67,14 +67,15 @@ module.exports = {
     const mapped = this._mapResponse(results);
     return mapped;
   },
-  /** Get single period, and populate camper lists 
+  /** Get single period, and populate camper and staff lists 
   * @param id period id*/
   async get(id) {
     const query = `
-      SELECT 
+    SELECT * from
+( SELECT 
       day_id,
       period_number,
-      p.id, 
+      p.id as period_id, 
       act.name as activity_name,
       act.description as activity_description,
       act.id as activity_id,
@@ -85,15 +86,61 @@ module.exports = {
       camp.age AS camper_age,
       cw.id AS camper_session_id,
       ca.is_present AS camper_is_present,
-      ca.id AS camper_activity_id
+      ca.id AS camper_activity_id,
+      null AS staff_username,
+      null AS staff_first_name,
+      null AS staff_last_name,
+      null AS staff_lifeguard,
+      null AS staff_ropes,
+      null AS staff_archery,
+      null AS staff_first_year,
+      null AS staff_senior,
+      null AS staff_session_id
       FROM periods p 
       LEFT JOIN activity_sessions act_s ON act_s.period_id = p.id
       LEFT JOIN activities act ON act.id = act_s.activity_id
       LEFT JOIN camper_activities ca ON ca.activity_id = act_s.id
       LEFT JOIN camper_weeks cw ON cw.id = ca.camper_week_id
       LEFT JOIN campers camp ON camp.id = cw.camper_id
-      WHERE p.id = $1
-      ORDER BY act_s.id
+
+      
+      UNION ALL
+      
+      SELECT 
+      day_id,
+      period_number,
+      p.id as period_id,
+      act.name as activity_name,
+      act.description as activity_description,
+      act.id as activity_id,
+      act_s.id as activity_session_id,
+      null AS camper_last_name,
+      null AS camper_first_name,
+      null AS camper_pronouns,
+      null AS camper_age,
+      null AS camper_session_id,
+      null AS camper_is_present,
+      null AS camper_activity_id,
+      u.username AS staff_username,
+      u.first_name AS staff_first_name,
+      u.last_name AS staff_last_name,
+      u.lifeguard AS staff_lifeguard,
+      u.ropes AS staff_ropes,
+      u.archery AS staff_archery,
+      u.first_year AS staff_first_year,
+      u.senior AS staff_senior,
+      stafsess.id AS staff_session_id
+      FROM periods p 
+      LEFT JOIN activity_sessions act_s ON act_s.period_id = p.id
+      LEFT JOIN activities act ON act.id = act_s.activity_id
+      LEFT JOIN staff_activities stafact ON  stafact.activity_session_id = act_s.id
+      LEFT JOIN staff_sessions stafsess ON stafsess.id = stafact.staff_session_id
+      LEFT JOIN users u ON u.username = stafsess.username) un
+      
+  
+      WHERE period_id = $1
+      ORDER BY activity_session_id
+  
     `;
     const values = [id];
     const results = await fetchMany(query, values);
@@ -117,11 +164,12 @@ module.exports = {
     const period = { id: oneRes.id, dayId: oneRes.day_id, periodNumber: oneRes.periodNumber, activities: [] }
     for (const data of results) {
       //check if current activity is == to last activity
-      let activity = { name: data.activity_name, description: data.activity_description, activityId: data.activity_id, sessionId: data.activity_session_id, campers: [] }
+      let activity = { name: data.activity_name, description: data.activity_description, activityId: data.activity_id, sessionId: data.activity_session_id, campers: [], staff: [] }
 
       if (period.activities.at(-1) && period.activities.at(-1).sessionId === data.activity_session_id) {
         activity = period.activities.pop()
       }
+      /** Add camper to camper list if row is camper info */
       if (data.camper_session_id !== null) {
         activity.campers.push(
           {
@@ -134,6 +182,20 @@ module.exports = {
             activityId: data.camper_activity_id
           }
         )
+      }
+      /** Add staff to staff list if row is staff info */
+      if (data.staff_session_id !== undefined && data.staff_session_id !== null) {
+        activity.staff.push({
+          firstName: data.staff_first_name,
+          lastName: data.staff_last_name,
+          username: data.staff_username,
+          archery: data.staff_archery,
+          ropes: data.staff__ropes,
+          lifeguard: data.staff_lifeguard,
+          firstYear: data.staff_first_year,
+          senior: data.staff_senior
+
+        })
       }
       period.activities.push(activity);
     }

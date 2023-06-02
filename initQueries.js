@@ -109,11 +109,11 @@ module.exports = {
   CREATE TABLE IF NOT EXISTS staff_activities
   (
   id serial NOT NULL,
-  staffable_session_id integer NOT NULL,
+  staff_session_id integer NOT NULL,
   period_id integer NOT NULL,
   activity_session_id integer NOT NULL,
   CONSTRAINT staffAct_pkey PRIMARY KEY (id),
-  CONSTRAINT "one staff assignment per period" UNIQUE (period_id, staffable_session_id),
+  CONSTRAINT "one staff assignment per period" UNIQUE (period_id, staff_session_id),
   CONSTRAINT f_act_s FOREIGN KEY (activity_session_id) REFERENCES activity_sessions (id)
   ON UPDATE CASCADE
   ON DELETE CASCADE
@@ -122,7 +122,7 @@ module.exports = {
   ON UPDATE CASCADE
   ON DELETE CASCADE
   NOT VALID,
-  CONSTRAINT staffable_relation FOREIGN KEY (staffable_session_id) REFERENCES staffable_sessions (id)
+  CONSTRAINT staff_sess_relation FOREIGN KEY (staff_session_id) REFERENCES staff_sessions (id)
   ON UPDATE CASCADE
   ON DELETE CASCADE
   NOT VALID
@@ -130,12 +130,12 @@ module.exports = {
   `,
 
 
-  staffableSession: `
-  CREATE TABLE IF NOT EXISTS staffable_sessions(
+  staffSession: `
+  CREATE TABLE IF NOT EXISTS staff_sessions(
     id serial NOT NULL,
     week_number integer NOT NULL,
     username CHARACTER VARYING NOT NULL,
-    CONSTRAINT pkey_staffable_session PRIMARY KEY (id),
+    CONSTRAINT pkey_staff_session PRIMARY KEY (id),
     CONSTRAINT week_relation FOREIGN KEY (week_number) REFERENCES weeks (number)
     ON UPDATE CASCADE
     ON DELETE CASCADE,

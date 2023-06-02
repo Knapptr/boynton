@@ -1,4 +1,4 @@
-import { useContext, useState, useEffect } from "react";
+import { useContext, useState, useEffect, useCallback } from "react";
 import { MenuSelector } from "../components/styled";
 import UserContext from "../components/UserContext";
 import fetchWithToken from "../fetchWithToken";
@@ -34,7 +34,7 @@ const StaffSchedule = () => {
   // get all weeks
   useEffect(() => {
     const getWeeks = async () => {
-      const weeks = await fetchWithToken("/api/weeks?staff=true", {}, auth);
+      const weeks = await fetchWithToken("/api/weeks", {}, auth);
       const data = await weeks.json();
       setWeeks(data)
     }
@@ -66,10 +66,33 @@ const StaffSchedule = () => {
       <h1>Available Staff</h1>
       {/* Acts go Here */}
       <h1>Activities</h1>
-      <ul tw="flex gap-2">
-        {selectedPeriod && selectedPeriod.activities.map(act => <li tw="bg-gray-100 p-2 rounded"><header><h2>{act.name}</h2></header> <ul>{act.staff.map(s => <li>{s.username}</li>)}</ul></li>)}
-      </ul>
+      {selectedPeriod !== null && <ActivityStaffList selectedPeriod={selectedPeriod} />}
     </>
+  )
+}
+
+const ActivityStaffList = ({ selectedPeriod }) => {
+  const auth = useContext(UserContext);
+
+
+  const [activities, setActivities] = useState([]);
+  //
+  //** Get staff for selected period
+  const fetchActivities = useCallback(async () => {
+    const result = await fetchWithToken(`/api/periods/${selectedPeriod.id}`, {}, auth)
+    const periodData = await result.json();
+    setActivities(periodData.activities);
+  }, [selectedPeriod, auth])
+
+  /** Set staff on mount */
+  useEffect(() => {
+    fetchActivities();
+  }, [fetchActivities])
+
+  return (
+    <ul>
+      {activities.map(activity => <li>{activity.name}</li>)}
+    </ul>
   )
 }
 
