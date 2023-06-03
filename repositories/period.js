@@ -195,7 +195,7 @@ module.exports = {
           lastName: data.staff_last_name,
           username: data.staff_username,
           archery: data.staff_archery,
-          ropes: data.staff__ropes,
+          ropes: data.staff_ropes,
           lifeguard: data.staff_lifeguard,
           firstYear: data.staff_first_year,
           senior: data.staff_senior,

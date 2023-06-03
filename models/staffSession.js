@@ -84,7 +84,7 @@ const StaffSession = {
             archery: r.archery,
             ropes: r.ropes,
             senior: r.senior,
-            firstYear: r.firstYear,
+            firstYear: r.first_year,
             staffSessionId: r.staff_session_id
 
         }))
