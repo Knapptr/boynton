@@ -1,4 +1,4 @@
-import { useState, useEffect,useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import useGetDataOnMount from "../hooks/useGetData";
 import tw, { styled } from "twin.macro";
@@ -7,8 +7,8 @@ import "styled-components/macro";
 import { PopOut, MenuSelector } from "../components/styled";
 import cl from "../cl.png";
 import UserContext from "../components/UserContext";
-import {faCircleXmark} from '@fortawesome/free-regular-svg-icons'
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome"
+import { faCircleXmark } from '@fortawesome/free-regular-svg-icons'
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 
 const SignUpIndex = () => {
 	const [cabins] = useGetDataOnMount({
@@ -71,7 +71,7 @@ const SignUpIndex = () => {
 										});
 									}}
 								>
-                    <FontAwesomeIcon icon={faCircleXmark}/>
+									<FontAwesomeIcon icon={faCircleXmark} />
 								</button>
 								<header tw="text-xl">
 									<h1 tw="text-base">Sign-Up</h1>
@@ -91,7 +91,7 @@ const SignUpIndex = () => {
 						</PopOut>
 					)}
 					<ul tw="flex gap-1 flex-wrap flex-col">
-						{weeks.map((w,wIndex) => (
+						{weeks.map((w, wIndex) => (
 							<MenuSelector
 								tw="p-1 border  cursor-pointer"
 								isSelected={w.number === selected.week}
