@@ -39,7 +39,9 @@ module.exports = {
   ON DELETE CASCADE
   NOT VALID,
   CONSTRAINT act_session_id FOREIGN KEY (activity_id)
-  REFERENCES activity_sessions (id),
+  REFERENCES activity_sessions (id)
+  ON UPDATE CASCADE
+  ON DELETE CASCADE,
   CONSTRAINT "same" FOREIGN KEY (activity_id, period_id)
   REFERENCES activity_sessions (id, period_id) MATCH SIMPLE
   ON UPDATE CASCADE

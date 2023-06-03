@@ -4,6 +4,7 @@ import UserContext from "../components/UserContext";
 import fetchWithToken from "../fetchWithToken";
 import tw from 'twin.macro';
 import 'styled-components/macro';
+import styled from "styled-components";
 
 const StaffSchedule = () => {
   const auth = useContext(UserContext);
@@ -16,20 +17,36 @@ const StaffSchedule = () => {
 
   const [selectedPeriod, setSelectedPeriod] = useState(null);
 
+  const [viableStaff, setViableStaff] = useState([]);
+
+  /** Get unassigned staff for period */
+  const fetchViableStaff = useCallback(async (period) => {
+    const result = await fetchWithToken(`/api/staff-sessions/period/${period.id}/viable`, {}, auth);
+    if (!result) {
+      // no viable staff, OR no staff sessions
+      console.log("no staff. Handle this")
+    }
+    const viableStaffAssignments = await result.json();
+    setViableStaff(viableStaffAssignments);
+  }, [auth])
+
 
   const selectWeek = (week) => {
     setSelectedPeriod(null);
     setSelectedDay(null);
     setSelectedWeek(week);
+    setViableStaff([]);
   }
 
   const selectDay = (day) => {
     setSelectedPeriod(null);
     setSelectedDay(day);
+    setViableStaff([]);
   }
 
   const selectPeriod = (period) => {
     setSelectedPeriod(period);
+    fetchViableStaff(period)
   }
 
 
@@ -41,7 +58,8 @@ const StaffSchedule = () => {
       setWeeks(data)
     }
     getWeeks();
-  }, [])
+  }, [auth])
+
 
   return (
     <>
@@ -64,12 +82,24 @@ const StaffSchedule = () => {
         {selectedDay && selectedDay.periods.map(p => <li key={`period-${p.id}`} onClick={() => selectPeriod(p)}><MenuSelector isSelected={selectedPeriod && selectedPeriod.id === p.id}>Act {p.number}</MenuSelector></li>)}
       </ul>
       {/* Staff Goes Here */}
-      {/* This will need a query that looks for all staff who have not been assigned any activities this period AND have not had 2 activities assigned on the day */}
       <h1>Available Staff</h1>
+      <ViableStaffList staff={viableStaff} />
       {/* Acts go Here */}
       <h1>Activities</h1>
       {selectedPeriod !== null && <ActivityStaffList selectedPeriod={selectedPeriod} />}
     </>
+  )
+}
+
+const ViableStaffList = ({ staff }) => {
+  return (
+    <ul tw="flex justify-center">
+      {staff.map(staffer => (
+        <li key={`viable-staff-${staff.staffSessionId}`}>
+          <StaffListing staffer={staffer} />
+        </li>
+      ))}
+    </ul>
   )
 }
 
@@ -78,6 +108,7 @@ const ActivityStaffList = ({ selectedPeriod }) => {
 
 
   const [activities, setActivities] = useState([]);
+
   const [loading, setLoading] = useState(true);
   //
   //** Get staff for selected period
@@ -89,18 +120,19 @@ const ActivityStaffList = ({ selectedPeriod }) => {
     setLoading(false)
   }, [selectedPeriod, auth])
 
-  /** Set staff on mount */
+
+  /** Set assignedstaff on mount */
   useEffect(() => {
     fetchActivities();
   }, [fetchActivities])
 
   return (
     <ul tw="flex  flex-wrap justify-center gap-4">
-      {!loading && activities.map(activity => <li tw="p-4 bg-blue-50 flex flex-col">{activity.name}
+      {!loading && activities.map(activity => <li key={`activity-${activity.sessionId}`} tw="p-4 bg-blue-50 flex flex-col">{activity.name}
         <span> {activity.campers.length} campers</span>
         <ul>
-          <header><h2>{activity.staff.length === 0 && "No staff assigned" || "Assigned"}</h2></header>
-          {activity.staff.map(staffer => <li><StaffBadge staffer={staffer} /></li>)}
+          <header><h2>{(activity.staff.length === 0 && "No staff assigned") || "Assigned"}</h2></header>
+          {activity.staff.map(staffer => <li key={`activity-staff-${staffer.staffSessionId}`}><StaffListing staffer={staffer} /></li>)}
         </ul>
 
       </li>)}
@@ -108,12 +140,33 @@ const ActivityStaffList = ({ selectedPeriod }) => {
   )
 }
 
-const StaffBadge = ({ staffer }) => {
+const StaffListing = ({ staffer }) => {
   return (
-    <div>
-      <h3>{staffer.firstName} {staffer.lastName}</h3>
-    </div>
+    <div tw="px-2 py-1 bg-cyan-100 rounded-full shadow flex border gap-2 justify-center items-center">
+      <h3 tw="text-xl">{staffer.firstName} {staffer.lastName}</h3>
+      <ul tw="flex gap-2" id={`badges-${staffer.staffSessionId}`}>
+        {staffer.firstYear && <StaffBadge firstYear>FY</StaffBadge>}
+        {staffer.senior && <StaffBadge senior>SR</StaffBadge>}
+        {staffer.lifeguard && <StaffBadge lifeguard >LG</StaffBadge>}
+        {staffer.ropes && <StaffBadge ropes >RO</StaffBadge>}
+        {staffer.archery && <StaffBadge archery >AR</StaffBadge>}
+
+      </ul>
+    </div >
   )
 }
+
+const StaffBadge = styled.li(({ lifeguard, senior, firstYear, ropes, archery }) => [
+  tw`text-xs bg-gray-50 font-bold p-1 rounded-full`,
+  firstYear && tw`text-green-500`,
+  senior && tw`text-black`,
+  lifeguard && tw`text-red-500`,
+  ropes && tw`text-amber-500`,
+  archery && tw`text-yellow-500`
+
+
+
+
+])
 
 export default StaffSchedule

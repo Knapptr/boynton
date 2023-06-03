@@ -12,6 +12,7 @@ const passport = require("passport");
 const activitySessionRouter = require("./activitySession");
 const camperActivityRouter = require("./camperActivity");
 const usersRouter = require("./users");
+const staffSessionRouter = require("./staffSessions");
 const { adminOnly } = require("../middleware/authRole");
 
 //log all api requs
@@ -26,6 +27,7 @@ router.use("/activity-sessions", activitySessionRouter);
 router.use("/campers", camperRouter);
 router.use("/camper-activities", camperActivityRouter);
 router.use("/periods", periodRouter);
+router.use("/staff-sessions", staffSessionRouter);
 router.use("/days", daysRouter);
 router.use("/cabin-sessions", cabinSessionRouter);
 router.use("/cabins", cabinRouter);

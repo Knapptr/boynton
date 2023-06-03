@@ -95,7 +95,8 @@ module.exports = {
       null AS staff_archery,
       null AS staff_first_year,
       null AS staff_senior,
-      null AS staff_session_id
+      null AS staff_session_id,
+      null AS staff_activity_id
       FROM periods p 
       LEFT JOIN activity_sessions act_s ON act_s.period_id = p.id
       LEFT JOIN activities act ON act.id = act_s.activity_id
@@ -130,7 +131,8 @@ module.exports = {
       u.archery AS staff_archery,
       u.first_year AS staff_first_year,
       u.senior AS staff_senior,
-      stafsess.id AS staff_session_id
+      stafsess.id AS staff_session_id,
+      stafact.id AS staff_activity_id
       FROM periods p 
       LEFT JOIN activity_sessions act_s ON act_s.period_id = p.id
       LEFT JOIN activities act ON act.id = act_s.activity_id
@@ -139,7 +141,7 @@ module.exports = {
       LEFT JOIN users u ON u.username = stafsess.username) un
       WHERE period_id = $1
 
-      ORDER BY activity_session_id
+      ORDER BY activity_session_id, camper_last_name, staff_first_name
   
     `;
     const values = [id];
@@ -187,6 +189,8 @@ module.exports = {
       /** Add staff to staff list if row is staff info */
       if (data.staff_session_id !== undefined && data.staff_session_id !== null) {
         activity.staff.push({
+
+          staffSessionId: data.staff_session_id,
           firstName: data.staff_first_name,
           lastName: data.staff_last_name,
           username: data.staff_username,
@@ -194,7 +198,8 @@ module.exports = {
           ropes: data.staff__ropes,
           lifeguard: data.staff_lifeguard,
           firstYear: data.staff_first_year,
-          senior: data.staff_senior
+          senior: data.staff_senior,
+          staffActivityId: data.staff_activity_id
 
         })
       }
