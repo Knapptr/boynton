@@ -6,12 +6,15 @@ const error = require("../../utils/jsonError");
 
 const weekHandler = {
 	async getAll(req, res, next) {
-		const weeks = await Week.getAll();
+		const getStaff = req.query.staff === "true";
+		const weeks = await Week.getAll(getStaff);
 		res.json(weeks);
 	},
 	async getOne(req, res, next) {
+		const getStaff = req.query.staff === "true";
+		const weeks = await Week.getAll(getStaff);
 		const weekID = req.params.weekNumber;
-		const week = await Week.get(weekID);
+		const week = await Week.get(weekID, getStaff);
 		res.json(week);
 	},
 	async getWeekCampers(req, res, next) {

@@ -17,6 +17,7 @@ import Score from "./components/Score"
 import ProgrammingSchedule from "./pages/ProgrammingSchedule";
 import AdminAccess from "./components/ProtectedAdminAccess";
 import UsersPage from "./pages/UsersPage";
+import StaffSchedule from "./pages/StaffSchedule";
 
 function App() {
   const userState = useUserData();
@@ -60,8 +61,9 @@ function App() {
                 <Route path="scoreboard" element={<Scoreboard />}>
                   <Route path=":weekNumber" element={<Score />} />
                 </Route>
-                <Route path="cabins/*">{CabinAssignmentRoutes()}</Route>
-                <Route path="programming-schedule/*" element={<ProgrammingSchedule />}>
+                <Route path="programming-schedule/">
+                  <Route path="activities/" element={<AdminAccess><ProgrammingSchedule /></AdminAccess>} />
+                  <Route path="staff" element={<AdminAccess><StaffSchedule /></AdminAccess>} />
                 </Route>
                 <Route
                   path="schedule/*"

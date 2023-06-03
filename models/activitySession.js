@@ -105,7 +105,7 @@ class ActivitySession {
             // there should only be one result, so return it instead of an array
             return deserResults[0];
         } else {
-            return []
+            return false
         }
     }
     async addCamper(camperID) {
@@ -113,12 +113,28 @@ class ActivitySession {
          INSERT INTO camper_activities (camper_week_id,activity_id,period_id) 
             VALUES ($1,$2,$3) 
             ON CONFLICT ON CONSTRAINT one_activity_per_camper 
-            DO UPDATE set activity_id = $2 ,period_id = $3, is_present = false 
+            DO UPDATE SET activity_id = $2 ,period_id = $3, is_present = false 
             RETURNING id, period_id,activity_id`
         const values = [camperID, this.id, this.periodId];
         const result = await fetchOne(query, values);
         const camperActivityID = result.id;
         return camperActivityID;
+    }
+    async addStaff(staffMember) {
+        const query = `
+        INSERT INTO staff_activities (staff_session_id, period_id, activity_session_id)
+        VALUES ($1,$2,$3)
+        ON CONFLICT ON CONSTRAINT "one staff assignment per period" 
+        DO UPDATE SET staff_session_id = $1, period_id = $2, activity_session_id = $3
+        RETURNING *
+        `
+        const values = [staffMember.staffSessionId, this.periodId, this.id]
+        console.log({ values });
+        const response = await fetchOne(query, values);
+        return response
+        if (!response) {
+            throw new Error("Could not add staff member to activity");
+        }
     }
 
 }
