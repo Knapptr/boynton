@@ -46,9 +46,9 @@ const Dashboard = () => {
               Programming
             </NavBarLink></Link>
           )}
-          <Link to="programming-schedule/staff"><NavBarLink color="blue">
+          {user.role === "admin" && <Link to="programming-schedule/staff"><NavBarLink color="blue">
             Staff Scheduling
-          </NavBarLink></Link>
+          </NavBarLink></Link>}
           <NavBarLink
             tw="mt-8"
             onClick={() => {

@@ -62,8 +62,8 @@ function App() {
                   <Route path=":weekNumber" element={<Score />} />
                 </Route>
                 <Route path="programming-schedule/">
-                  <Route path="activities/" element={<ProgrammingSchedule />} />
-                  <Route path="staff" element={<StaffSchedule />} />
+                  <Route path="activities/" element={<AdminAccess><ProgrammingSchedule /></AdminAccess>} />
+                  <Route path="staff" element={<AdminAccess><StaffSchedule /></AdminAccess>} />
                 </Route>
                 <Route
                   path="schedule/*"
