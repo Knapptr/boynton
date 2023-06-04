@@ -26,6 +26,7 @@ act.name AS name,
 act.id,
 act.description
 FROM activities act
+ORDER BY act.name
 		`;
         const results = await fetchMany(query);
         if (results) {

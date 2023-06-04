@@ -1,5 +1,5 @@
 import { useContext, useState, useEffect, useCallback } from "react";
-import { MenuSelector } from "../components/styled";
+import { MenuSelector, StaffListing } from "../components/styled";
 import UserContext from "../components/UserContext";
 import fetchWithToken from "../fetchWithToken";
 import tw from 'twin.macro';
@@ -243,7 +243,7 @@ const ViableStaffList = ({ staff, selectStaff, isSelected }) => {
     <ul tw="flex justify-center">
       {staff.map(staffer => (
         <li onClick={(e) => { e.preventDefault(); selectStaff(StaffSelectionSources.UNASSIGNED(), staffer) }} key={`viable-staff-${staffer.staffSessionId}`}>
-          <StaffListing isSelected={isSelected(staffer)} staffer={staffer} />
+          <StaffListing selectable isSelected={isSelected(staffer)} staffer={staffer} />
         </li>
       ))}
     </ul>
@@ -278,34 +278,6 @@ const ActivityStaffList = ({ activities, selectStaff, isSelected, handleActivity
   )
 }
 
-const StaffListing = ({ staffer, isSelected, removeable, remove }) => {
-  return (
-    <div tw="select-none cursor-pointer px-2 py-1 bg-cyan-100 rounded-full shadow flex border gap-2 justify-center items-center" css={[isSelected && tw`bg-cyan-700`]} >
-      <h3 tw="text-xl">{staffer.firstName} {staffer.lastName}</h3>
-      <ul tw="flex gap-2" id={`badges-${staffer.staffSessionId}`}>
-        {staffer.firstYear && <StaffBadge firstYear>FY</StaffBadge>}
-        {staffer.senior && <StaffBadge senior>SR</StaffBadge>}
-        {staffer.lifeguard && <StaffBadge lifeguard >LG</StaffBadge>}
-        {staffer.ropes && <StaffBadge ropes >RO</StaffBadge>}
-        {staffer.archery && <StaffBadge archery >AR</StaffBadge>}
 
-      </ul>
-      {removeable && remove && <button onClick={remove}>X</button>}
-    </div >
-  )
-}
-
-const StaffBadge = styled.li(({ lifeguard, senior, firstYear, ropes, archery }) => [
-  tw`text-xs bg-gray-50 font-bold p-1 rounded-full`,
-  firstYear && tw`text-green-500`,
-  senior && tw`text-black`,
-  lifeguard && tw`text-red-500`,
-  ropes && tw`text-amber-500`,
-  archery && tw`text-yellow-500`
-
-
-
-
-])
 
 export default StaffSchedule
