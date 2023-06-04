@@ -16,16 +16,46 @@ const dayDictionary = {
 
 const ProgrammingSchedule = () => {
   const auth = useContext(UserContext);
+
+
+  // Refactored 
+  const [activities, _, updateActivities] = useGetDataOnMount({
+    url: "/api/activities",
+    initialState: [],
+    useToken: true
+  })
   // get the list of weeks
   const [weeks, setWeeks] = useState([]);
-  const [selectedWeek, setSelectedWeek] = useState(undefined);
+  // selectedWeekId is mainly concerned with the selection menu and UI logic
+  const [selectedWeekNumber, setSelectedWeekNumber] = useState(undefined);
+  // current Week is data fetched from /api/weeks/:weekid
+  const [currentWeek, setCurrentWeek] = useState(undefined);
+
+  const [selectedDayIndex, setSelectedDayIndex] = useState(undefined);
+
+  const selectDay = (dayIndex) => {
+    setSelectedDayIndex(dayIndex)
+  }
+
+  const getSelectedDay = () => {
+    if (!currentWeek) { return undefined }
+    return currentWeek.days[selectedDayIndex]
+  }
+
+
 
   const getWeeks = useCallback(async () => {
     const response = await fetchWithToken("/api/weeks", {}, auth)
     if (!response || response.status !== 200) { console.log("Something went wrong!"); return; }
     const data = await response.json();
     setWeeks(data);
+  }, [auth])
 
+  const getWeek = useCallback(async (weekNumber) => {
+    const response = await fetchWithToken(`/api/weeks/${weekNumber}`, {}, auth)
+    if (!response || response.status !== 200) { console.log("Something went wrong!"); return; }
+    const data = await response.json();
+    setCurrentWeek(data);
   }, [auth])
 
 
@@ -33,6 +63,49 @@ const ProgrammingSchedule = () => {
     getWeeks();
   }, [getWeeks])
 
+  const selectWeek = (weekNumber) => {
+    // clear the selected day
+    setSelectedDayIndex(undefined);
+    // Select for menu
+    setSelectedWeekNumber(weekNumber);
+    // fetch weeks data
+    getWeek(weekNumber);
+  }
+  const [createActivityData, setCreateActivityData] = useState({ showWindow: false, name: "", description: "", periodId: null });
+  const [selectActivityData, setSelectActivityData] = useState({ showWindow: false, selection: undefined, period: undefined });
+
+  const closeCreatePopOut = () => {
+    setCreateActivityData(d => ({ ...d, showWindow: false }));
+  }
+
+  const closeAddPopout = () => {
+    setSelectActivityData(d => ({ ...d, showWindow: false }));
+  }
+  // const openAddPopout = () => {
+  //   setSelectActivityData(d => ({ ...d, showWindow: true }));
+  // }
+
+  /** Begin the creation of an activity, display a popup with relevant fields.
+    * @param periodId {periodId} the period for which to instantiate a session of the newly created activity */
+  const beginCreateActivity = (periodId) => {
+    // close the select activity window
+    closeAddPopout()
+    setCreateActivityData({ showWindow: true, name: "", description: "", periodId });
+  }
+  /** Begin the creation of an activity session
+    * @param periodId {periodId} the period for which to create the session */
+  const beginAddActivity = (period) => {
+    // openAddPopout();
+    setSelectActivityData({ showWindow: true, currentSelection: undefined, period });
+  }
+
+  /** things to do after creating activity and activity session with activity creator
+    */
+  const afterActivityCreation = async () => {
+    await getWeek(selectedWeekNumber);
+    closeCreatePopOut();
+    updateActivities();
+  }
 
   const addActivitySession = async (activityId, periodId) => {
     console.log("adding activity");
@@ -48,71 +121,24 @@ const ProgrammingSchedule = () => {
     const setData = await response.json();
     return setData
   }
+  //
+  ///// END REFACTOR
 
 
-  /* NOTE TO SELF
-      * Refactor the selctions to use indicies 
-      * such that the selected day/week/period
-      * remain selected when the state of the week
-      * is updated
-  */
 
-  const [selectedDay, setSelectedDay] = useState(undefined);
 
-  const [selectedPeriod, setSelectedPeriod] = useState(undefined);
 
-  const [displayAddPopout, setDisplayPopout] = useState(false);
 
-  const [activities, _, updateActivities] = useGetDataOnMount({
-    url: "/api/activities",
-    initialState: [],
-    useToken: true
-  })
 
-  /** Select a week */
-  const selectWeek = (week) => {
-    setSelectedWeek(week);
-    setSelectedDay(undefined);
-  }
-
-  /** Select a day */
-  const selectDay = (day) => {
-    setSelectedDay(day);
-  }
-
-  /** Display the add activity popout 
-    * @param {boolean} state New State*/
-  const showPopout = (state) => {
-    setDisplayPopout(state)
-  }
 
   /** Select a period to add to
     * @param {period} period period to select
     */
-  const selectPeriod = (period) => {
-    setSelectedPeriod(period);
-  }
+  // const selectPeriod = (periodIndex) => {
+  //   setSelectedPeriodIndex(periodIndex);
+  //   setSelectedPeriod(selectedDay.periods[periodIndex])
+  // }
 
-  const [createActivityData, setCreateActivityData] = useState({ showWindow: false, name: "", description: "", periodId: null });
-
-  const closeCreatePopOut = () => {
-    setCreateActivityData(d => ({ ...d, showWindow: false }));
-  }
-  /** Begin the creation of an activity, display a popup with relevant fields.
-    * @param periodId {periodId} the period for which to instantiate a session of the newly created activity */
-  const beginCreateActivity = (periodId) => {
-    // close the select activity window
-    setDisplayPopout(false);
-    setCreateActivityData({ showWindow: true, name: "", description: "", periodId });
-  }
-
-  /** things to do after creating activity and activity session with activity creator
-    */
-  const afterActivityCreation = async () => {
-    await getWeeks();
-    closeCreatePopOut();
-    updateActivities();
-  }
 
   return (
     <>
@@ -121,30 +147,30 @@ const ProgrammingSchedule = () => {
           <CreateActivity data={createActivityData} setData={setCreateActivityData} close={closeCreatePopOut} addActivitySession={addActivitySession} afterCreation={afterActivityCreation} />
         </PopOut>
       }
-      {selectedWeek && selectedDay && selectedPeriod && displayAddPopout &&
-        <PopOut shouldDisplay={true} onClick={(e) => { showPopout(false) }}>
-          <AddActivityBox activities={activities} addActivitySession={addActivitySession} week={selectedWeek} day={selectedDay} period={selectedPeriod} close={() => { showPopout(false) }} createActivity={beginCreateActivity} updateWeeks={getWeeks} />
+      {selectActivityData.showWindow &&
+        <PopOut shouldDisplay={true} onClick={closeAddPopout}>
+          <AddActivityBox activities={activities} addActivitySession={addActivitySession} week={currentWeek} day={currentWeek.days[selectedDayIndex]} period={selectActivityData.period} close={closeAddPopout} createActivity={beginCreateActivity} updateWeeks={() => getWeek(selectedWeekNumber)} />
         </PopOut>
       }
       <ul tw="flex justify-center sm:justify-evenly gap-2">
-        {weeks.map((week) => {
+        {weeks.map((week, weekIndex) => {
           return (
-            <MenuSelector key={`week-select-${week.number}`} onClick={() => { selectWeek(week) }} isSelected={selectedWeek && week.number === selectedWeek.number} >
+            <MenuSelector key={`week-select-${week.number}`} onClick={() => { selectWeek(week.number) }} isSelected={selectedWeekNumber && week.number === selectedWeekNumber} >
               <h2><span tw="hidden  sm:block">Week</span> {week.number} </h2><span tw="hidden sm:block text-xs font-thin">{week.title}</span>
             </MenuSelector>
           )
         })}
       </ul>
-      < ul tw="flex justify-center sm:justify-evenly gap-2"> {selectedWeek !== undefined && selectedWeek.days.map(day =>
-        <MenuSelector key={`day-select-${day.id}`} onClick={(e) => { e.stopPropagation(); setSelectedDay(day) }} isSelected={selectedDay && day.id === selectedDay.id}> <h3>{day.name}</h3></MenuSelector>
+      < ul tw="flex justify-center sm:justify-evenly gap-2"> {selectedWeekNumber !== undefined && currentWeek && currentWeek.days.map((day, dayIndex) =>
+        <MenuSelector key={`day-select-${day.id}`} onClick={(e) => { e.stopPropagation(); selectDay(dayIndex) }} isSelected={getSelectedDay() && day.id === getSelectedDay().id}> <h3>{day.name}</h3></MenuSelector>
       )
       }
       </ul >
       {/* PERIODS */}
-      <ul tw="grid grid-cols-2 sm:flex justify-evenly gap-2"> {selectedDay !== undefined && selectedDay.periods.map(period => {
+      <ul tw="grid grid-cols-2 sm:flex justify-evenly gap-2"> {getSelectedDay() !== undefined && getSelectedDay().periods.map((period) => {
         return <li key={`period-select-${period.id}`} ><span>Act {period.number}</span>
           <ul>
-            <button onClick={() => { showPopout(true); selectPeriod(period) }} tw="bg-green-200 rounded shadow-sm border border-black w-full text-xs px-1">+ Add Activity</button>
+            <button onClick={() => { beginAddActivity(period) }} tw="bg-green-200 rounded shadow-sm border border-black w-full text-xs px-1">+ Add Activity</button>
             {period.activities.map(activity => <li key={`activity-list-${activity.id}`}>{activity.name}</li>)}
           </ul>
         </li>
@@ -291,7 +317,11 @@ const CreateActivity = ({ data, setData, close, addActivitySession, afterCreatio
     }
 
     const result = await fetchWithToken(url, options, auth)
-    if (result.status === 400) { console.log("Not created"); return; }
+    if (result.status === 400) {
+      close();
+      const message = await result.text();
+      console.log(message); return;
+    }
     const { id } = await result.json();
     // Create a session for the activity
     await addActivitySession(id, data.periodId);

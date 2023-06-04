@@ -1,15 +1,22 @@
 const Activity = require("../../models/activity");
 const CamperActivity = require("../../models/CamperActivity");
 const ApiError = require("../../utils/apiError");
+const DbError = require("../../utils/DbError");
 const jsonError = require("../../utils/jsonError");
 module.exports = {
     async create(req, res, next) {
         //TODO Add sanitization and more validation
         const { name, description } = req.body;
-        if (!name || !description) { next(ApiError.notCreated("Needs name and description")); return; }
-        const activity = await Activity.create({ name, description })
-        if (!activity) { next(ApiError.notCreated("Activity not created")); return; }
-        res.json(activity)
+        if (!name || description === undefined) { next(ApiError.notCreated("Needs name and description")); return; }
+        try {
+            const activity = await Activity.create({ name: name.trim(), description: description.trim() })
+            // if (!activity) { next(ApiError.notCreated("Activity not created")); return; }
+            res.json(activity)
+            return;
+        } catch (e) {
+            if (e.code = 23505) { next(DbError.alreadyExists("The activity already exists")); return; }
+            next(e);
+        }
     },
     async getOne(req, res, next) {
         const id = req.params.activityID;

@@ -124,8 +124,7 @@ class ActivitySession {
                 periodId: result.period_id
             }
         } catch (e) {
-            console.log("Something went wrong. Fix this error handling in activitySession")
-            console.log(e);
+            throw e
         }
 
     }

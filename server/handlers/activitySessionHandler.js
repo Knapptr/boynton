@@ -2,8 +2,8 @@ const ActivitySession = require("../../models/activitySession");
 const StaffSession = require("../../models/staffSession");
 const StaffActivity = require("../../models/staffActivity");
 const ApiError = require("../../utils/apiError");
+const DbError = require("../../utils/DbError");
 
-// ERROR HANDLING MOVE THIS OUT OF THIS AND BEGIN IMPLEMENTING IT ELSEWHERE
 const activitySessionHandler = {
   async getAllSessions(req, res, next) {
     const { period } = req.query;
@@ -27,7 +27,13 @@ const activitySessionHandler = {
       res.json(activitySession);
       return;
     } catch (e) {
-      next(e);
+      console.log({ e })
+      if (e.code === "23505") {
+        next(DbError.alreadyExists("The activity already exists"))
+        return;
+      }
+      next(new Error("something went wrong"));
+      return;
     }
 
   },

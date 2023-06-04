@@ -81,7 +81,7 @@ module.exports = {
   activities: `
   CREATE TABLE IF NOT EXISTS activities (
   id serial NOT NULL UNIQUE,
-  name character varying(255),
+  name character varying(255) NOT NULL UNIQUE,
   description character varying(255) COLLATE pg_catalog."default",
   CONSTRAINT act_pkey PRIMARY KEY (id)
   )

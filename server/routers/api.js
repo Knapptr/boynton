@@ -15,6 +15,18 @@ const usersRouter = require("./users");
 const staffSessionRouter = require("./staffSessions");
 const { adminOnly } = require("../middleware/authRole");
 
+const errorHandling = (err, req, res, next) => {
+	if (err.type) {
+		switch (err.type) {
+			case "API":
+				res.status(err.status).json(err);
+				break;
+			case "DB":
+				res.status(400).send(err.message);
+
+		}
+	}
+}
 //log all api requs
 router.use((req, res, next) => {
 	console.log(`Request to: ${req.url}. Params:`, req.params, "Query:", req.query);
@@ -35,4 +47,5 @@ router.use("/camper-weeks", camperWeekRouter);
 router.use("/weeks", weekRouter);
 router.use(adminOnly);
 router.use("/users", usersRouter);
+router.use(errorHandling)
 module.exports = router;
