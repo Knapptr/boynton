@@ -45,7 +45,7 @@ const activitySessionHandler = {
     if (!activitySession) { next(ApiError.notFound("Activity Session Not Found")); return; }
     const deleted = await activitySession.delete();
     if (!activitySession) { next(ApiError.server("Nothing deleted")); return; }
-    res.json(deleted);
+    res.status(202).json(deleted);
   },
 
   async addCamperToActivity(req, res, next) {

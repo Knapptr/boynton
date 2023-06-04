@@ -17,13 +17,12 @@ const dayDictionary = {
 const ProgrammingSchedule = () => {
   const auth = useContext(UserContext);
 
-
-  // Refactored 
   const [activities, _, updateActivities] = useGetDataOnMount({
     url: "/api/activities",
     initialState: [],
     useToken: true
   })
+
   // get the list of weeks
   const [weeks, setWeeks] = useState([]);
   // selectedWeekId is mainly concerned with the selection menu and UI logic
@@ -41,8 +40,6 @@ const ProgrammingSchedule = () => {
     if (!currentWeek) { return undefined }
     return currentWeek.days[selectedDayIndex]
   }
-
-
 
   const getWeeks = useCallback(async () => {
     const response = await fetchWithToken("/api/weeks", {}, auth)
@@ -107,8 +104,7 @@ const ProgrammingSchedule = () => {
     updateActivities();
   }
 
-  const addActivitySession = async (activityId, periodId) => {
-    console.log("adding activity");
+  const requestAddActivitySession = async (activityId, periodId) => {
     const url = "/api/activity-sessions"
     const data = { activityId, periodId };
     const opts = {
@@ -120,35 +116,38 @@ const ProgrammingSchedule = () => {
     const response = await fetchWithToken(url, opts, auth);
     return response
   }
-  //
-  ///// END REFACTOR
 
+  const requestDeleteActivitySession = async (activitySessionId) => {
+    const url = `/api/activity-sessions/${activitySessionId}`;
+    const opts = { method: "DELETE" };
+    const response = await fetchWithToken(url, opts, auth);
+    return response;
+  }
 
+  const [waitingForDeleteRequest, setWaitingForDeleteRequest] = useState(null);
+  const handleDeleteRequest = async (activitySessionId) => {
+    setWaitingForDeleteRequest(activitySessionId);
+    const response = await requestDeleteActivitySession(activitySessionId);
+    if (response.status !== 202) {
+      console.log("Could not delete activity session");
+      return;
+    }
+    console.log("Deleted activity session");
+    await getWeek(selectedWeekNumber);
+    setWaitingForDeleteRequest(null);
 
-
-
-
-
-
-  /** Select a period to add to
-    * @param {period} period period to select
-    */
-  // const selectPeriod = (periodIndex) => {
-  //   setSelectedPeriodIndex(periodIndex);
-  //   setSelectedPeriod(selectedDay.periods[periodIndex])
-  // }
-
+  }
 
   return (
     <>
       {createActivityData.showWindow &&
         <PopOut shouldDisplay={true} onClick={closeCreatePopOut}>
-          <CreateActivity data={createActivityData} setData={setCreateActivityData} close={closeCreatePopOut} addActivitySession={addActivitySession} afterCreation={afterActivityCreation} />
+          <CreateActivity data={createActivityData} setData={setCreateActivityData} close={closeCreatePopOut} addActivitySession={requestAddActivitySession} afterCreation={afterActivityCreation} />
         </PopOut>
       }
       {selectActivityData.showWindow &&
         <PopOut shouldDisplay={true} onClick={closeAddPopout}>
-          <AddActivityBox activities={activities} addActivitySession={addActivitySession} week={currentWeek} day={currentWeek.days[selectedDayIndex]} period={selectActivityData.period} close={closeAddPopout} createActivity={beginCreateActivity} updateWeek={() => getWeek(selectedWeekNumber)} />
+          <AddActivityBox activities={activities} addActivitySession={requestAddActivitySession} week={currentWeek} day={currentWeek.days[selectedDayIndex]} period={selectActivityData.period} close={closeAddPopout} createActivity={beginCreateActivity} updateWeek={() => getWeek(selectedWeekNumber)} />
         </PopOut>
       }
       <ul tw="flex justify-center sm:justify-evenly gap-2">
@@ -166,11 +165,15 @@ const ProgrammingSchedule = () => {
       }
       </ul >
       {/* PERIODS */}
-      <ul tw="grid grid-cols-2 sm:flex justify-evenly gap-2"> {getSelectedDay() !== undefined && getSelectedDay().periods.map((period) => {
-        return <li key={`period-select-${period.id}`} ><span>Act {period.number}</span>
-          <ul>
+      <ul tw="grid grid-cols-2 sm:flex justify-center gap-4"> {getSelectedDay() !== undefined && getSelectedDay().periods.map((period) => {
+        return <li tw="w-full border-r last:border-none px-2" key={`period-select-${period.id}`} ><h1 tw="font-bold text-lg">Act {period.number}</h1>
+          <ul tw="w-full">
             <button onClick={() => { beginAddActivity(period) }} tw="bg-green-200 rounded shadow-sm border border-black w-full text-xs px-1">+ Add Activity</button>
-            {period.activities.map(activity => <li key={`activity-list-${activity.id}`}>{activity.name}</li>)}
+            {period.activities.map(activity => <li tw="even:bg-cyan-100 flex justify-between py-1 px-2" key={`activity-list-${activity.id}`}>{activity.name}
+              {waitingForDeleteRequest !== activity.sessionId && <button tw="p-1 bg-red-500 text-white font-bold text-lg rounded" onClick={() => { handleDeleteRequest(activity.sessionId) }}>-</button>}
+              {waitingForDeleteRequest === activity.sessionId && <button tw="py-1 px-2 text-white font-bold text-lg rounded bg-yellow-700 cursor-default" ></button>}
+
+            </li>)}
           </ul>
         </li>
       })}
