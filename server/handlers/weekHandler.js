@@ -8,7 +8,7 @@ const weekHandler = {
 	async getAll(req, res, next) {
 		const getStaff = req.query.staff === "true";
 		const weeks = await Week.getAll(getStaff);
-		res.json(weeks);
+		res.status(200).json(weeks);
 	},
 	async getOne(req, res, next) {
 		const getStaff = req.query.staff === "true";

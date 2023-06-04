@@ -46,15 +46,17 @@ const useGetDataOnMount = ({
     }
   }, [auth, location.pathname, navigate]);
   const update = useCallback(() => {
+    console.log("Updating");
     fetchAndSet({
       url,
-      beforeSet,
+      beforeSet: (d) => { console.log({ d }); return d },
       handler: setData,
       afterSet,
       optionalSortFunction,
       useToken,
     });
   }, [beforeSet, optionalSortFunction, useToken, afterSet, url, fetchAndSet]);
+
   useEffect(() => {
     fetchAndSet({
       url,
@@ -64,7 +66,7 @@ const useGetDataOnMount = ({
       optionalSortFunction,
       useToken,
     });
-  }, [...runOn]);
+  }, []);
 
   return [data, setData, update, loaded];
 };

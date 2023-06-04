@@ -108,6 +108,38 @@ class ActivitySession {
             return false
         }
     }
+    static async create(activityId, periodId) {
+        const query = `
+        INSERT INTO activity_sessions (activity_id, period_id) VALUES ($1, $2) RETURNING *
+        `
+        const values = [activityId, periodId];
+
+        try {
+            const result = await fetchOne(query, values);
+            console.log({ result })
+            if (!result) { throw new Error("Cannot create activity session") }
+            return {
+                id: result.id,
+                activityId: result.activity_id,
+                periodId: result.period_id
+            }
+        } catch (e) {
+            console.log("Something went wrong. Fix this error handling in activitySession")
+            console.log(e);
+        }
+
+    }
+    async delete() {
+        const query = `
+        DELETE FROM activity_sessions acts WHERE acts.id = $1
+        RETURNING *
+        `
+        const values = [this.id];
+
+        const result = await fetchOne(query, values);
+        if (!result) { return false }
+        return { id: result.id, periodId: result.period_id, activityId: result.activity_id }
+    }
     async addCamper(camperID) {
         const query = `
          INSERT INTO camper_activities (camper_week_id,activity_id,period_id) 

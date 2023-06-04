@@ -1,7 +1,9 @@
 const ActivitySession = require("../../models/activitySession");
 const StaffSession = require("../../models/staffSession");
-const StaffActivity = require("../../models/staffActivity")
+const StaffActivity = require("../../models/staffActivity");
+const ApiError = require("../../utils/apiError");
 
+// ERROR HANDLING MOVE THIS OUT OF THIS AND BEGIN IMPLEMENTING IT ELSEWHERE
 const activitySessionHandler = {
   async getAllSessions(req, res, next) {
     const { period } = req.query;
@@ -16,6 +18,28 @@ const activitySessionHandler = {
     const { activitySessionId } = req.params;
     const activitySession = await ActivitySession.get(activitySessionId);
     res.json(activitySession);
+  },
+
+  async create(req, res, next) {
+    const { activityId, periodId } = req.body;
+    try {
+      const activitySession = await ActivitySession.create(activityId, periodId);
+      res.json(activitySession);
+      return;
+    } catch (e) {
+      next(e);
+    }
+
+  },
+
+  async delete(req, res, next) {
+    const { activitySessionId } = req.params;
+    //find the error session
+    const activitySession = await ActivitySession.get(activitySessionId);
+    if (!activitySession) { next(ApiError.notFound("Activity Session Not Found")); return; }
+    const deleted = await activitySession.delete();
+    if (!activitySession) { next(ApiError.server("Nothing deleted")); return; }
+    res.json(deleted);
   },
 
   async addCamperToActivity(req, res, next) {
@@ -35,7 +59,7 @@ const activitySessionHandler = {
     console.log({ activitySession, staffSession });
     //TODO handle non activty or non staff session
     if (!activitySession || !staffSession) {
-      next(new Error("Cannot handle. Error handling not yet implemented"))
+      next(new ApiError("Cannot handle. Error handling not yet implemented"))
       return;
     }
     try {

@@ -82,16 +82,13 @@ WHERE act.id = $1 `;
         }
         return [];
     }
-    static async create({ name, description, periodID }) {
+    static async create({ name, description }) {
         const query =
-            "INSERT INTO activities (name,description,period_id) VALUES ($1,$2,$3) RETURNING id, name, description period_id";
-        const values = [name, description, periodID];
-        const activity = await fetchOneAndCreate({
-            query,
-            values,
-            Model: Activity,
-        });
-        return activity;
+            "INSERT INTO activities (name,description) VALUES ($1,$2) RETURNING *";
+        const values = [name, description];
+        const result = await fetchOne(query, values);
+        if (!result) { return false }
+        return new Activity({ name: result.name, description: result.description, id: result.id })
     }
     async addCamper(camperID, periodID) {
         const query =

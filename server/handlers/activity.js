@@ -1,7 +1,16 @@
 const Activity = require("../../models/activity");
 const CamperActivity = require("../../models/CamperActivity");
+const ApiError = require("../../utils/apiError");
 const jsonError = require("../../utils/jsonError");
 module.exports = {
+    async create(req, res, next) {
+        //TODO Add sanitization and more validation
+        const { name, description } = req.body;
+        if (!name || !description) { next(ApiError.notCreated("Needs name and description")); return; }
+        const activity = await Activity.create({ name, description })
+        if (!activity) { next(ApiError.notCreated("Activity not created")); return; }
+        res.json(activity)
+    },
     async getOne(req, res, next) {
         const id = req.params.activityID;
         let activity = await Activity.get(id);
@@ -18,14 +27,14 @@ module.exports = {
         res.json(activities);
     },
     async addCamper(req, res, next) {
-      console.log({body:req.body});
+        console.log({ body: req.body });
         const { camperWeekId, periodId } = req.body;
         const activityId = req.params.activityID;
-      console.log({
-        camperWeekId,periodId,activityId
-      })
+        console.log({
+            camperWeekId, periodId, activityId
+        })
         const activity = await Activity.get(activityId);
-      console.log({activity});
+        console.log({ activity });
         const camperActivityID = await activity.addCamper(
             camperWeekId,
             periodId
