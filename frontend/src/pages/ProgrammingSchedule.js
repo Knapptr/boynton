@@ -118,8 +118,7 @@ const ProgrammingSchedule = () => {
     }
 
     const response = await fetchWithToken(url, opts, auth);
-    const setData = await response.json();
-    return setData
+    return response
   }
   //
   ///// END REFACTOR
@@ -149,7 +148,7 @@ const ProgrammingSchedule = () => {
       }
       {selectActivityData.showWindow &&
         <PopOut shouldDisplay={true} onClick={closeAddPopout}>
-          <AddActivityBox activities={activities} addActivitySession={addActivitySession} week={currentWeek} day={currentWeek.days[selectedDayIndex]} period={selectActivityData.period} close={closeAddPopout} createActivity={beginCreateActivity} updateWeeks={() => getWeek(selectedWeekNumber)} />
+          <AddActivityBox activities={activities} addActivitySession={addActivitySession} week={currentWeek} day={currentWeek.days[selectedDayIndex]} period={selectActivityData.period} close={closeAddPopout} createActivity={beginCreateActivity} updateWeek={() => getWeek(selectedWeekNumber)} />
         </PopOut>
       }
       <ul tw="flex justify-center sm:justify-evenly gap-2">
@@ -192,9 +191,9 @@ const ProgrammingSchedule = () => {
   * @param props.close function to close popup
   * @param props.addActivitySession {activityAdder}
   * @param props.createActivity called when pressing "create activity"
-  * @param props.updateWeeks called after creating session
+  * @param props.updateWeek called after creating session
   */
-const AddActivityBox = ({ week, period, day, close, addActivitySession, createActivity, activities, updateWeeks }) => {
+const AddActivityBox = ({ week, period, day, close, addActivitySession, createActivity, activities, updateWeek }) => {
   // get list of activities
   const [searchResults, setSearchResults] = useState([]);
 
@@ -237,8 +236,14 @@ const AddActivityBox = ({ week, period, day, close, addActivitySession, createAc
   const handleSubmit = async () => {
     if (selectedActivity !== undefined) {
       const actSessResponse = await addActivitySession(selectedActivity.id, period.id)
+      if (actSessResponse.status === 400) {
+        closeAndClear();
+        const message = await actSessResponse.text();
+        console.log(message);
+        return;
+      }
       console.log({ actSessResponse });
-      await updateWeeks()
+      await updateWeek()
       closeAndClear()
     }
 

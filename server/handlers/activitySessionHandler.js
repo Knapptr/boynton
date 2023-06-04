@@ -29,7 +29,7 @@ const activitySessionHandler = {
     } catch (e) {
       console.log({ e })
       if (e.code === "23505") {
-        next(DbError.alreadyExists("The activity already exists"))
+        next(DbError.alreadyExists("The activity already exists in that period"))
         return;
       }
       next(new Error("something went wrong"));
