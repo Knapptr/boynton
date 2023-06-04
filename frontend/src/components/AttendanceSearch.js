@@ -20,14 +20,15 @@ const AttendanceSearch = ({
       return;
     }
     const searchTerm = query.toUpperCase();
-    const newResults = activities.reduce((acc, cv) => {
-      const campers = cv.campers.filter(
-        (camper) =>
-          camper.firstName.toUpperCase().includes(searchTerm) ||
-          camper.lastName.toUpperCase().includes(searchTerm)
-      );
-      acc = [...acc, ...campers];
-      return acc;
+    const newResults = activities.reduce((activityAcc, activityCv) => {
+      const campers = activityCv.campers.reduce((camperAcc, camperCv) => {
+        if (camperCv.firstName.includes(searchTerm) || camperCv.lastName.includes(searchTerm)) {
+          camperAcc.push({ activityName: activityCv.name, ...camperCv })
+        }
+        return camperAcc
+      }, [])
+      activityAcc = [...activityAcc, ...campers];
+      return activityAcc;
     }, []);
     setResults(newResults);
   }, [query, activities]);
