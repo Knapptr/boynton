@@ -16,7 +16,6 @@ const usersHandler = {
   },
 
   async create(req, res, next) {
-    console.log("User Create Body:", { body: req.body });
     const { username, password, role, firstName, lastName, lifeguard, senior, firstYear, archery, ropes } = req.body;
     try {
       const user = await User.create({ username, password, role, firstName, lastName, lifeguard, archery, senior, firstYear, ropes });
@@ -61,7 +60,9 @@ const usersHandler = {
 
   async weekSchedule(req, res, next) {
     const { username, weekNumber } = req.params;
-    const scheduleResponse = await User.weekSchedule(username, weekId);
+    const scheduleResponse = await User.weekSchedule(username, weekNumber);
+    if (!scheduleResponse) { next(ApiError.notFound("User or UserSession not found")); return; }
+    res.json(scheduleResponse);
 
   }
 }

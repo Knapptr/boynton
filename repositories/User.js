@@ -47,12 +47,56 @@ const UserRepository = {
 		}
 	},
 	async get(username) {
-		const query = "SELECT * from users WHERE username = $1";
+		const query = `
+		SELECT u.*, ss.week_number as week_number, ss.id as staff_session_id from users u
+		LEFT JOIN staff_sessions ss ON ss.username = u.username
+		WHERE u.username = $1
+		`;
 		const values = [username];
-		const user = await fetchOne(query, values);
-		if (!user) {
+		const userResponse = await fetchMany(query, values);
+		if (!userResponse) {
 			return false;
 		}
+
+
+		const initUser = {
+			username: "",
+			password: "",
+			firstName: "",
+			lastName: "",
+			role: "counselor",
+			senior: false,
+			firstYear: false,
+			lifeguard: false,
+			archery: false,
+			ropes: false,
+			sessions: []
+		}
+
+		const user = userResponse.reduce((mappedUser, db) => {
+			mappedUser.username = db.username;
+			mappedUser.password = db.password;
+			mappedUser.firstName = db.first_name;
+			mappedUser.lastName = db.last_name;
+			mappedUser.role = db.role;
+			mappedUser.senior = db.senior;
+			mappedUser.firstYear = db.first_year;
+			mappedUser.lifeguard = db.lifeguard;
+			mappedUser.archery = db.archery;
+			mappedUser.ropes = db.ropes
+
+			if (db.staff_session_id !== null) {
+				mappedUser.sessions.push(
+					{
+						id: db.staff_session_id,
+						weekNumber: db.week_number
+					}
+				)
+			}
+			return mappedUser
+		}, initUser)
+
+
 		return user;
 	},
 	async create({ username, password: unhashedPassword, role, firstName, lastName, lifeguard = false, archery = false, ropes = false, firstYear = false, senior = false }) {

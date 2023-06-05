@@ -7,7 +7,7 @@ const VALID_ROLES = ["admin", "unit_head", "programming", "counselor"];
 
 module.exports = class User {
   constructor(
-    { username, password, role, firstName, lastName, lifeguard = false, archery = false, ropes = false, firstYear = false, senior = false },
+    { username, password, role, firstName, lastName, lifeguard = false, archery = false, ropes = false, firstYear = false, senior = false, sessions = [] },
 
     userRepository = defaultUserRepository
   ) {
@@ -22,6 +22,8 @@ module.exports = class User {
     this.firstYear = firstYear;
     this.ropes = ropes;
     this.senior = senior;
+    this.sessions = sessions;
+
   }
 
   toJSON() {
@@ -34,28 +36,16 @@ module.exports = class User {
       archery: this.archery,
       ropes: this.ropes,
       firstYear: this.firstYear,
-      senior: this.senior
+      senior: this.senior,
+      sessions: this.sessions
     }
   }
 
   static async get(username, userRepository = defaultUserRepository) {
-    const dbUserData = await userRepository.get(username);
-    if (!dbUserData) {
+    const userData = await userRepository.get(username);
+    if (!userData) {
       return false
     }
-    const userData = {
-      username: dbUserData.username,
-      password: dbUserData.password,
-      role: dbUserData.role,
-      lifeguard: dbUserData.lifeguard,
-      ropes: dbUserData.ropes,
-      archery: dbUserData.archery,
-      firstYear: dbUserData.first_year,
-      senior: dbUserData.senior,
-      firstName: dbUserData.first_name,
-      lastName: dbUserData.last_name
-    }
-    console.log({ userData });
     return new User({ ...userData }, userRepository);
   }
 
@@ -121,7 +111,48 @@ module.exports = class User {
   }
 
   static async weekSchedule(username, weekNumber) {
-    const query = ``
+    const query = `
+    SELECT 
+    d.id as day_id,
+    d.name as day_name,
+    p.period_number, 
+    p.id as period_id,
+    act.name as activity_name, 
+    acts.id as activity_session_id
+    FROM staff_sessions ss
+    JOIN days d ON d.week_id = ss.week_number
+    JOIN periods p ON p.day_id = d.id
+    LEFT JOIN staff_activities sa ON sa.staff_session_id = ss.id AND sa.period_id = p.id
+    LEFT JOIN activity_sessions acts ON acts.id = sa.activity_session_id
+    LEFT JOIN activities act ON act.id = acts.activity_id
+    WHERE d.week_id = $2 AND ss.username = $1
+    ORDER BY d.week_id, d.id, p.period_number
+    `
+    const values = [username, weekNumber]
+
+    const response = await fetchMany(query, values);
+    if (!response) { return false }
+    // deserialize
+    const days = [];
+
+    for (const db of response) {
+      const currentDay = (days.at(-1) && days.at(-1).id === db.day_id) ? days.pop() : {
+        id: db.day_id,
+        name: db.day_name,
+        periods: []
+      };
+
+      const currentPeriod = (currentDay.periods.at(-1) && currentDay.periods.at(-1).id === db.period_id) ? currentDay.periods.pop() : {
+        id: db.period_id,
+        number: db.period_number,
+        activityName: db.activity_name || "OFF",
+        activitySessionId: db.activity_session_id
+      }
+
+      currentDay.periods.push(currentPeriod);
+      days.push(currentDay);
+    }
+    return days;
   }
 
   async delete() {

@@ -29,7 +29,7 @@ const errorHandling = (err, req, res, next) => {
 router.use(passport.authenticate("jwt", { session: false }));
 //log all api requs
 router.use((req, res, next) => {
-	console.log(`${req.method} Request to: ${req.url}. Params:`, req.params, "Query:", req.query, "User", req.user);
+	console.log(`${req.method} Request to: ${req.url}. Params:`, req.params, "Query:", req.query, "User", { username: req.user.username, first: req.user.firstName, last: req.user.lastName });
 	next()
 })
 router.use('/scores', scoreRouter);

@@ -5,6 +5,7 @@ const userRouter = require("express").Router();
 
 
 const selfOrAdminOnly = (req, res, next) => {
+	console.log("user:", req.user);
 	if (req.user.role === "admin") { next(); return; }
 	if (req.params.username !== req.user.username) { res.status(401).send("Not Authorized"); return; }
 	next();
