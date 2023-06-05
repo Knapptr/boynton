@@ -101,23 +101,27 @@ const ActivityAttendance = ({
   return (
     <>
       <div tw="relative ">
-        <header tw="mb-4 bg-lightBlue-500 sticky top-0 flex justify-center py-2 px-3">
-          <div tw="py-3 px-2 text-xl font-bold text-white w-1/2 sm:w-2/3 ">
-            <h2 tw="">
-              {activity.name}
-              <span tw="text-gray-800 ml-3 font-thin">
-                {activity.campers.length}
-              </span>
-            </h2>
-            <ul tw="flex text-black font-normal gap-3">{activity.staff.map(staffer => <StaffListing staffer={staffer}>{staffer.firstName}</StaffListing>)}</ul>
+        <header tw="mb-4 bg-lightBlue-500 sticky top-0  justify-center py-2 px-3">
+          <div id="top-row" tw="flex" >
+            <div tw="py-3 px-2 text-xl font-bold text-white w-1/2 sm:w-2/3 ">
+              <h2 tw="">
+                {activity.name}
+                <span tw="text-gray-800 ml-3 font-thin">
+                  {activity.campers.length}
+                </span>
+              </h2>
+            </div>
+            <AttendanceSummary allHere={getUnaccountedFor() === 0}>
+              {getUnaccountedFor() ? (
+                <span>{getUnaccountedFor()} unaccounted</span>
+              ) : (
+                <span>All Here!</span>
+              )}
+            </AttendanceSummary>
           </div>
-          <AttendanceSummary allHere={getUnaccountedFor() === 0}>
-            {getUnaccountedFor() ? (
-              <span>{getUnaccountedFor()} unaccounted</span>
-            ) : (
-              <span>All Here!</span>
-            )}
-          </AttendanceSummary>
+          <div id="bottom-row">
+            <ul tw="flex flex-col sm:flex-row text-black font-normal gap-3">{activity.staff.map(staffer => <StaffListing staffer={staffer}>{staffer.firstName}</StaffListing>)}</ul>
+          </div>
         </header>
         <ul tw="w-11/12 mx-auto my-3">
           {activity.campers.length === 0 ? (

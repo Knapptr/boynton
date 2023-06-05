@@ -61,7 +61,7 @@ export const DialogBox = ({ close, children, scrollable, full }) => <DialogBoxBo
   {children}</DialogBoxBox>
 
 export const StaffBadge = styled.li(({ firstYear, senior, ropes, archery, lifeguard }) => [
-  tw`text-xs bg-gray-50 font-bold p-1 rounded-full`,
+  tw`hidden rounded-full sm:inline text-xs bg-gray-50 font-bold p-1 `,
   firstYear && tw`text-green-500`,
   senior && tw`text-black`,
   lifeguard && tw`text-red-500`,
@@ -69,10 +69,10 @@ export const StaffBadge = styled.li(({ firstYear, senior, ropes, archery, lifegu
   archery && tw`text-yellow-500`
 ])
 
-export const StaffListing = ({ staffer, isSelected, removeable, remove, selectable }) => {
+export const StaffListing = ({ staffer, fullName, isSelected, removeable, remove, selectable }) => {
   return (
-    <div tw="select-none  px-2 py-1 bg-cyan-100 rounded-full shadow flex border gap-2 justify-center items-center" css={[isSelected && tw`bg-cyan-700`, selectable && tw`cursor-pointer`]} >
-      <h3 tw="text-lg">{staffer.firstName} {staffer.lastName}</h3>
+    <div tw="select-none  px-2 py-1 bg-cyan-100 text-xs sm:text-sm rounded-full shadow flex border gap-2 justify-center items-center" css={[isSelected && tw`bg-cyan-700`, selectable && tw`cursor-pointer`]} >
+      <h3 tw="">{staffer.firstName} {(fullName && staffer.lastName) || staffer.lastName[0].toUpperCase() + "."}</h3>
       <ul tw="flex gap-2" id={`badges-${staffer.staffSessionId}`}>
         {staffer.firstYear && <StaffBadge firstYear>FY</StaffBadge>}
         {staffer.senior && <StaffBadge senior>SR</StaffBadge>}

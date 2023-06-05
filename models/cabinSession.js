@@ -128,7 +128,6 @@ module.exports = class CabinSession {
 			values,
 			Model: CamperWeek,
 		});
-		console.log({ camperSessions });
 		return camperSessions;
 	}
 };
