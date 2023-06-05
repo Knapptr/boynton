@@ -182,8 +182,6 @@ module.exports = class User {
 
   async update({ sessions, username, firstName, lastName, role, lifeguard, archery, ropes, firstYear, senior }) {
     //TODO There should be some sanitization and validation here of updated values
-    console.log("Updating user");
-    console.log({ sessions });
     const query = `
       UPDATE users
       set username = $1,
@@ -200,10 +198,8 @@ module.exports = class User {
     `
     const values = [username, firstName, lastName, role, senior, firstYear, lifeguard, archery, ropes, this.username];
 
-    console.log("sending request: ", { query, values });
     const response = await fetchOne(query, values);
     if (!response) { return false }
-    console.log({ response });
     const userData = {
       username: response.username,
       firstName: response.first_name,
@@ -215,6 +211,39 @@ module.exports = class User {
       firstYear: response.first_year,
       senior: response.senior
     }
-    return new User(userData);
+    // get the newly created user
+    const createdUser = await User.get(response.username);
+    // insert sessions for updated user
+    const allPromises = [];
+    for (const session of sessions) {
+      console.log({ processing: session });
+      // do nothing if a submitted session already exists on user
+      if (createdUser.sessions.some(s => s.weekNumber === session.weekNumber)) {
+        continue;
+      }
+      const sessionQuery = `INSERT INTO staff_sessions (week_number, username) VALUES ($1,$2)`;
+      const sessionValues = [session.weekNumber, createdUser.username];
+      allPromises.push(fetchOne(sessionQuery, sessionValues));
+    }
+    for (const session of createdUser.sessions) {
+      //check if original users has any sessions that created does not and delete them
+      if (!sessions.some(s => s.weekNumber === session.weekNumber)) {
+        const delQuery = `DELETE FROM staff_sessions WHERE week_number = $1 AND username = $2`
+        const delValues = [session.weekNumber, createdUser.username];
+        allPromises.push(fetchOne(delQuery, delValues))
+      }
+    }
+
+    try {
+      const results = await Promise.all(allPromises);
+    } catch (e) {
+      console.log("ERROR", e);
+    }
+
+
+    // fetch completely updated user
+    const user = await User.get(createdUser.username);
+    return user;
+
   }
 };

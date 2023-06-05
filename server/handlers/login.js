@@ -6,7 +6,6 @@ const jwt = require("jsonwebtoken");
 module.exports = {
   async login(req, res) {
     const { username, password } = req.body;
-    console.log({ username, password });
     // if (!username || !password) {
     // 	res.status(400).json(error("No username or password"));
     // 	return;
@@ -17,7 +16,7 @@ module.exports = {
     });
     if (!authResponse) { res.status(401); res.json(error('Not authorized')); return; }
     const { user, isAuthenticated } = authResponse;
-    console.log({ isAuthenticated });
+    // console.log({ isAuthenticated });
     if (!isAuthenticated) {
       res.status(401);
       res.json(error("Not authorized"));
