@@ -150,7 +150,7 @@ const UsersPage = () => {
     try {
       const response = await fetchWithToken(url, opts, auth);
       // TODO handle incorrect args etc
-      if (response.status !== 200) { const err = await response.text(); throw new Error(err) }
+      if (response.status !== 201) { const err = await response.text(); throw new Error(err) }
       console.log("Submitted New User");
       getUsers();
       closePopOut();
@@ -225,7 +225,7 @@ const UsersPage = () => {
       }
       {edit.type === editTypes.CREATE && weeks &&
         <PopOut shouldDisplay={true} onClick={closePopOut}>
-          <EditUserBox editType={editTypes.CREATE} user={edit.user} edits={edit.edits} closePopOut={closePopOut} handleChange={handleChange} onConfirm={submitNew} />
+          <EditUserBox weeks={weeks} editType={editTypes.CREATE} user={edit.user} edits={edit.edits} closePopOut={closePopOut} handleChange={handleChange} onConfirm={submitNew} />
         </PopOut>
       }
       {edit.type === editTypes.DELETE &&

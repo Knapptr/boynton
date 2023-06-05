@@ -90,7 +90,7 @@ module.exports = class User {
     return usersData.map(u => new User(u));
   }
   static async create(
-    { username, firstName, lastName, password, role = "counselor", lifeguard = false, archery = false, ropes = false, firstYear = false, senior = false },
+    { username, firstName, lastName, password, role = "counselor", lifeguard = false, archery = false, ropes = false, firstYear = false, senior = false, sessions = [] },
     userRepository = defaultUserRepository
   ) {
     if (!VALID_ROLES.includes(role)) {
@@ -113,7 +113,20 @@ module.exports = class User {
         firstYear,
         senior
       });
-      return new User(createdData)
+      console.log({ createdData });
+      //create sessions
+      const sessionCreations = [];
+      for (const session of sessions) {
+        const sessQuery = "INSERT INTO staff_sessions (username,week_number) VALUES ($1, $2)"
+        const sessValues = [createdData.username, session.weekNumber];
+        sessionCreations.push(fetchOne(sessQuery, sessValues));
+      }
+      const results = await Promise.all(sessionCreations);
+
+      console.log({ results });
+      const createdUser = await User.get(createdData.username)
+      console.log({ createdUser });
+      return createdUser;
     } else {
       throw new Error("Cannot create user, user exists.");
     }

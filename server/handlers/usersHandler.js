@@ -16,10 +16,10 @@ const usersHandler = {
   },
 
   async create(req, res, next) {
-    const { username, password, role, firstName, lastName, lifeguard, senior, firstYear, archery, ropes } = req.body;
+    const { username, password, role, firstName, lastName, lifeguard, senior, firstYear, archery, ropes, sessions } = req.body;
     try {
-      const user = await User.create({ username, password, role, firstName, lastName, lifeguard, archery, senior, firstYear, ropes });
-      res.sendStatus(200);
+      const user = await User.create({ username, password, role, firstName, lastName, lifeguard, archery, senior, firstYear, ropes, sessions });
+      res.status(201).json(user);
 
     } catch (e) {
       res.status(500);
@@ -43,9 +43,11 @@ const usersHandler = {
   async update(req, res, next) {
     const { username } = req.params;
     // check all fields
+    console.log({ updateBody: req.body })
     const { role, senior, firstYear, firstName, lastName, ropes, lifeguard, archery } = req.body;
-    if (role === undefined || senior === undefined || firstYear === undefined || firstName === undefined || lastName === undefined || ropes === undefined || lifeguard || archery === undefined) {
+    if (role === undefined || senior === undefined || firstYear === undefined || firstName === undefined || lastName === undefined || ropes === undefined || lifeguard === undefined || archery === undefined) {
       next(ApiError.badRequest("Missing fields for user"));
+      return;
     }
     const user = await User.get(username);
     if (!user) { next(new Error("Cannot Delete: User does not exist")) }
@@ -53,6 +55,7 @@ const usersHandler = {
       const result = await user.update(req.body);
       if (!result) { throw new Error("Error updating user") }
       res.json(result)
+      return;
     } catch (e) {
       next(e)
     }
