@@ -5,7 +5,7 @@ import { DialogBox, PopOut } from "../components/styled";
 import tw from "twin.macro";
 import "styled-components/macro";
 
-const EditUserBox = ({ user, edits, editType, handleChange, closePopOut, onConfirm }) => {
+const EditUserBox = ({ weeks, user, edits, editType, handleChange, closePopOut, onConfirm }) => {
   const [showStaffing, setShowStaffing] = useState(false);
   return (
 
@@ -42,9 +42,6 @@ const EditUserBox = ({ user, edits, editType, handleChange, closePopOut, onConfi
             </div>
           }
           <div>
-            <button onClick={() => { setShowStaffing(s => !s) }}>Staffing 🔽</button>
-          </div>
-          {showStaffing && <div>
             <label htmlFor="lifeguardField">Lifeguard</label>
             <input type="checkbox" id="lifeguardField" name="lifeguard" onChange={handleChange} checked={edits.lifeguard || false} />
             <label htmlFor="archeryField">Archery</label>
@@ -55,7 +52,16 @@ const EditUserBox = ({ user, edits, editType, handleChange, closePopOut, onConfi
             <input type="checkbox" id="ropesField" name="ropes" onChange={handleChange} checked={edits.ropes || false} />
             <label htmlFor="firstYearField">First Year</label>
             <input type="checkbox" id="firstYearField" name="firstYear" onChange={handleChange} checked={edits.firstYear || false} />
-          </div>}
+          </div>
+          <div>
+            <ul>
+              {weeks.map(week => (
+                <li key={`week-check-${week.number}`}>
+                  <label htmlFor={`session-${week.number}`}>Week {week.number}</label>
+                  <input type="checkbox" name={`SESSION-${week.number}`} id={`session-${week.number}`} onChange={handleChange} checked={edits.sessions.some(ss => ss.weekNumber === week.number)} /></li>
+              ))}
+            </ul>
+          </div>
           <footer tw="py-4"> </footer>
           <div tw="absolute bottom-4 flex justify-center flex-wrap gap-4">
             <button tw="bg-red-400 py-2 px-4 rounded" onClick={closePopOut}>Cancel</button>
@@ -80,13 +86,27 @@ const UsersPage = () => {
 
   const [users, setUsers] = useState([]);
 
-  const [edit, setEdit] = useState({ type: editTypes.NONE, user: null, edits: null })
+  const [edit, setEdit] = useState({ type: editTypes.NONE, user: null, edits: null, })
+
+  const [weeks, setWeeks] = useState([]);
 
   const handleChange = (event) => {
     // parse if checkbox and map data appropriately
     const value = event.target.type === "checkbox" ? event.target.checked : event.target.value
-
-    setEdit((oldEdit) => ({ ...oldEdit, edits: { ...oldEdit.edits, [event.target.name]: value } }))
+    if (event.target.name.startsWith("SESSION-")) {
+      const weekNumber = Number.parseInt(event.target.name.split("-")[1]);
+      setEdit((oldEdit) => {
+        let updatedSessions = [...oldEdit.edits.sessions];
+        if (value) {
+          updatedSessions.push({ weekNumber })
+        } else {
+          updatedSessions = updatedSessions.filter(s => s.weekNumber !== weekNumber);
+        }
+        return { ...oldEdit, edits: { ...oldEdit.edits, sessions: updatedSessions } }
+      })
+    } else {
+      setEdit((oldEdit) => ({ ...oldEdit, edits: { ...oldEdit.edits, [event.target.name]: value } }))
+    }
   }
   const toggleUpdatePopOut = (user) => {
     const edits = {
@@ -98,7 +118,8 @@ const UsersPage = () => {
       archery: user.archery,
       ropes: user.ropes,
       firstYear: user.firstYear,
-      senior: user.senior
+      senior: user.senior,
+      sessions: user.sessions
     }
     setEdit(e => ({ edits: edits, user, type: editTypes.UPDATE }));
   }
@@ -111,7 +132,7 @@ const UsersPage = () => {
   }
 
   const toggleCreateNew = () => {
-    const initEdits = { username: "", firstName: "", lastName: "", role: "counselor", password: "", lifeguard: false, archery: false, firstYear: false, ropes: false }
+    const initEdits = { username: "", firstName: "", lastName: "", role: "counselor", password: "", lifeguard: false, archery: false, firstYear: false, ropes: false, sessions: [] }
     const initUser = { ...initEdits, username: "New User" };
     setEdit({ type: editTypes.CREATE, edits: initEdits, user: initUser });
   }
@@ -182,20 +203,27 @@ const UsersPage = () => {
     setUsers(users);
   }, [auth])
 
-  // Get users on load
+  const getWeeks = useCallback(async () => {
+    const weekResponse = await fetchWithToken("/api/weeks", {}, auth);
+    const weeks = await weekResponse.json();
+    setWeeks(weeks);
+  }, [auth])
+
+  // Get users and weeks on load
   useEffect(() => {
     getUsers();
-  }, [getUsers])
+    getWeeks();
+  }, [getUsers, getWeeks])
 
   return (
     <>
       <h1>Users</h1>
-      {edit.type === editTypes.UPDATE &&
+      {edit.type === editTypes.UPDATE && weeks &&
         <PopOut shouldDisplay={true} onClick={closePopOut}>
-          <EditUserBox user={edit.user} edits={edit.edits} closePopOut={closePopOut} handleChange={handleChange} onConfirm={updateUser} />
+          <EditUserBox weeks={weeks} user={edit.user} edits={edit.edits} closePopOut={closePopOut} handleChange={handleChange} onConfirm={updateUser} />
         </PopOut>
       }
-      {edit.type === editTypes.CREATE &&
+      {edit.type === editTypes.CREATE && weeks &&
         <PopOut shouldDisplay={true} onClick={closePopOut}>
           <EditUserBox editType={editTypes.CREATE} user={edit.user} edits={edit.edits} closePopOut={closePopOut} handleChange={handleChange} onConfirm={submitNew} />
         </PopOut>

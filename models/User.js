@@ -52,25 +52,42 @@ module.exports = class User {
   static async getAll() {
     const query = `
     SELECT 
-    username, 
-    role,
-    first_name,
-    last_name,
-    senior,
-    ropes,
-    first_year,
-    archery,
-    lifeguard
-    FROM users
-    ORDER BY last_name, first_name, username
+    u.*,
+    ss.id as staff_session_id,
+    ss.week_number as week_number
+    FROM users u
+    LEFT JOIN staff_sessions ss ON ss.username = u.username
+    ORDER BY last_name, first_name, username, ss.week_number
     `
     const results = await fetchMany(query);
     if (!results) { return [] }
 
-    return results.map(r => {
-      const userData = { username: r.username, password: r.password, role: r.role, firstName: r.first_name, lastName: r.last_name, lifeguard: r.lifeguard, archery: r.archery, ropes: r.ropes, senior: r.senior, firstYear: r.first_year }
-      return new User(userData);
-    })
+    const usersData = [];
+
+    for (const row of results) {
+      const currentUser = (usersData.at(-1) && usersData.at(-1).username === row.username) ? usersData.pop() : {
+        username: row.username,
+        password: row.password,
+        role: row.role,
+        firstName: row.first_name,
+        lastName: row.last_name,
+        senior: row.senior,
+        firstYear: row.first_year,
+        lifeguard: row.lifeguard,
+        archery: row.archery,
+        ropes: row.ropes,
+        sessions: []
+      };
+
+      if (row.staff_session_id !== null) {
+        const session = { id: row.staff_session_id, weekNumber: row.week_number }
+        currentUser.sessions.push(session);
+      }
+
+      usersData.push(currentUser);
+    }
+
+    return usersData.map(u => new User(u));
   }
   static async create(
     { username, firstName, lastName, password, role = "counselor", lifeguard = false, archery = false, ropes = false, firstYear = false, senior = false },
@@ -163,9 +180,10 @@ module.exports = class User {
     return true
   }
 
-  async update({ username, firstName, lastName, role, lifeguard, archery, ropes, firstYear, senior }) {
+  async update({ sessions, username, firstName, lastName, role, lifeguard, archery, ropes, firstYear, senior }) {
     //TODO There should be some sanitization and validation here of updated values
     console.log("Updating user");
+    console.log({ sessions });
     const query = `
       UPDATE users
       set username = $1,
