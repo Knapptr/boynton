@@ -9,7 +9,7 @@ const storeToken = (token) => {
 };
 
 const LoginField = tw.input`rounded my-4 border-gray-200 border-2 p-4`;
-const SubmitButton = tw.button`bg-green-400 p-4 rounded-lg`;
+const SubmitButton = tw.button`bg-green-600 p-4 rounded-lg`;
 
 const Login = () => {
 	const auth = useContext(UserContext);

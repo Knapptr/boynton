@@ -43,7 +43,7 @@ export const menuColors = {
   },
 };
 export const MenuSelector = styled.li(({ isSelected, color = "stone" }) => [
-  tw`border p-2 rounded cursor-pointer hocus:brightness-95`,
+  tw`select-none border p-2 rounded cursor-pointer hocus:brightness-95`,
   menuColors[color],
   isSelected && menuColors.selected[color],
 ]);
@@ -60,7 +60,7 @@ export const DialogBox = ({ close, children, scrollable, full }) => <DialogBoxBo
   <button tw="absolute top-1 right-3" onClick={close}><FontAwesomeIcon size="xl" icon={faCircleXmark} /></button>
   {children}</DialogBoxBox>
 
-const StaffBadge = styled.li(({ firstYear, senior, ropes, archery, lifeguard }) => [
+export const StaffBadge = styled.li(({ firstYear, senior, ropes, archery, lifeguard }) => [
   tw`text-xs bg-gray-50 font-bold p-1 rounded-full`,
   firstYear && tw`text-green-500`,
   senior && tw`text-black`,
