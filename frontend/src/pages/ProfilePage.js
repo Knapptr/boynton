@@ -30,9 +30,9 @@ const ProfilePage = () => {
         <><div id="userInfo">
           <header><h1>Hello, {userData.firstName}!</h1></header>
         </div>
-          <div tw="flex">
+          <div tw="flex flex-col sm:flex-row justify-center flex-wrap items-center ">
             <div tw="">Nav</div>
-            <div tw="border ml-auto py-2 px-4 w-1/3">
+            <div tw="border ml-auto py-2 px-4 w-full mr-auto sm:mr-0 md:w-1/3">
               <UserSchedule user={userData} sessions={userData.sessions} />
               <div>
 
