@@ -18,6 +18,9 @@ const errorHandling = (err, req, res, next) => {
 	if (err.type) {
 		switch (err.type) {
 			case "API":
+				if (err.reason === "VALIDATION") {
+					res.status(err.status).json(err.errors);
+				}
 				res.status(err.status).json(err);
 				break;
 			case "DB":

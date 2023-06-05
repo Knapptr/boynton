@@ -1,3 +1,4 @@
+const { body } = require("express-validator");
 const usersHandler = require("../handlers/usersHandler");
 const { adminOnly } = require("../middleware/authRole");
 

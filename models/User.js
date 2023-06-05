@@ -3,7 +3,6 @@ const defaultUserRepository = require("../repositories/User");
 const { fetchMany, fetchOne } = require("../utils/pgWrapper.js");
 const UserRepository = require("../repositories/User");
 
-const VALID_ROLES = ["admin", "unit_head", "programming", "counselor"];
 
 module.exports = class User {
   constructor(
@@ -40,6 +39,7 @@ module.exports = class User {
       sessions: this.sessions
     }
   }
+  static VALID_ROLES = ["admin", "programming", "counselor", "unit_head"]
 
   static async get(username, userRepository = defaultUserRepository) {
     const userData = await userRepository.get(username);
@@ -93,7 +93,7 @@ module.exports = class User {
     { username, firstName, lastName, password, role = "counselor", lifeguard = false, archery = false, ropes = false, firstYear = false, senior = false, sessions = [] },
     userRepository = defaultUserRepository
   ) {
-    if (!VALID_ROLES.includes(role)) {
+    if (!USER.VALID_ROLES.includes(role)) {
       throw new Error(`Invalid Role: ${role}`);
     }
     if (!username || !password || !firstName || !lastName) {
