@@ -8,19 +8,16 @@ module.exports = {
   day_camp boolean DEFAULT false,
   fl boolean DEFAULT false,
   cabin_session_id integer,
-  fl bool,
   CONSTRAINT camper_weeks_pkey PRIMARY KEY (id),
   CONSTRAINT one_week_per_camper UNIQUE (week_id, camper_id),
   CONSTRAINT cabin_assignment FOREIGN KEY (cabin_session_id)
-  REFERENCES cabin_sessions (id) MATCH SIMPLE
+  REFERENCES cabin_sessions (id) 
   ON UPDATE SET NULL
-  ON DELETE SET NULL
-  NOT VALID,
+  ON DELETE SET NULL,
   CONSTRAINT camper_id FOREIGN KEY (camper_id)
-  REFERENCES campers (id) MATCH SIMPLE
+  REFERENCES campers (id) 
   ON UPDATE NO ACTION
   ON DELETE CASCADE
-  NOT VALID
   )
 `,
   camperActivities: `
@@ -34,19 +31,17 @@ module.exports = {
   CONSTRAINT camper_periods_pkey PRIMARY KEY (id),
   CONSTRAINT one_activity_per_camper UNIQUE (period_id, camper_week_id),
   CONSTRAINT camper_session_ids FOREIGN KEY (camper_week_id)
-  REFERENCES camper_weeks (id) MATCH SIMPLE
+  REFERENCES camper_weeks (id) 
   ON UPDATE CASCADE
-  ON DELETE CASCADE
-  NOT VALID,
+  ON DELETE CASCADE,
   CONSTRAINT act_session_id FOREIGN KEY (activity_id)
   REFERENCES activity_sessions (id)
   ON UPDATE CASCADE
   ON DELETE CASCADE,
   CONSTRAINT "same" FOREIGN KEY (activity_id, period_id)
-  REFERENCES activity_sessions (id, period_id) MATCH SIMPLE
+  REFERENCES activity_sessions (id, period_id) 
   ON UPDATE CASCADE
   ON DELETE CASCADE
-  NOT VALID
   )
 `,
   cabins: `
@@ -67,15 +62,12 @@ module.exports = {
   CONSTRAINT act_sess_p_key PRIMARY KEY (id),
   CONSTRAINT activity_id FOREIGN KEY (activity_id) REFERENCES activities (id)
   ON UPDATE CASCADE
-  ON DELETE CASCADE
-  NOT VALID,
+  ON DELETE CASCADE,
   CONSTRAINT no_duplicates UNIQUE (period_id, activity_id),
   CONSTRAINT p UNIQUE (period_id, id),
-  CONSTRAINT period_id FOREIGN KEY (period_id)
-  REFERENCES periods (id) MATCH SIMPLE
+  CONSTRAINT period_id FOREIGN KEY (period_id) REFERENCES periods (id)
   ON UPDATE CASCADE
   ON DELETE CASCADE
-  NOT VALID
   )
   `,
   activities: `
@@ -96,15 +88,13 @@ module.exports = {
   CONSTRAINT cabin_sessions_pkey PRIMARY KEY (id),
   CONSTRAINT "one camper cabin assigment per week" UNIQUE (week_id, cabin_name),
   CONSTRAINT cabin_id FOREIGN KEY (cabin_name)
-  REFERENCES cabins (name) MATCH SIMPLE
+  REFERENCES cabins (name) 
   ON UPDATE CASCADE
-  ON DELETE CASCADE
-  NOT VALID,
+  ON DELETE CASCADE,
   CONSTRAINT week FOREIGN KEY (week_id)
-  REFERENCES weeks ("number") MATCH SIMPLE
+  REFERENCES weeks ("number") 
   ON UPDATE CASCADE
   ON DELETE CASCADE
-  NOT VALID
   )`,
 
   staffActivities: `
@@ -118,16 +108,13 @@ module.exports = {
   CONSTRAINT "one staff assignment per period" UNIQUE (period_id, staff_session_id),
   CONSTRAINT f_act_s FOREIGN KEY (activity_session_id) REFERENCES activity_sessions (id)
   ON UPDATE CASCADE
-  ON DELETE CASCADE
-  NOT VALID,
+  ON DELETE CASCADE,
   CONSTRAINT period_id FOREIGN KEY (period_id) REFERENCES periods (id)
   ON UPDATE CASCADE
-  ON DELETE CASCADE
-  NOT VALID,
+  ON DELETE CASCADE,
   CONSTRAINT staff_sess_relation FOREIGN KEY (staff_session_id) REFERENCES staff_sessions (id)
   ON UPDATE CASCADE
   ON DELETE CASCADE
-  NOT VALID
   )
   `,
 

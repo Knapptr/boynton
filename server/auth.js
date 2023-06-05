@@ -11,7 +11,7 @@ module.exports = (passport) => {
 	passport.use(
 		new JwtStrategy(options, async (jwt_payload, done) => {
 			try {
-				const user = await User.get(jwt_payload.userName);
+				const user = await User.get(jwt_payload.username);
 				// console.log("Request made by:",{ user });
 				if (!user) {
 					return done(null, false);

@@ -18,6 +18,7 @@ import ProgrammingSchedule from "./pages/ProgrammingSchedule";
 import AdminAccess from "./components/ProtectedAdminAccess";
 import UsersPage from "./pages/UsersPage";
 import StaffSchedule from "./pages/StaffSchedule";
+import ProfilePage from "./pages/ProfilePage";
 
 function App() {
   const userState = useUserData();
@@ -29,14 +30,6 @@ function App() {
             <Routes>
               <Route path="/login" element={<LoginPage />} />
               <Route
-                path="/"
-                element={
-                  <Protected>
-                    <Dashboard />
-                  </Protected>
-                }
-              ></Route>
-              <Route
                 path="/*"
                 element={
                   <Protected>
@@ -44,6 +37,17 @@ function App() {
                   </Protected>
                 }
               >
+                <Route
+                  path=""
+                  element={
+                    <Protected>
+                      <Dashboard />
+                    </Protected>
+                  }
+                >
+                </Route>
+                <Route path="profile/" element={<ProfilePage />} />
+
                 <Route path="cabins/">
                   {CabinAssignmentRoutes()}{" "}
                   <Route path="list/">

@@ -7,7 +7,8 @@ const VALID_ROLES = ["admin", "unit_head", "programming", "counselor"];
 
 module.exports = class User {
   constructor(
-    { username, password, role, firstName, lastName, staffing },
+    { username, password, role, firstName, lastName, lifeguard = false, archery = false, ropes = false, firstYear = false, senior = false },
+
     userRepository = defaultUserRepository
   ) {
     this.username = username;
@@ -15,8 +16,12 @@ module.exports = class User {
     this.role = role;
     this.userRepository = userRepository;
     this.firstName = firstName;
-    this.lastName = lastName
-    this.staffing = staffing
+    this.lastName = lastName;
+    this.lifeguard = lifeguard;
+    this.archery = archery;
+    this.firstYear = firstYear;
+    this.ropes = ropes;
+    this.senior = senior;
   }
 
   toJSON() {
@@ -25,15 +30,32 @@ module.exports = class User {
       role: this.role,
       firstName: this.firstName,
       lastName: this.lastName,
-      staffing: this.staffing
+      lifeguard: this.lifeguard,
+      archery: this.archery,
+      ropes: this.ropes,
+      firstYear: this.firstYear,
+      senior: this.senior
     }
   }
 
   static async get(username, userRepository = defaultUserRepository) {
-    const userData = await userRepository.get(username);
-    if (!userData) {
+    const dbUserData = await userRepository.get(username);
+    if (!dbUserData) {
       return false
     }
+    const userData = {
+      username: dbUserData.username,
+      password: dbUserData.password,
+      role: dbUserData.role,
+      lifeguard: dbUserData.lifeguard,
+      ropes: dbUserData.ropes,
+      archery: dbUserData.archery,
+      firstYear: dbUserData.first_year,
+      senior: dbUserData.senior,
+      firstName: dbUserData.first_name,
+      lastName: dbUserData.last_name
+    }
+    console.log({ userData });
     return new User({ ...userData }, userRepository);
   }
 
@@ -50,14 +72,13 @@ module.exports = class User {
     archery,
     lifeguard
     FROM users
+    ORDER BY last_name, first_name, username
     `
     const results = await fetchMany(query);
     if (!results) { return [] }
 
     return results.map(r => {
-      const userData = { username: r.username, password: r.password, role: r.role, firstName: r.first_name, lastName: r.last_name }
-      const staffingData = { lifeguard: r.lifeguard, archery: r.archery, ropes: r.ropes, senior: r.senior, firstYear: r.first_year }
-      userData.staffing = staffingData;
+      const userData = { username: r.username, password: r.password, role: r.role, firstName: r.first_name, lastName: r.last_name, lifeguard: r.lifeguard, archery: r.archery, ropes: r.ropes, senior: r.senior, firstYear: r.first_year }
       return new User(userData);
     })
   }
@@ -99,6 +120,10 @@ module.exports = class User {
     return { user, isAuthenticated };
   }
 
+  static async weekSchedule(username, weekNumber) {
+    const query = ``
+  }
+
   async delete() {
     const query = "DELETE FROM users WHERE username = $1 RETURNING *";
     const values = [this.username];
@@ -109,6 +134,7 @@ module.exports = class User {
 
   async update({ username, firstName, lastName, role, lifeguard, archery, ropes, firstYear, senior }) {
     //TODO There should be some sanitization and validation here of updated values
+    console.log("Updating user");
     const query = `
       UPDATE users
       set username = $1,
@@ -125,8 +151,21 @@ module.exports = class User {
     `
     const values = [username, firstName, lastName, role, senior, firstYear, lifeguard, archery, ropes, this.username];
 
+    console.log("sending request: ", { query, values });
     const response = await fetchOne(query, values);
     if (!response) { return false }
-    return new User(response)
+    console.log({ response });
+    const userData = {
+      username: response.username,
+      firstName: response.first_name,
+      lastName: response.last_name,
+      role: response.role,
+      ropes: response.ropes,
+      archery: response.archery,
+      lifeguard: response.archery,
+      firstYear: response.first_year,
+      senior: response.senior
+    }
+    return new User(userData);
   }
 };

@@ -94,11 +94,11 @@ const UsersPage = () => {
       firstName: user.firstName,
       lastName: user.lastName,
       role: user.role,
-      lifeguard: user.staffing.lifeguard,
-      archery: user.staffing.archery,
-      ropes: user.staffing.ropes,
-      firstYear: user.staffing.firstYear,
-      senior: user.staffing.senior
+      lifeguard: user.lifeguard,
+      archery: user.archery,
+      ropes: user.ropes,
+      firstYear: user.firstYear,
+      senior: user.senior
     }
     setEdit(e => ({ edits: edits, user, type: editTypes.UPDATE }));
   }
@@ -111,7 +111,7 @@ const UsersPage = () => {
   }
 
   const toggleCreateNew = () => {
-    const initEdits = { username: "", firstName: "", lastName: "", role: "counselor", password: "", lifeguard: false, archery: false, firstYear: false, ropes: false, ropes: false }
+    const initEdits = { username: "", firstName: "", lastName: "", role: "counselor", password: "", lifeguard: false, archery: false, firstYear: false, ropes: false }
     const initUser = { ...initEdits, username: "New User" };
     setEdit({ type: editTypes.CREATE, edits: initEdits, user: initUser });
   }

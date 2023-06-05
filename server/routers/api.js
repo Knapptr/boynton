@@ -13,7 +13,6 @@ const activitySessionRouter = require("./activitySession");
 const camperActivityRouter = require("./camperActivity");
 const usersRouter = require("./users");
 const staffSessionRouter = require("./staffSessions");
-const { adminOnly } = require("../middleware/authRole");
 
 const errorHandling = (err, req, res, next) => {
 	if (err.type) {
@@ -27,13 +26,13 @@ const errorHandling = (err, req, res, next) => {
 		}
 	}
 }
+router.use(passport.authenticate("jwt", { session: false }));
 //log all api requs
 router.use((req, res, next) => {
-	console.log(`Request to: ${req.url}. Params:`, req.params, "Query:", req.query);
+	console.log(`${req.method} Request to: ${req.url}. Params:`, req.params, "Query:", req.query, "User", req.user);
 	next()
 })
 router.use('/scores', scoreRouter);
-router.use(passport.authenticate("jwt", { session: false }));
 router.use("/activities", activityRouter);
 router.use("/activity-sessions", activitySessionRouter);
 router.use("/campers", camperRouter);
@@ -45,7 +44,7 @@ router.use("/cabin-sessions", cabinSessionRouter);
 router.use("/cabins", cabinRouter);
 router.use("/camper-weeks", camperWeekRouter);
 router.use("/weeks", weekRouter);
-router.use(adminOnly);
 router.use("/users", usersRouter);
 router.use(errorHandling)
+
 module.exports = router;

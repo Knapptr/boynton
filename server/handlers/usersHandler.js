@@ -1,9 +1,20 @@
 const User = require("../../models/User");
+const ApiError = require("../../utils/apiError");
 const usersHandler = {
   async getAll(req, res, next) {
     const users = await User.getAll();
     res.json(users);
   },
+
+  async get(req, res, next) {
+    {
+      const { username } = req.params;
+      const user = await User.get(username.trim());
+      if (!user) { next(ApiError.notFound("User not found")); return; }
+      res.json(user);
+    }
+  },
+
   async create(req, res, next) {
     console.log("User Create Body:", { body: req.body });
     const { username, password, role, firstName, lastName, lifeguard, senior, firstYear, archery, ropes } = req.body;
@@ -32,7 +43,11 @@ const usersHandler = {
 
   async update(req, res, next) {
     const { username } = req.params;
-    console.log({ body: req.body });
+    // check all fields
+    const { role, senior, firstYear, firstName, lastName, ropes, lifeguard, archery } = req.body;
+    if (role === undefined || senior === undefined || firstYear === undefined || firstName === undefined || lastName === undefined || ropes === undefined || lifeguard || archery === undefined) {
+      next(ApiError.badRequest("Missing fields for user"));
+    }
     const user = await User.get(username);
     if (!user) { next(new Error("Cannot Delete: User does not exist")) }
     try {
@@ -42,6 +57,12 @@ const usersHandler = {
     } catch (e) {
       next(e)
     }
+  },
+
+  async weekSchedule(req, res, next) {
+    const { username, weekNumber } = req.params;
+    const scheduleResponse = await User.weekSchedule(username, weekId);
+
   }
 }
 
