@@ -1,5 +1,6 @@
 const User = require("../../models/User");
 const ApiError = require("../../utils/apiError");
+const DbError = require("../../utils/DbError");
 const usersHandler = {
   async getAll(req, res, next) {
     const users = await User.getAll();
@@ -50,7 +51,8 @@ const usersHandler = {
       return;
     }
     const user = await User.get(username);
-    if (!user) { next(new Error("Cannot Delete: User does not exist")) }
+    console.log({ user });
+    if (!user) { next(DbError.notFound("User does not exist")); return; }
     try {
       const result = await user.update(req.body);
       if (!result) { throw new Error("Error updating user") }
