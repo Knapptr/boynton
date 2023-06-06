@@ -10,6 +10,6 @@ const pool = new Pool({
 	// poolSize: 10
 });
 
-console.log({ pool });
+// console.log({ pool });
 
 module.exports = pool;

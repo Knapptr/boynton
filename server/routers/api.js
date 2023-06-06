@@ -28,6 +28,10 @@ const errorHandling = (err, req, res, next) => {
 				res.status(400).send(err.message);
 
 		}
+	} else {
+		console.log("Unhandleable error. Sending 500");
+		console.log({ err });
+		res.status(500).send("Server Error");
 	}
 }
 router.use(passport.authenticate("jwt", { session: false }));

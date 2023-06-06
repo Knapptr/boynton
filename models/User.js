@@ -1,7 +1,9 @@
 const compare = require("../utils/comparePassword");
+const pool = require("../db")
 const defaultUserRepository = require("../repositories/User");
 const { fetchMany, fetchOne } = require("../utils/pgWrapper.js");
 const UserRepository = require("../repositories/User");
+const encrypt = require("../utils/encryptPassword");
 
 
 module.exports = class User {
@@ -89,47 +91,91 @@ module.exports = class User {
 
     return usersData.map(u => new User(u));
   }
+
   static async create(
     { username, firstName, lastName, password, role = "counselor", lifeguard = false, archery = false, ropes = false, firstYear = false, senior = false, sessions = [] },
     userRepository = defaultUserRepository
   ) {
-    if (!USER.VALID_ROLES.includes(role)) {
-      throw new Error(`Invalid Role: ${role}`);
+    const isUser = await User.get(username);
+    if (isUser) {
+      throw new Error("Cannot create user, user exists.");
+      return;
     }
-    if (!username || !password || !firstName || !lastName) {
-      throw new Error("Cannot create user, missing fields.");
-    }
-    const isUser = await userRepository.get(username);
-    if (!isUser) {
-      const createdData = await userRepository.create({
+
+    const encryptedPassword = await encrypt(password);
+
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+
+      const userQuery = `
+      INSERT INTO users 
+      (username,
+      password,
+      role,
+      first_name,
+      last_name,
+      lifeguard,
+      archery,
+      ropes,
+      first_year,
+      senior) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING * `;
+
+      const userValues = [
         username,
-        password,
+        encryptedPassword,
+        role,
         firstName,
         lastName,
-        role,
         lifeguard,
         archery,
         ropes,
         firstYear,
         senior
-      });
-      console.log({ createdData });
-      //create sessions
-      const sessionCreations = [];
-      for (const session of sessions) {
-        const sessQuery = "INSERT INTO staff_sessions (username,week_number) VALUES ($1, $2)"
-        const sessValues = [createdData.username, session.weekNumber];
-        sessionCreations.push(fetchOne(sessQuery, sessValues));
-      }
-      const results = await Promise.all(sessionCreations);
+      ];
 
-      console.log({ results });
-      const createdUser = await User.get(createdData.username)
-      console.log({ createdUser });
-      return createdUser;
-    } else {
-      throw new Error("Cannot create user, user exists.");
+
+      const userResult = await client.query(userQuery, userValues);
+      const userData = userResult.rows[0];
+
+      console.log("Mapping Sessions");
+      const sessionQueries = sessions.map(session => {
+        console.log("\tMapping Session")
+        const sessQuery = "INSERT INTO staff_sessions (username,week_number) VALUES ($1, $2) RETURNING *"
+        const sessValues = [userData.username, session.weekNumber];
+
+        return client.query(sessQuery, sessValues);
+      })
+
+      const sessionsResult = await Promise.all(sessionQueries);
+      const insertedSessions = sessionsResult.map(result => ({ weekNumber: result.rows[0].week_number, id: result.rows[0].id }));
+      console.log({ sessionsResult });
+      console.log({ sessions });
+
+      console.log("COMMITED");
+      const user = new User({
+        username: userData.username,
+        password: userData.password,
+        firstName: userData.first_name,
+        lastName: userData.last_name,
+        role: userData.role,
+        senior: userData.senior,
+        firstYear: userData.first_year,
+        lifeguard: userData.lifeguard,
+        archery: userData.archery,
+        ropes: userData.ropes,
+        sessions: insertedSessions
+      })
+
+      return user
+    } catch (e) {
+      await client.query("ROLLBACK");
+      throw e
+    } finally {
+      client.release();
     }
+
+
   }
 
   static async authenticate({ username, password }, userRepository = defaultUserRepository) {
