@@ -1,4 +1,6 @@
 const { fetchOne, fetchMany } = require("../utils/pgWrapper");
+const pool = require("../db/index");
+const DbError = require("../utils/DbError");
 
 class ActivitySession {
     constructor({ name, id, description, activityId, campers, periodId }) {
@@ -139,17 +141,38 @@ class ActivitySession {
         if (!result) { return false }
         return { id: result.id, periodId: result.period_id, activityId: result.activity_id }
     }
-    async addCamper(camperID) {
-        const query = `
+    async addCampers(campersList, activityId) {
+        const client = await pool.connect();
+        try {
+            await client.query("BEGIN");
+            const queries = campersList.map(camper => {
+                const query = `
          INSERT INTO camper_activities (camper_week_id,activity_id,period_id) 
             VALUES ($1,$2,$3) 
             ON CONFLICT ON CONSTRAINT one_activity_per_camper 
             DO UPDATE SET activity_id = $2 ,period_id = $3, is_present = false 
             RETURNING id, period_id,activity_id`
-        const values = [camperID, this.id, this.periodId];
-        const result = await fetchOne(query, values);
-        const camperActivityID = result.id;
-        return camperActivityID;
+                const values = [camper.camperSessionId, this.id, this.periodId];
+                return client.query(query, values);
+            })
+
+            const results = await Promise.all(queries);
+            const camperActivities = results.map(r => {
+                return {
+                    periodId: r.rows[0].period_id,
+                    activitySessiionId: r.rows[0].activity_id,
+                    id: r.rows[0].id
+                }
+            })
+            await client.query("COMMIT")
+            return camperActivities;
+
+        } catch (e) {
+            client.query("ROLLBACK");
+            throw DbError.transactionFailure(e.message)
+        } finally {
+            client.release();
+        }
     }
     async addStaff(staffMember) {
         const query = `

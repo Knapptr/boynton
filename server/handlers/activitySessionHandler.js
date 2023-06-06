@@ -48,12 +48,13 @@ const activitySessionHandler = {
     res.status(202).json(deleted);
   },
 
-  async addCamperToActivity(req, res, next) {
-    const { camperWeekId } = req.body;
+  async addCampersToActivity(req, res, next) {
+    const { campers } = req.body;
+    console.log({ campers });
     const activitySessionId = req.params.activitySessionId
     const activitySession = await ActivitySession.get(activitySessionId);
-    const camperActivityId = await activitySession.addCamper(camperWeekId);
-    res.json({ camperActivityId });
+    const camperActivities = await activitySession.addCampers(campers);
+    res.json({ camperActivities });
 
   },
 

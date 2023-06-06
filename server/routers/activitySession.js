@@ -4,7 +4,7 @@ const { adminOnly } = require("../middleware/authRole");
 
 router.get("/", activitySessionHandler.getAllSessions);
 router.get("/:activitySessionId", activitySessionHandler.getOneSession);
-router.post("/:activitySessionId/campers", activitySessionHandler.addCamperToActivity);
+router.post("/:activitySessionId/campers", activitySessionHandler.addCampersToActivity);
 // Protected
 router.use(adminOnly);
 router.post("/", activitySessionHandler.create)

@@ -33,23 +33,44 @@ const SelectActivities = ({
   } = useActivityAttendance(periodId, cabinName);
   const auth = useContext(UserContext)
 
-  const addCamperActivityToDB = async (camperWeekId, activitySessionId) => {
-    const camper = {
-      camperWeekId,
-    };
+  const addCamperActivitiesToDb = async (campers, activitySessionId) => {
     const reqConfig = {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify(camper),
+      body: JSON.stringify({ campers }),
     };
-    // console.log(reqConfig);
     const result = await fetchWithToken(
       `/api/activity-sessions/${activitySessionId}/campers`,
       reqConfig,
       auth
     );
     const data = await result.json();
+    return data;
   };
+
+  const handleSubmit = async (activitySessionId) => {
+    if (selectedCampers.length > 0) {
+      const campersToAdd = [...selectedCampers];
+      try {
+        const response = await addCamperActivitiesToDb(campersToAdd.map(c => c.camper), activitySessionId);
+      } catch (e) {
+        console.log("Something went wrong assigning campers to db", e); refresh();
+      }
+      // Eagerly update UI
+      let newState = lodash.cloneDeep(activityLists)
+      for (const selectedCamper of campersToAdd) {
+        // Remove camper from source
+        newState[selectedCamper.sourceId].campers = newState[selectedCamper.sourceId].campers.filter(c => c.camperSessionId !== selectedCamper.camper.camperSessionId);
+        // Add camper to destination
+        newState[activitySessionId].campers.push(selectedCamper.camper);
+      }
+      // update state
+      clearSelection();
+      setLists(newState);
+
+    }
+
+  }
 
 
   return (
@@ -72,7 +93,6 @@ const SelectActivities = ({
                     {activityLists.unassigned &&
                       [...activityLists.unassigned.campers].sort((a, b) => a.lastName.localeCompare(b.lastName)).map((c, index) => (
                         <CamperItem
-                          // ref={provided.innerRef}
                           key={`unassigned-camper-${c.camperSessionId}`}
                           isDragging={false}
                           isSelected={selectedCampers.some(sc => sc.camper.camperSessionId === c.camperSessionId)}
@@ -92,33 +112,7 @@ const SelectActivities = ({
                     key={`activity-list-${aid}`}
                     tw="flex-grow"
                     isDraggingOver={false}
-                    onClick={() => {
-                      if (selectedCampers.length > 0) {
-                        /// Refactor this into its own function
-                        const campersToAdd = [...selectedCampers];
-                        // Use Promise.all to Update UI from DB after all campers have been processed
-                        const requests = campersToAdd.map(c => addCamperActivityToDB(c.camper.camperSessionId, aid))
-                        Promise.all(requests).catch(rej => {
-                          console.log("Something went wrong assigning campers to db", rej); refresh();
-                        }).then((res) => {
-                          console.log("Succesfully added campers to db")
-                          refresh();
-                        })
-                        // Eagerly update UI
-                        let newState = lodash.cloneDeep(activityLists)
-                        for (const selectedCamper of campersToAdd) {
-                          // Remove camper from source
-                          newState[selectedCamper.sourceId].campers = newState[selectedCamper.sourceId].campers.filter(c => c.camperSessionId !== selectedCamper.camper.camperSessionId);
-                          // Add camper to destination
-                          newState[aid].campers.push(selectedCamper.camper);
-                        }
-                        // update state
-                        clearSelection();
-                        setLists(newState);
-
-                      }
-
-                    }}
+                    onClick={() => { handleSubmit(aid) }}
                   >
                     <header>
                       <h2 tw="font-bold">

@@ -31,7 +31,6 @@ const useActivityAttendance = (period, cabin) => {
 		const campers = await camperResult.json();
 
 		const listing = { activityIds: [], unassigned: { campers: [] } };
-		console.log({ activitiesResponse: activities });
 		activities.forEach((act) => {
 			listing.activityIds.push(act.id);
 			listing[act.id] = {
