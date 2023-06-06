@@ -8,8 +8,7 @@ const Score = () => {
     const tribes = { N: "Naumkeag", T: "Tahattawan" };
     const scoreSums = scores.reduce(
       (acc, cv) => {
-        console.log(acc);
-        acc[tribes[cv.awardedTo]] += cv.points;
+        acc[cv.awardedTo] += cv.points;
         return acc;
       },
       { Naumkeag: 0, Tahattawan: 0 }
@@ -21,6 +20,7 @@ const Score = () => {
     initialState: null,
     runOn: [weekNumber],
     beforeSet: getScoreTotals,
+    useToken: true
   });
   const renderScores = (scores) => {
     const scoresArray = [
@@ -35,9 +35,9 @@ const Score = () => {
             <h2 tw="font-bold text-4xl md:text-6xl ">{score.team}s</h2>
             <div tw="flex-grow bg-green-300 p-2 shadow rounded mx-4 text-right">
               <span tw="text-3xl md:text-6xl font-bold ">
-              {score.sum}
+                {score.sum}
               </span>
-          </div>
+            </div>
           </div>
         ))}
       </div>

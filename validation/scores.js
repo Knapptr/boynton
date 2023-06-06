@@ -8,7 +8,7 @@ const validatePoints = () => body("points").isInt().withMessage("Points must be 
 
 const validateWeek = () => body("weekNumber").isInt().withMessage("Week number is expected to be an integer");
 
-const validateFor = () => body("awardedFor").exists().withMessage("Points must have a reason for awarding")
+const validateFor = () => body("awardedFor").trim().notEmpty().withMessage("Points must have a reason for awarding")
 
 module.exports = {
 	validateTeam, validatePoints, validateWeek, validateFor

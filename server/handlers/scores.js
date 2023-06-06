@@ -1,6 +1,7 @@
 const { body } = require('express-validator');
 const Score = require('../../models/score');
 const { validateFor, validateWeek, validatePoints, validateTeam } = require('../../validation/scores');
+const handleValidation = require('../../validation/validationMiddleware');
 
 module.exports = {
   async getAll(req, res) {
@@ -24,16 +25,22 @@ module.exports = {
       res.send(e);
     }
   },
-  insert: [validateTeam(), validatePoints(), validateWeek(), validateFor(), async (req, res) => {
-    const { awardedTo, points, awardedFor, weekNumber } = req.body;
-    try {
-      scoreToInsert = { awardedTo, points, awardedFor, weekNumber };
-      const createdScore = await Score.create(scoreToInsert);
-      res.json(createdScore);
-    } catch (e) {
-      res.status(500);
-      res.send(e);
-    }
-  }]
+  insert: [
+    validateTeam(),
+    validatePoints(),
+    validateWeek(),
+    validateFor(),
+    handleValidation,
+    async (req, res) => {
+      const { awardedTo, points, awardedFor, weekNumber } = req.body;
+      try {
+        scoreToInsert = { awardedTo, points, awardedFor, weekNumber };
+        const createdScore = await Score.create(scoreToInsert);
+        res.json(createdScore);
+      } catch (e) {
+        res.status(500);
+        res.send(e);
+      }
+    }]
 }
 
