@@ -1,12 +1,14 @@
 const defaultRepository = require("../repositories/score");
 class Score {
   constructor({ awardedTo, points, awardedFor, weekNumber, id }) {
-   this.id = id;
+    this.id = id;
     this.awardedTo = awardedTo;
     this.awardedFor = awardedFor;
     this.weekNumber = weekNumber;
     this.points = points;
   }
+
+  static VALID_TEAMS = ["Tahattawan", "Naumkeag"];
   static async getAll(repository = defaultRepository) {
     const response = await repository.getAll();
     if (!response) {
@@ -14,7 +16,7 @@ class Score {
     }
     return response.map((r) => new Score(r));
   }
-  static async create(props,repository=defaultRepository){
+  static async create(props, repository = defaultRepository) {
     const response = await repository.create(props);
     return new Score(response);
   }

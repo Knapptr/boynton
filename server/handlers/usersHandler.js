@@ -2,6 +2,7 @@ const { body, validationResult } = require("express-validator");
 const User = require("../../models/User");
 const ApiError = require("../../utils/apiError");
 const DbError = require("../../utils/DbError");
+const handleValidation = require("../../validation/validationMiddleware");
 const userValidation = require("../../validation/user");
 
 const usersHandler = {
@@ -25,11 +26,13 @@ const usersHandler = {
     userValidation.validateNameField("firstName"),
     userValidation.validateNameField("lastName"),
     userValidation.validatePassword(),
-    handleValidation, async (req, res, next) => {
+    handleValidation,
+    async (req, res, next) => {
       const { username, password, role, firstName, lastName, lifeguard, senior, firstYear, archery, ropes, sessions } = req.body;
       try {
         const user = await User.create({ username, password, role, firstName, lastName, lifeguard, archery, senior, firstYear, ropes, sessions });
         res.status(201).json(user);
+        return;
 
       } catch (e) {
         res.status(500);
@@ -51,12 +54,15 @@ const usersHandler = {
   },
 
   update: [
+    userValidation.validateUsername(),
+    userValidation.validateRole(),
     userValidation.validateBooleanField("lifeguard"),
     userValidation.validateBooleanField("senior"),
     userValidation.validateBooleanField("firstYear"),
     userValidation.validateBooleanField("ropes"),
     userValidation.validateBooleanField("lifeguard"),
     userValidation.validateBooleanField("archery"),
+    handleValidation,
     async (req, res, next) => {
       const { username } = req.params;
       // check all fields
@@ -86,15 +92,6 @@ const usersHandler = {
     res.json(scheduleResponse);
 
   }
-}
-
-const handleValidation = (req, res, next) => {
-  const result = validationResult(req);
-  if (result.isEmpty()) {
-    next();
-    return;
-  }
-  next(ApiError.validation(result.errors, "Invalid fields."))
 }
 
 module.exports = usersHandler;

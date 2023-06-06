@@ -20,6 +20,7 @@ const errorHandling = (err, req, res, next) => {
 			case "API":
 				if (err.reason === "VALIDATION") {
 					res.status(err.status).json(err.errors);
+					return;
 				}
 				res.status(err.status).json(err);
 				break;

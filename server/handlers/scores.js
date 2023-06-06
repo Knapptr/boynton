@@ -1,35 +1,39 @@
+const { body } = require('express-validator');
 const Score = require('../../models/score');
+const { validateFor, validateWeek, validatePoints, validateTeam } = require('../../validation/scores');
+
 module.exports = {
-  async getAll(req,res){
-    const {to,week,awardedfor} = req.query;
-    try{
+  async getAll(req, res) {
+    const { to, week, awardedfor } = req.query;
+    try {
       let scores = await Score.getAll();
-      if(to){
-        scores = scores.filter(s=>s.awardedTo === to.toUpperCase());
+      if (to) {
+        scores = scores.filter(s => s.awardedTo === to.toUpperCase());
       }
-      if(week){
-        scores = scores.filter(s=>s.weekNumber===Number.parseInt(week));
+      if (week) {
+        scores = scores.filter(s => s.weekNumber === Number.parseInt(week));
       }
-      if(awardedfor){
-        scores = scores.filter(s=>s.awardedFor===awardedfor);
+      if (awardedfor) {
+        scores = scores.filter(s => s.awardedFor === awardedfor);
       }
 
       res.json(scores);
-    }catch (e){
+    } catch (e) {
       console.log(e);
       res.status(500);
       res.send(e);
     }
   },
-  async insert(req,res){
-    const {awardedTo,points,awardedFor,weekNumber} = req.body;
-    try{
-      scoreToInsert= {awardedTo,points,awardedFor,weekNumber };
-      const createdScore= await Score.create(scoreToInsert);
+  insert: [validateTeam(), validatePoints(), validateWeek(), validateFor(), async (req, res) => {
+    const { awardedTo, points, awardedFor, weekNumber } = req.body;
+    try {
+      scoreToInsert = { awardedTo, points, awardedFor, weekNumber };
+      const createdScore = await Score.create(scoreToInsert);
       res.json(createdScore);
-    }catch (e){
+    } catch (e) {
       res.status(500);
       res.send(e);
     }
-  }
+  }]
 }
+

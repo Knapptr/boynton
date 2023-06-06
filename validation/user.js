@@ -1,6 +1,6 @@
+const { body } = require("express-validator");
 const User = require("../models/User");
-module.exports = {
-
+const userValidation = {
 	validateUsername: () => body("username").trim().notEmpty().withMessage("username can not be blank").isAlphanumeric().withMessage("Username must be alphanumeric. No spaces.").isLength({ max: 24 }).withMessage("username too long. 24 characters max"),
 
 	validateNameField: (nameField) => body(nameField).trim().notEmpty().escape().withMessage(`Invalid name field: ${nameField}`),
@@ -9,7 +9,7 @@ module.exports = {
 
 	validateBooleanField: (field) => body(field).exists().isBoolean().withMessage(`${field} must be a boolean value`),
 
-	validateRole: () => body("role").isIn(User.VALID_ROLES).withMessage("invalid Role"),
-	handleValidation,
+	validateRole: () => body("role").isIn(User.VALID_ROLES).withMessage("invalid Role")
 
 }
+module.exports = userValidation;
