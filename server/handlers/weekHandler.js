@@ -13,7 +13,6 @@ const weekHandler = {
 	},
 	async getOne(req, res, next) {
 		const getStaff = req.query.staff === "true";
-		const weeks = await Week.getAll(getStaff);
 		const weekID = req.params.weekNumber;
 		const week = await Week.get(weekID, getStaff);
 		res.json(week);
@@ -81,6 +80,15 @@ const weekHandler = {
 			list = list.filter(c => c.area.toUpperCase() === req.query.area.toUpperCase())
 		}
 		res.json(list);
+	},
+
+	async clearCabins(req, res, next) {
+		const { weekNumber } = req.params;
+		// Area can be "BA" or "GA"
+		const area = req.query.area;
+		const week = await Week.get(weekNumber);
+		const response = await week.clearCabins(area);
+		res.json(response);
 	}
 };
 

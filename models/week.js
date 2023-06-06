@@ -1,3 +1,4 @@
+const pool = require("../db");
 const defaultWeekRepository = require("../repositories/week");
 
 class Week {
@@ -34,6 +35,12 @@ class Week {
 	static async create({ title, number }, weekRepository = defaultWeekRepository) {
 		const weekResponse = await weekRepository.create({ title, number })
 		return new Week(weekResponse);
+	}
+	async clearCabins(area) {
+		const query = `UPDATE camper_weeks SET cabin_session_id = NULL WHERE week_id = $1 AND cabin_session_id IN (SELECT cs.id FROM cabins cab JOIN cabin_sessions cs ON cs.week_id = $1 AND cab.area = $2) RETURNING * `
+		const values = [this.number, area];
+		const result = await pool.query(query, values);
+		return result.rows;
 	}
 }
 module.exports = Week;

@@ -166,6 +166,13 @@ module.exports = class CabinSession {
 		});
 		return camperSessions;
 	}
+	async removeCamper(camperSessionId) {
+		const query = "UPDATE camper_weeks SET cabin_session_id = NULL WHERE camper_weeks.id = $1 RETURNING *";
+		const values = [camperSessionId];
+		const results = await pool.query(query, values);
+		return results.rows[0];
+	}
+
 	async addCampers(campers) {
 		const client = await pool.connect();
 		try {

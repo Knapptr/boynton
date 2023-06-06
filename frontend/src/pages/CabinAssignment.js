@@ -145,15 +145,15 @@ const CabinAssignment = ({ area, weekNumber }) => {
     * @param {string} cabinNumber (a unique cabin identifier)
     */
   const assignCabin = async (cabinSession) => {
-    console.log("Eagerly updating UI");
-    removeSelectedFromUnassigned();
-    updateCabinUI(cabinSession.name, [...selectedCampers]);
-
     const camperSessions = [...selectedCampers];
     if (camperSessions.length > cabinSession.capacity - cabinSession.campers.length) {
       console.log("Handle this case: Not enough space for all selected campers");
       return;
     }
+    console.log("Eagerly updating UI");
+    removeSelectedFromUnassigned();
+    updateCabinUI(cabinSession.name, [...selectedCampers]);
+
     const url = `/api/cabin-sessions/${cabinSession.id}/campers`
     const requestConfig = {
       method: "POST",
