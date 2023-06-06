@@ -1,6 +1,5 @@
 const DbError = {
 	alreadyExists(message) {
-		console.error(message);
 		return {
 			type: "DB",
 			reason: "Not Unique",
@@ -8,10 +7,16 @@ const DbError = {
 		}
 	},
 	notFound(message) {
-		console.error(message)
 		return {
 			type: "DB",
 			reason: "Does not exsit",
+			message
+		}
+	},
+	transactionFailure(message) {
+		return {
+			type: "DB",
+			reason: "Transaction failed",
 			message
 		}
 	}

@@ -26,6 +26,8 @@ const usersHandler = {
     userValidation.validateNameField("firstName"),
     userValidation.validateNameField("lastName"),
     userValidation.validatePassword(),
+    userValidation.validateOptionalSessions(),
+    userValidation.validateUniqueUser(),
     handleValidation,
     async (req, res, next) => {
       const { username, password, role, firstName, lastName, lifeguard, senior, firstYear, archery, ropes, sessions } = req.body;

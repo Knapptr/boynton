@@ -4,6 +4,7 @@ const defaultUserRepository = require("../repositories/User");
 const { fetchMany, fetchOne } = require("../utils/pgWrapper.js");
 const UserRepository = require("../repositories/User");
 const encrypt = require("../utils/encryptPassword");
+const DbError = require("../utils/DbError");
 
 
 module.exports = class User {
@@ -93,14 +94,10 @@ module.exports = class User {
   }
 
   static async create(
+    // Validation is performed by the handler and express-validator
     { username, firstName, lastName, password, role = "counselor", lifeguard = false, archery = false, ropes = false, firstYear = false, senior = false, sessions = [] },
     userRepository = defaultUserRepository
   ) {
-    const isUser = await User.get(username);
-    if (isUser) {
-      throw new Error("Cannot create user, user exists.");
-      return;
-    }
 
     const encryptedPassword = await encrypt(password);
 
@@ -138,7 +135,6 @@ module.exports = class User {
       const userResult = await client.query(userQuery, userValues);
       const userData = userResult.rows[0];
 
-      console.log("Mapping Sessions");
       const sessionQueries = sessions.map(session => {
         console.log("\tMapping Session")
         const sessQuery = "INSERT INTO staff_sessions (username,week_number) VALUES ($1, $2) RETURNING *"
@@ -149,10 +145,8 @@ module.exports = class User {
 
       const sessionsResult = await Promise.all(sessionQueries);
       const insertedSessions = sessionsResult.map(result => ({ weekNumber: result.rows[0].week_number, id: result.rows[0].id }));
-      console.log({ sessionsResult });
-      console.log({ sessions });
 
-      console.log("COMMITED");
+      client.query("COMMIT");
       const user = new User({
         username: userData.username,
         password: userData.password,
@@ -170,7 +164,7 @@ module.exports = class User {
       return user
     } catch (e) {
       await client.query("ROLLBACK");
-      throw e
+      throw DbError.transactionFailure("User creation transaction failed");
     } finally {
       client.release();
     }
