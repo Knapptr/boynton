@@ -1,4 +1,3 @@
-import useGetDataOnMount from "../hooks/useGetData";
 import Campers from "../components/Campers";
 import Cabins from "../components/Cabins";
 import { Route } from "react-router-dom";
@@ -123,7 +122,7 @@ const CabinAssignment = ({ area, weekNumber }) => {
       // remove id from array
       // maybe just use a set here?
       const index = s.findIndex((v) => v.id === sessionId);
-      if (index == -1) { console.log(`Cannot deselect camper: ${sessionId}. They are not currently selected.`) } else {
+      if (index === -1) { console.log(`Cannot deselect camper: ${sessionId}. They are not currently selected.`) } else {
         // set state to updated array
         const newState = [...s]
         newState.splice(index, 1);
@@ -145,62 +144,39 @@ const CabinAssignment = ({ area, weekNumber }) => {
     * @param {camperSession} camperSession an object with a camperId and a session Id (id)
     * @param {string} cabinNumber (a unique cabin identifier)
     */
-  const assignCabin = async (camperSession, cabinSession) => {
-    console.log("Assigning", { camperSession, cabinSession });
-    const requestConfig = {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        cabinSessionID: cabinSession ? cabinSession.id : null,
-      }),
-    };
-    const results = await fetch(
-      `/api/campers/${camperSession.camperId}/${camperSession.id}/cabin`,
-      requestConfig
-    );
-  };
-
-  /** Send all campers from selected campers to a cabin
-    * @param {string} cabinNumber is a unique indentifier of a cabin
-    * @param {number} currentAmt number of campers in cabin
-    */
-  const sendAllToCabin = async (cabinSession, currentAmt) => {
-    // Check cabin capacity
-    if (currentAmt + selectedCampers.length > cabinSession.capacity) {
-      // TODO handle this case
+  const assignCabin = async (cabinSession) => {
+    const camperSessions = [...selectedCampers];
+    if (camperSessions.length > cabinSession.capacity - cabinSession.campers.length) {
       console.log("Handle this case: Not enough space for all selected campers");
       return;
     }
-    // Eager UI State change
-    console.log("Eagerly updating UI");
-    removeSelectedFromUnassigned();
-    updateCabinUI(cabinSession.name, [...selectedCampers]);
+    const url = `/api/cabin-sessions/${cabinSession.id}/campers`
+    const requestConfig = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
 
-    // Action
-    let promises = selectedCampers.map(({ camperId, id }) => assignCabin({ camperId, id }, cabinSession));
-    try {
-      console.log("Sending to DB")
-      await Promise.all(promises);
-      console.log("DB Update successful")
-      setSelected([]);
+      },
+      body: JSON.stringify({
+        campers: camperSessions
+      }),
+    };
+    const results = await fetch(
+      url,
+      requestConfig
+    );
+    console.log("DB Update successful")
+    setSelected([]);
 
 
-      // Update state from DB
-      console.log("Updating UI from DB");
-      refreshCabins();
-      // updateCamperList();
-    }
-    // Handle Unsucc. db update
-    catch {
-      console.log("Something went wrong sending all to cabin");
-      setSelected([]);
-      refreshCabins();
-      // updateCamperList()
-    }
-  }
+    // Update state from DB
+    console.log("Updating UI from DB");
+    refreshCabins();
+    // updateCamperList();
+
+    console.log({ results });
+  };
 
   /** Push selected campers into cabin selection (optimistic UI update)
     * @param {string} cabinName Cabin name / number (the unique cabin identifier)
@@ -289,7 +265,7 @@ const CabinAssignment = ({ area, weekNumber }) => {
         <div tw="max-h-[45vh] lg:w-1/2 lg:max-h-screen flex lg:flex-col flex-wrap lg:flex-nowrap overflow-auto ">
           <Cabins
             unassignCamper={unassignCamper}
-            assign={sendAllToCabin}
+            assign={assignCabin}
             toggleUnassignModal={() => {
               setShowUnassignModal((d) => !d);
             }}
@@ -316,7 +292,6 @@ const CabinAssignment = ({ area, weekNumber }) => {
             showAllLists={cabinsOnly || allAssigned()}
             cabinSessions={cabinSessions}
             cabinsOnly={true}
-            lists={cabinList}
             weekNumber={weekNumber}
             area={area}
           />

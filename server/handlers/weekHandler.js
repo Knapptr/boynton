@@ -1,4 +1,5 @@
 const Week = require("../../models/week");
+const CabinSession = require("../../models/cabinSession");
 const Period = require("../../models/period");
 const Day = require("../../models/day");
 const Camper = require("../../models/camper");
@@ -72,6 +73,15 @@ const weekHandler = {
 		const campers = await period.getUnSignedUpCampers(weekID, cabin);
 		res.json(campers);
 	},
+
+	async getCabinSessions(req, res, next) {
+		const weekNumber = req.params.weekNumber;
+		let list = await CabinSession.getForWeek(weekNumber)
+		if (req.query.area && ["BA", "GA"].includes(req.query.area.toUpperCase())) {
+			list = list.filter(c => c.area.toUpperCase() === req.query.area.toUpperCase())
+		}
+		res.json(list);
+	}
 };
 
 module.exports = weekHandler;

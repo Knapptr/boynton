@@ -1,4 +1,20 @@
 module.exports = {
+  users: `
+    CREATE TABLE IF NOT EXISTS users
+    (
+    username character varying(24) NOT NULL,
+    password character varying(255) NOT NULL,
+    first_name character varying(255) NOT NULL,
+    last_name character varying(255) NOT NULL,
+    role character varying(255) NOT NULL DEFAULT 'counselor'::character varying,
+    lifeguard bool NOT NULL DEFAULT false,
+    archery bool NOT NULL DEFAULT false,
+    senior bool NOT NULL DEFAULT false,
+    first_year bool NOT NULL DEFAULT false,
+    ropes bool NOT NULL DEFAULT false,
+    CONSTRAINT users_pkey PRIMARY KEY (username)
+    )`,
+
   camperWeeks: `
   CREATE TABLE IF NOT EXISTS camper_weeks
   (

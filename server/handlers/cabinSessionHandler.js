@@ -23,4 +23,14 @@ module.exports = {
 		const campers = await cabinSession.getCampers();
 		res.json(campers);
 	},
+
+	async assignCampers(req, res, next) {
+		const cabinSessionId = req.params.cabinSessionId;
+		const campers = req.body.campers;
+		console.log({ campers });
+		const cabinSession = await CabinSession.get(cabinSessionId);
+		const addedSessions = await cabinSession.addCampers(campers);
+		res.json(addedSessions)
+
+	}
 };

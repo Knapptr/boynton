@@ -21,9 +21,9 @@ const Cabins = ({
   cabinSessions,
   toggleUnassignModal,
   cabinsOnly,
-  lists,
   unassignCamper,
 }) => {
+  console.log({ cabinSessions });
 
   const [hideFull, setHideFull] = useState(false);
 
@@ -34,7 +34,7 @@ const Cabins = ({
     }
   };
   const displayCabins = () => {
-    let list = cabinSessions;
+    let list = [...cabinSessions];
     if (hideFull) {
       list = cabinSessions.filter(
         (cabin) => cabin.capacity > cabin.campers.length

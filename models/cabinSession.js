@@ -1,4 +1,5 @@
 const { fetchManyAndCreate, fetchOneAndCreate, fetchMany } = require("../utils/pgWrapper");
+const pool = require("../db");
 const CamperWeek = require("./camperWeek");
 const sortCabins = require('../utils/sortCabins');
 
@@ -43,6 +44,41 @@ module.exports = class CabinSession {
 			Model: CabinSession,
 		});
 		return cabin;
+	}
+	static async getForWeek(weekNumber) {
+		const query = `
+			SELECT 
+			weeks.number as week_number, 
+			cs.id as id,
+			weeks.title as week_title,
+			cab.name as cabin_name,
+			cab.capacity as capacity,
+			cab.area as area,
+			camp.first_name as camper_first,
+			camp.last_name as camper_last,
+			camp.pronouns as camper_pronouns,
+			camp.age as camper_age,
+			camp.id as camper_id,
+			cw.day_camp as camper_day_camp,
+			cw.fl as camper_fl,
+			cw.id as camper_session_id
+			FROM cabin_sessions cs
+			JOIN cabins cab ON cab.name = cs.cabin_name
+			LEFT JOIN camper_weeks cw ON cw.cabin_session_id = cs.id
+			left JOIN campers camp ON camp.id = cw.camper_id
+			JOIN weeks ON cs.week_id = weeks.number
+			WHERE weeks.number = $1
+			ORDER BY cs.id, camp.age, camp.last_name
+		`
+		const values = [weekNumber]
+			;
+		const response = await fetchMany(query, values);
+		const cabins = CabinSession.deserialize(response);
+
+		// cabins.sort(sortCabins)
+		// console.log({ sortedCabins: cabins })
+		return cabins;
+
 	}
 	static async getAll() {
 		const query = `
@@ -129,5 +165,35 @@ module.exports = class CabinSession {
 			Model: CamperWeek,
 		});
 		return camperSessions;
+	}
+	async addCampers(campers) {
+		const client = await pool.connect();
+		try {
+			await client.query("BEGIN")
+			const queries = campers.map(camperSession => {
+				const query = `UPDATE camper_weeks SET cabin_session_id = $1 WHERE camper_weeks.id = $2 RETURNING *`
+				const values = [this.id, camperSession.id];
+				return client.query(query, values);
+			})
+			const results = await Promise.all(queries);
+			const camperSessions = results.map(r => ({
+				cabinSessionId: r.rows[0].cabin_session_id,
+				id: r.rows[0].id,
+				camperId: r.rows[0].camper_id,
+				dayCamp: r.rows[0].day_camp,
+				fl: r.rows[0].fl,
+				weekNumber: r.rows[0].week_id
+			}))
+			await client.query("COMMIT");
+			return camperSessions;
+
+
+		} catch (e) {
+			await client.query("ROLLBACK")
+			throw e
+		}
+		finally {
+			client.release()
+		}
 	}
 };

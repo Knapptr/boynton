@@ -4,22 +4,12 @@ import UserContext from '../components/UserContext';
 
 const getAllSessionsForWeek = async (week, area, auth) => {
 	const data = await fetchWithToken(
-		`/api/cabin-sessions?week=${week}&area=${area}`, {}, auth
+		`/api/cabin-sessions?week=${week}&area=${area}`/*`/api/week/${week}/cabin-sessions?area=${area}`*/, {}, auth
 	);
 	const cabinSessions = await data.json();
 	return cabinSessions;
 };
 
-const getCampersForCabin = async (cabinSessionID, auth) => {
-	const data = await fetchWithToken(
-		`/api/cabin-sessions/${cabinSessionID}/campers`, {}, auth
-	);
-	const campers = await data.json();
-	if (campers) {
-		campers.sort((a, b) => a.age - b.age);
-	}
-	return campers || [];
-};
 
 const useCabinSessions = (weekNumber, area) => {
 	const [cabinList, setCabinList] = useState({});
@@ -36,21 +26,15 @@ const useCabinSessions = (weekNumber, area) => {
 	};
 
 	const getData = useCallback(async () => {
-		const cabinsState = {};
 		const cabinSessions = await getAllSessionsForWeek(weekNumber, area, auth);
-		for (let session of cabinSessions) {
-			const campers = await getCampersForCabin(session.id, auth);
-			cabinsState[session.cabinName] = campers;
-		}
 		// const cabinNames = Object.keys(cabinsState);
 
-		return { cabinsState, cabinSessions }
+		return cabinSessions
 	}, [weekNumber, area, auth])
 
 	const refresh = async () => {
 		const setState = async (auth) => {
-			let { cabinsState, cabinSessions } = await getData();
-			setCabinList(cabinsState);
+			let cabinSessions = await getData();
 			setCabinSessions(cabinSessions);
 		};
 		setState(auth);
@@ -59,14 +43,13 @@ const useCabinSessions = (weekNumber, area) => {
 
 	useEffect(() => {
 		const setState = async (auth) => {
-			let { cabinsState, cabinSessions } = await getData();
-			setCabinList(cabinsState);
+			let cabinSessions = await getData();
 			setCabinSessions(cabinSessions);
 		};
 		setState(auth);
 	}, [auth, area, weekNumber, getData]);
 
-	return { setCabinList, cabinList, cabinSessions, updateCabinList, refreshCabins: refresh, setCabinSessions };
+	return { setCabinList, cabinSessions, updateCabinList, refreshCabins: refresh, setCabinSessions };
 };
 
 export default useCabinSessions;
