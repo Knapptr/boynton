@@ -52,7 +52,7 @@ const Camper = ({
                 <RemoveButton
                     onClick={(e) => {
                         e.stopPropagation();
-                        unassignCamper(index);
+                        unassignCamper(camper.id);
                     }}
                 >
                     <FontAwesomeIcon icon={faUserMinus} />

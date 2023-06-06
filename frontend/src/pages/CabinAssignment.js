@@ -197,6 +197,35 @@ const CabinAssignment = ({ area, weekNumber }) => {
     setCabinSessions(updatedList);
   }
 
+  const unassignReq = async (camperSessionId, cabinSessionId) => {
+    const url = `/api/cabin-sessions/${cabinSessionId}/campers/${camperSessionId}`
+    const options = {
+      method: "DELETE"
+    }
+    //Eager UI updates
+    let camper = undefined;
+    setCabinSessions(c => {
+      // remove from assigned
+      const newState = [...c];
+      const newCabinIndex = newState.findIndex(cab => cab.id === cabinSessionId);
+      const newCabin = { ...newState[newCabinIndex] };
+      const newCampers = [...newCabin.campers];
+      const camperIndex = newCampers.find(camper => camper.id === camperSessionId);
+      camper = newCampers.splice(camperIndex, 1)[0];
+      newCabin.campers = newCampers;
+      newState[newCabinIndex] = newCabin;
+      return newState
+    })
+    // add to unassigned
+    setAllCampers(c => {
+      const updatedList = [...c.unassigned, camper];
+      sortByAge(updatedList);
+      return { unassigned: updatedList, all: c.all };
+
+    });
+    const result = await fetchWithToken(url, options, auth);
+
+  }
   /** Unassign a single camper from a cabin
     * @param {string} cabinName Unique identifier for cabin
     * @param {camperSession} camper data about camper session
@@ -212,11 +241,12 @@ const CabinAssignment = ({ area, weekNumber }) => {
 
     });
 
-    setCabinSessions(c => {
-      const newCabinsList = [...c];
-      newCabinsList[cabinIndex].campers.splice(camperIndex, 1);
-      return newCabinsList;
-    })
+    // setCabinSessions(c => {
+    //   const
+    //   const newCabinsList = [...c];
+    //   newCabinsList[cabinIndex].campers.splice(camperIndex, 1);
+    //   return newCabinsList;
+    // })
 
     // DB Action
     try {
@@ -268,6 +298,7 @@ const CabinAssignment = ({ area, weekNumber }) => {
 
         <div tw="max-h-[45vh] lg:w-1/2 lg:max-h-screen flex lg:flex-col flex-wrap lg:flex-nowrap overflow-auto ">
           <Cabins
+            unassign={unassignReq}
             unassignCamper={unassignCamper}
             assign={assignCabin}
             toggleUnassignModal={() => {

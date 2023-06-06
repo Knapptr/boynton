@@ -21,6 +21,7 @@ const Cabins = ({
   cabinSessions,
   toggleUnassignModal,
   cabinsOnly,
+  unassign,
   unassignCamper,
 }) => {
   console.log({ cabinSessions });
@@ -46,7 +47,7 @@ const Cabins = ({
           cabinsOnly={cabinsOnly}
           assign={assign}
           key={`cabin-${cabinSession.name}`}
-          unassignCamper={(camperIndex) => unassignCamper(index, camperIndex)}
+          unassignCamper={(camperSessionId) => unassign(camperSessionId, cabinSession.id)}
           allOpenState={showAllLists}
           session={cabinSession}
         />
