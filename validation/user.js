@@ -1,4 +1,4 @@
-const { body } = require("express-validator");
+const { body, param } = require("express-validator");
 const pool = require("../db");
 const User = require("../models/User");
 const userValidation = {
@@ -19,7 +19,26 @@ const userValidation = {
 		if (userResult) {
 			throw new Error("User already exists.");
 		}
+	}),
 
+	validateUpdateUsernameUnique: () => body("username").custom(async (bodyUsername, { req }) => {
+		console.log("From Validator:", { params: req.params }, { bodyUsername });
+		if (bodyUsername !== req.params.username) {
+			console.log("not equal");
+			const userResult = await User.get(bodyUsername);
+			if (userResult) {
+				throw new Error("User already exists.");
+			}
+		}
+	}),
+
+	validateUserParamExists: () => param("username").custom(async (username, { req }) => {
+		const user = await User.get(username);
+		if (!user) {
+			throw new Error("User does not exist");
+		}
+		// set the body to be the existing user
+		req.body.targetUser = user;
 	})
 
 }

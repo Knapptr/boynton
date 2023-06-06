@@ -57,6 +57,7 @@ const usersHandler = {
 
   update: [
     userValidation.validateUsername(),
+    userValidation.validateUserParamExists(),
     userValidation.validateRole(),
     userValidation.validateBooleanField("lifeguard"),
     userValidation.validateBooleanField("senior"),
@@ -64,19 +65,11 @@ const usersHandler = {
     userValidation.validateBooleanField("ropes"),
     userValidation.validateBooleanField("lifeguard"),
     userValidation.validateBooleanField("archery"),
+    userValidation.validateUpdateUsernameUnique(),
     handleValidation,
     async (req, res, next) => {
-      const { username } = req.params;
       // check all fields
-      console.log({ updateBody: req.body })
-      const { role, senior, firstYear, firstName, lastName, ropes, lifeguard, archery } = req.body;
-      if (role === undefined || senior === undefined || firstYear === undefined || firstName === undefined || lastName === undefined || ropes === undefined || lifeguard === undefined || archery === undefined) {
-        next(ApiError.badRequest("Missing fields for user"));
-        return;
-      }
-      const user = await User.get(username);
-      console.log({ user });
-      if (!user) { next(DbError.notFound("User does not exist")); return; }
+      const user = req.body.targetUser;
       try {
         const result = await user.update(req.body);
         if (!result) { throw new Error("Error updating user") }
