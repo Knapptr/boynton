@@ -1,8 +1,6 @@
 const compare = require("../utils/comparePassword");
 const pool = require("../db")
-const defaultUserRepository = require("../repositories/User");
 const { fetchMany, fetchOne } = require("../utils/pgWrapper.js");
-const UserRepository = require("../repositories/User");
 const encrypt = require("../utils/encryptPassword");
 const DbError = require("../utils/DbError");
 
@@ -11,12 +9,10 @@ module.exports = class User {
   constructor(
     { username, password, role, firstName, lastName, lifeguard = false, archery = false, ropes = false, firstYear = false, senior = false, sessions = [] },
 
-    userRepository = defaultUserRepository
   ) {
     this.username = username;
     this.password = password;
     this.role = role;
-    this.userRepository = userRepository;
     this.firstName = firstName;
     this.lastName = lastName;
     this.lifeguard = lifeguard;
@@ -44,12 +40,58 @@ module.exports = class User {
   }
   static VALID_ROLES = ["admin", "programming", "counselor", "unit_head"]
 
-  static async get(username, userRepository = defaultUserRepository) {
-    const userData = await userRepository.get(username);
-    if (!userData) {
-      return false
+  static async get(username) {
+    const query = `
+    SELECT u.*, ss.week_number as week_number, ss.id as staff_session_id from users u
+    LEFT JOIN staff_sessions ss ON ss.username = u.username
+    WHERE u.username = $1
+    `;
+    const values = [username];
+    const userResponse = await fetchMany(query, values);
+    if (!userResponse) {
+      return false;
     }
-    return new User({ ...userData }, userRepository);
+
+
+    const initUser = {
+      username: "",
+      password: "",
+      firstName: "",
+      lastName: "",
+      role: "counselor",
+      senior: false,
+      firstYear: false,
+      lifeguard: false,
+      archery: false,
+      ropes: false,
+      sessions: []
+    }
+
+    const user = userResponse.reduce((mappedUser, db) => {
+      mappedUser.username = db.username;
+      mappedUser.password = db.password;
+      mappedUser.firstName = db.first_name;
+      mappedUser.lastName = db.last_name;
+      mappedUser.role = db.role;
+      mappedUser.senior = db.senior;
+      mappedUser.firstYear = db.first_year;
+      mappedUser.lifeguard = db.lifeguard;
+      mappedUser.archery = db.archery;
+      mappedUser.ropes = db.ropes
+
+      if (db.staff_session_id !== null) {
+        mappedUser.sessions.push(
+          {
+            id: db.staff_session_id,
+            weekNumber: db.week_number
+          }
+        )
+      }
+      return mappedUser
+    }, initUser)
+
+
+    return new User(user);
   }
 
   static async getAll() {
@@ -96,7 +138,6 @@ module.exports = class User {
   static async create(
     // Validation is performed by the handler and express-validator
     { username, firstName, lastName, password, role = "counselor", lifeguard = false, archery = false, ropes = false, firstYear = false, senior = false, sessions = [] },
-    userRepository = defaultUserRepository
   ) {
 
     const encryptedPassword = await encrypt(password);
@@ -172,9 +213,8 @@ module.exports = class User {
 
   }
 
-  static async authenticate({ username, password }, userRepository = defaultUserRepository) {
-    // console.log(`Authenticating: ${username}`)
-    const user = await User.get(username, userRepository);
+  static async authenticate({ username, password }) {
+    const user = await User.get(username);
     if (!user) { return false }
     const isAuthenticated = await compare(password, user.password);
     return { user, isAuthenticated };

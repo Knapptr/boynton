@@ -141,7 +141,7 @@ class ActivitySession {
         if (!result) { return false }
         return { id: result.id, periodId: result.period_id, activityId: result.activity_id }
     }
-    async addCampers(campersList, activityId) {
+    async addCampers(campersList) {
         const client = await pool.connect();
         try {
             await client.query("BEGIN");
