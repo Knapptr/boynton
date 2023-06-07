@@ -5,9 +5,6 @@ import tw, { styled } from "twin.macro";
 import { Button } from "@mui/material";
 import "styled-components/macro";
 import { MenuSelector, NavBarLink, StaffBadge } from "../components/styled";
-import { Link } from "react-router-dom";
-import NavMenu from "../components/NavMenu";
-import NavDrawer from "../components/NavDrawer";
 
 
 const ProfilePage = () => {
