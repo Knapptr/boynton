@@ -22,9 +22,7 @@ const Cabins = ({
   toggleUnassignModal,
   cabinsOnly,
   unassign,
-  unassignCamper,
 }) => {
-  console.log({ cabinSessions });
 
   const [hideFull, setHideFull] = useState(false);
 

@@ -28,21 +28,18 @@ const StaffSchedule = () => {
   /** Add all selected staff to activity */
   const addSelectedToActivity = async (activity, activityIndex) => {
     const url = `/api/activity-sessions/${activity.sessionId}/staff`
-    const allRequests = selectedStaff.map(data => {
-      const options = {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ staffSessionId: data.staffer.staffSessionId })
-      }
-      return fetchWithToken(url, options, auth);
-    })
+    const options = {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ staff: selectedStaff.map(s => ({ staffSessionId: s.staffer.staffSessionId })) })
+    }
     //// DO EAGER UPDATE
     eagerUpdateInsertion(selectedStaff, activityIndex);
     // Clear Selection after update
     clearSelectedStaff();
     //// On DB response
     try {
-      await Promise.all(allRequests);
+      await fetchWithToken(url, options, auth);
       // Update accordingly
       fetchViableStaff(selectedPeriod);
       fetchActivities()

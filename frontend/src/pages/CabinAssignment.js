@@ -1,7 +1,7 @@
 import Campers from "../components/Campers";
 import Cabins from "../components/Cabins";
 import { Route } from "react-router-dom";
-import { useState, useContext, useEffect } from "react";
+import { useState, useContext, useEffect, useCallback } from "react";
 import UserContext from "../components/UserContext";
 import tw from "twin.macro";
 import "styled-components/macro";
@@ -74,22 +74,24 @@ const CabinAssignment = ({ area, weekNumber }) => {
 
   const [allCampers, setAllCampers] = useState({ unassigned: [], all: [] })
 
-  useEffect(() => {
-    const getCampers = async () => {
-      const response = await fetchWithToken(`/api/camper-weeks?week=${weekNumber}&area=${area}`, {}, auth);
-      const ungroupedCampers = await response.json();
-      const unassigned = [];
-      const all = [];
+  const getCampers = useCallback(async () => {
+    const response = await fetchWithToken(`/api/camper-weeks?week=${weekNumber}&area=${area}`, {}, auth);
+    const ungroupedCampers = await response.json();
+    const unassigned = [];
+    const all = [];
 
-      for (const camper of ungroupedCampers) {
-        all.push(camper);
-        if (camper.cabinSessionID === null) {
-          unassigned.push(camper);
-        }
+    for (const camper of ungroupedCampers) {
+      all.push(camper);
+      if (camper.cabinSessionID === null) {
+        unassigned.push(camper);
       }
-
-      setAllCampers({ unassigned, all });
     }
+
+    setAllCampers({ unassigned, all });
+  }, [auth, area, weekNumber]
+  );
+
+  useEffect(() => {
     getCampers();
   }, [weekNumber, area, auth])
 
@@ -150,7 +152,6 @@ const CabinAssignment = ({ area, weekNumber }) => {
       console.log("Handle this case: Not enough space for all selected campers");
       return;
     }
-    console.log("Eagerly updating UI");
     removeSelectedFromUnassigned();
     updateCabinUI(cabinSession.name, [...selectedCampers]);
 
@@ -170,16 +171,11 @@ const CabinAssignment = ({ area, weekNumber }) => {
       url,
       requestConfig
     );
-    console.log("DB Update successful")
+    //clear selected
     setSelected([]);
-
-
     // Update state from DB
-    console.log("Updating UI from DB");
     refreshCabins();
-    // updateCamperList();
-
-    console.log({ results });
+    getCampers();
   };
 
   /** Push selected campers into cabin selection (optimistic UI update)
@@ -226,59 +222,28 @@ const CabinAssignment = ({ area, weekNumber }) => {
     const result = await fetchWithToken(url, options, auth);
 
   }
-  /** Unassign a single camper from a cabin
-    * @param {string} cabinName Unique identifier for cabin
-    * @param {camperSession} camper data about camper session
-  */
-  const unassignCamper = async (cabinIndex, camperIndex) => {
-    // Eager UI Update
-    const camper = { ...cabinSessions[cabinIndex].campers[camperIndex] };
-    console.log({ camper });
-    setAllCampers(c => {
-      const updatedList = [...c.unassigned, camper];
-      sortByAge(updatedList);
-      return { unassigned: updatedList, all: c.all };
-
-    });
-
-    // setCabinSessions(c => {
-    //   const
-    //   const newCabinsList = [...c];
-    //   newCabinsList[cabinIndex].campers.splice(camperIndex, 1);
-    //   return newCabinsList;
-    // })
-
-    // DB Action
-    try {
-      await assignCabin(camper);
-      console.log("Update successful")
-    } catch {
-      console.log("Update Unsuccessful");
-    }
-    // Update from DB
-    refreshCabins();
-    // updateCampers();
-
-  };
-
   /** Unassign all campers from cabins */
   const unassignAll = async () => {
-    let campers = [...allCampers.unassigned];
-    let newlyUnassignedCampers = [];
-    let updatedCabinList = [...cabinSessions];
-    for (let cabin of updatedCabinList) {
-      const camperCopy = [...cabin.campers];
-      newlyUnassignedCampers = newlyUnassignedCampers.concat(camperCopy);
-      cabin.campers = [];
-    }
-    await Promise.all(newlyUnassignedCampers.map((c) => assignCabin(c, false)));
-    const newUnassigned = [...campers, ...newlyUnassignedCampers];
-    newUnassigned.sort((a, b) => a.age - b.age || a.lastName.localeCompare(b.name));
-    setAllCampers(ac => ({ all: ac.all, unassigned: newUnassigned }));
-    setCabinSessions(updatedCabinList);
-    // Update from DB
+    // API req data
+    console.log({ area })
+    const url = `/api/weeks/${weekNumber}/cabin-sessions/campers?area=${area.toUpperCase()}`;
+    const options = { method: "DELETE" };
+    // Eager UI update
+    // Add all removed campers to unassigned
+    let unassignedCampers = [...allCampers.unassigned];
+    unassignedCampers = unassignedCampers.concat(...cabinSessions.map(c => c.campers))
+    sortByAge(unassignedCampers);
+    setAllCampers(ac => ({ ...ac, unassigned: unassignedCampers }));
+    //remove all campers from cabins
+    setCabinSessions(cs => {
+      return cs.map(c => ({ ...c, campers: [] }));
+    })
+    // API Request
+    const results = await fetchWithToken(url, options, auth);
+    // Refresh page from DB
     refreshCabins();
-    // updateCampers();
+    getCampers();
+
   };
 
   /** Show Both Cabins and Campers **/
@@ -299,7 +264,6 @@ const CabinAssignment = ({ area, weekNumber }) => {
         <div tw="max-h-[45vh] lg:w-1/2 lg:max-h-screen flex lg:flex-col flex-wrap lg:flex-nowrap overflow-auto ">
           <Cabins
             unassign={unassignReq}
-            unassignCamper={unassignCamper}
             assign={assignCabin}
             toggleUnassignModal={() => {
               setShowUnassignModal((d) => !d);
@@ -323,7 +287,7 @@ const CabinAssignment = ({ area, weekNumber }) => {
             toggleUnassignModal={() => {
               setShowUnassignModal((d) => !d);
             }}
-            unassignCamper={unassignCamper}
+            unassign={unassignReq}
             showAllLists={cabinsOnly || allAssigned()}
             cabinSessions={cabinSessions}
             cabinsOnly={true}
