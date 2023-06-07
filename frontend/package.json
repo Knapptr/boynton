@@ -3,10 +3,14 @@
 	"version": "0.1.0",
 	"private": true,
 	"dependencies": {
+		"@fontsource/roboto": "^5.0.2",
 		"@fortawesome/fontawesome-svg-core": "^6.1.1",
 		"@fortawesome/free-regular-svg-icons": "^6.1.1",
 		"@fortawesome/free-solid-svg-icons": "^6.1.1",
 		"@fortawesome/react-fontawesome": "^0.1.18",
+		"@mui/icons-material": "^5.11.16",
+		"@mui/material": "^5.13.4",
+		"@mui/styled-engine-sc": "^5.12.0",
 		"@testing-library/jest-dom": "^5.16.4",
 		"@testing-library/react": "^13.2.0",
 		"@testing-library/user-event": "^13.5.0",
@@ -23,9 +27,9 @@
 	},
 	"proxy": "http://localhost:3000",
 	"scripts": {
-		"start": "PORT=3001 BROWSER=none react-scripts start",
-		"build": "react-scripts build",
-		"test": "react-scripts test",
+		"start": "PORT=3001 BROWSER=none craco start",
+		"build": "craco build",
+		"test": "craco test",
 		"eject": "react-scripts eject"
 	},
 	"babelMacros": {
@@ -50,5 +54,8 @@
 			"last 1 firefox version",
 			"last 1 safari version"
 		]
+	},
+	"devDependencies": {
+		"@craco/craco": "^7.1.0"
 	}
 }
