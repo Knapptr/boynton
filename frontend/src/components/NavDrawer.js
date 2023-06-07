@@ -86,11 +86,11 @@ function NavDrawer(props) {
             aria-label="open drawer"
             edge="start"
             onClick={handleDrawerToggle}
-            tw="mr-2 block sm:hidden"
+            tw="mr-2 block md:hidden"
           >
             <MenuIcon />
           </IconButton>
-          <Box tw="ml-auto hidden sm:block " >
+          <Box tw="ml-auto hidden md:block " >
             {navItems.map((item) => (
               <NavContextLinkButton key={`appbar-link-${item.name}`} item={item} active={location.pathname.startsWith(item.url)} to={item.url} />
             ))}
@@ -107,7 +107,7 @@ function NavDrawer(props) {
           ModalProps={{
             keepMounted: true, // Better open performance on mobile.
           }}
-          tw="block sm:hidden"
+          tw="block md:hidden"
           sx={{
             '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth, background: TAILWIND.darkBg },
           }}
