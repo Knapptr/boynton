@@ -7,22 +7,8 @@ const useActivityAttendance = (period, cabin) => {
 	const [loading, setLoading] = useState(true);
 	const auth = useContext(UserContext);
 
-	const update = (
-		sourceId,
-		destinationId,
-		newSourceList,
-		newDestinationList
-	) => {
-		setLists({
-			...lists,
-			[sourceId]: { ...lists[sourceId], campers: newSourceList },
-			[destinationId]: {
-				...lists[destinationId],
-				campers: newDestinationList,
-			},
-		});
-	};
-	const getCampers = useCallback(async (periodID, cabinName) => {
+	const getCampers = useCallback(async (periodID, cabinName, withLoading) => {
+		if (withLoading) { setLoading(true) }
 		const camperUrl = `/api/periods/${periodID}/campers?cabin=${cabinName}`;
 		const activityUrl = `/api/activity-sessions?period=${periodID}`;
 		const camperResult = await fetchWithToken(camperUrl, {}, auth);
@@ -47,23 +33,22 @@ const useActivityAttendance = (period, cabin) => {
 			}
 		});
 		setLists(listing);
+		if (withLoading) { setLoading(false) }
 	},
 
 		[auth])
-	const initialLoad = useCallback(() => {
-		setLoading(true);
-		getCampers(period, cabin);
-		setLoading(false);
-	}, [period, cabin, getCampers])
+	const getData = useCallback(async () => {
+		getCampers(period, cabin, true)
+	}, [period, cabin])
 
 	const refresh = () => {
-		getCampers(period, cabin)
+		getCampers(period, cabin, false);
 	}
 	useEffect(() => {
-		initialLoad();
-	}, [period, cabin, initialLoad]);
+		getData();
+	}, [period, cabin, getData]);
 
-	return { activityLists: lists, updateActivityAttendance: update, loading, setLists, refresh };
+	return { activityLists: lists, loading, setLists, refresh };
 };
 
 export default useActivityAttendance;

@@ -73,18 +73,6 @@ const CreateSchedulePage = () => {
 			setWeekLoaded(true);
 		}
 	}, [week]);
-	const [cabins, setCabins] = useGetDataOnMount({
-		url: `/api/cabin-sessions?week=${weekNumber}`,
-		useToken: true,
-		initialState: [],
-		optionalSortFunction: (cab) => {
-			if (cab.cabinArea === "GA") {
-				return -1;
-			} else {
-				return 1;
-			}
-		},
-	});
 	const isTheLastPeriod = () => {
 		if (weekLoaded) {
 			return (
@@ -101,7 +89,6 @@ const CreateSchedulePage = () => {
 		const currentPeriodIndex = selectedPeriod;
 		const nextPeriodIndex = currentPeriodIndex + numberToIncrement
 		const itIsTheLastPeriod = currentPeriods.length === nextPeriodIndex;
-		const itIstheFirstPeriod = currentPeriodIndex === 0
 
 		if (!itIsTheLastPeriod && nextPeriodIndex >= 0) {
 			setSelectedPeriod(nextPeriodIndex);
@@ -117,6 +104,8 @@ const CreateSchedulePage = () => {
 			}
 		}
 	};
+
+	const getPeriod = () => week.days[selectedDay].periods[selectedPeriod]
 
 	return (
 		<div tw="flex flex-col justify-center min-h-screen">
@@ -153,19 +142,11 @@ const CreateSchedulePage = () => {
 			{weekLoaded && (
 				<div tw="flex-grow ">
 					<SelectActivities
-						selectNext={selectNext}
 						handleSelectCamper={handleSelectCamper}
 						selectedCampers={selectedCampers}
 						clearSelection={clearSelection}
-						isTheLastPeriod={isTheLastPeriod}
-						dayName={week.days[selectedDay].name}
-						periodNumber={
-							week.days[selectedDay].periods[selectedPeriod].number
-						}
 						cabinName={cabin}
-						periodId={
-							week.days[selectedDay].periods[selectedPeriod].id
-						}
+						periodId={getPeriod().id}
 					/>
 				</div>
 			)}
@@ -189,12 +170,12 @@ const CreateSchedulePage = () => {
 							days={week.days}
 							selectedDay={selectedDay}
 						/>
-						<LabeledDivider text="Cabin" />
+						{/*			<LabeledDivider text="Cabin" />
 						<CabinNav
 							currentCabin={cabin}
 							weekNumber={weekNumber}
 							cabins={cabins}
-						/>
+						/>   */ }
 					</Controls>
 					<button
 						onClick={() => {
@@ -202,7 +183,7 @@ const CreateSchedulePage = () => {
 						}}
 						tw=" font-thin border rounded py-2 px-4 mt-2"
 					>
-						{showControls ? "Hide" : "More Options"}
+						{showControls ? "Hide" : "Select Day / Activity Period"}
 					</button>
 				</div>
 			)}

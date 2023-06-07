@@ -42,6 +42,10 @@ const SignUpIndex = () => {
 	const handleAccordionChange = (e, state) => {
 		setShowAccordion(state);
 	}
+
+	const handleNewSelection = () => {
+		setShowAccordion(false);
+	}
 	return (
 		<>
 			{!(weeks.length > 0 && cabins.length > 0) ? (
@@ -99,6 +103,7 @@ const SignUpIndex = () => {
 										<div tw="flex justify-center w-10/12 mx-auto mt-3">
 											<Link
 												tw="bg-green-300 rounded border border-stone-800 py-1 px-6"
+												onClick={handleNewSelection}
 												to={`${selected.cabin}/${selected.week}`}
 											>
 												Go!

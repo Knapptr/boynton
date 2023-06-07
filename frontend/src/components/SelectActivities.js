@@ -1,11 +1,12 @@
 import useActivityAttendance from "../hooks/useActivityAttendance";
-import { useContext } from 'react'
+import { useContext, useEffect } from 'react'
 import lodash from "lodash";
 import fetchWithToken from "../fetchWithToken";
 import tw, { styled } from "twin.macro";
 import "styled-components/macro";
 import toTitleCase from "../toTitleCase";
 import UserContext from "./UserContext";
+import { Skeleton } from "@mui/material";
 
 const CamperItem = styled.li(({ isDragging, isSelected }) => [
   tw`border p-1 bg-green-50 cursor-pointer select-none`,
@@ -31,6 +32,25 @@ const SelectActivities = ({
     setLists,
     refresh
   } = useActivityAttendance(periodId, cabinName);
+  // const [periodData, setPeriodData] = useState(null);
+
+  // const getPeriodData = useCallback(async () => {
+  //   const url = `/api/periods/${periodId}`;
+  //   const response = await fetchWithToken(url, {}, auth);
+  //   const period = await response.json();
+  //   setPeriodData(period);
+
+  // }, [periodId])
+
+  // useEffect(() => {
+  //   getPeriodData()
+  // }, [getPeriodData])
+
+  useEffect(() => {
+    console.log("running effect");
+    console.log({ activitiesLoading });
+  }, [activitiesLoading])
+
   const auth = useContext(UserContext)
 
   const addCamperActivitiesToDb = async (campers, activitySessionId) => {
@@ -75,11 +95,14 @@ const SelectActivities = ({
 
   return (
     <div tw="flex flex-col max-w-3xl mx-auto">
-      {activitiesLoading ? (
-        <h2 tw="animate-bounce">Loading</h2>
-      ) : (
-        <>
-          <div tw=" flex-col md:flex-row flex justify-center ">
+      <div tw=" flex-col md:flex-row flex justify-center ">
+        {activitiesLoading ? (
+          <div tw="w-full my-2 md:mx-2 flex justify-around">
+            <Skeleton animation="wave" variant="rectangular" height={400} width={350} />
+            <Skeleton animation="wave" variant="rectangular" height={400} width={350} />
+          </div>
+        ) : (
+          <>
             {activityLists.unassigned &&
               activityLists.unassigned.campers.length > 0 && (
                 <div tw="w-full my-2 md:mx-2">
@@ -135,10 +158,10 @@ const SelectActivities = ({
                   </ActivityList>
                 ))}
             </div>
-          </div>
-        </>
-      )
-      }
+          </>
+        )
+        }
+      </div>
     </div >
   );
 };
