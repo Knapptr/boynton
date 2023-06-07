@@ -50,58 +50,59 @@ const AttendanceIndex = () => {
   return (
     <>
       <h1 tw="text-xl font-bold">Attendance</h1>
-      <h2 tw="font-bold">Select Week</h2>
-      <ul tw="flex justify-center gap-3">
-        {schedule.map((week, weekIndex) => (
-          <MenuSelector
-            tw="px-4"
-            onClick={() => selectWeek(weekIndex)}
-            isSelected={selected.week === weekIndex}
-          >
-            <button>{week.number}</button>
-          </MenuSelector>
-        ))}
-      </ul>
-      {selected.week !== "none" &&
-        (
-          <>
-            <h1>Select Day</h1>
-            <ul tw="flex gap-3 justify-center">
-              {
-                schedule[selected.week].days.map((day, dayIndex) => (
-                  <MenuSelector
-                    isSelected={selected.day === dayIndex}
-                    onClick={() => {
-                      selectDay(dayIndex);
-                    }}
-                  >
-                    <button>{toTitleCase(day.name)}</button>
-                  </MenuSelector>
-                ))}
-            </ul>
-          </>
-        )}
-      {selected.day !== "none" &&
-        (
-          <>
-            <h1>Select Period</h1>
-            <ul tw="flex justify-center gap-3">
-              {
-                schedule[selected.week].days[selected.day].periods.map(
-                  (period, periodIndex) => (
+      <div tw="flex flex-wrap">
+        <ul tw="flex justify-center gap-3">
+          {schedule.map((week, weekIndex) => (
+            <MenuSelector
+              tw="px-4"
+              onClick={() => selectWeek(weekIndex)}
+              isSelected={selected.week === weekIndex}
+            >
+              <button>{week.number}</button>
+            </MenuSelector>
+          ))}
+        </ul>
+        {selected.week !== "none" &&
+          (
+            <>
+              <h1>Select Day</h1>
+              <ul tw="flex gap-3 justify-center">
+                {
+                  schedule[selected.week].days.map((day, dayIndex) => (
                     <MenuSelector
+                      isSelected={selected.day === dayIndex}
                       onClick={() => {
-                        selectPeriod(periodIndex);
+                        selectDay(dayIndex);
                       }}
-                      isSelected={periodIndex === selected.period}
                     >
-                      <button>{period.number}</button>
+                      <button>{toTitleCase(day.name)}</button>
                     </MenuSelector>
-                  ))
-              }
-            </ul>
-          </>
-        )}
+                  ))}
+              </ul>
+            </>
+          )}
+        {selected.day !== "none" &&
+          (
+            <>
+              <h1>Select Period</h1>
+              <ul tw="flex justify-center gap-3">
+                {
+                  schedule[selected.week].days[selected.day].periods.map(
+                    (period, periodIndex) => (
+                      <MenuSelector
+                        onClick={() => {
+                          selectPeriod(periodIndex);
+                        }}
+                        isSelected={periodIndex === selected.period}
+                      >
+                        <button>{period.number}</button>
+                      </MenuSelector>
+                    ))
+                }
+              </ul>
+            </>
+          )}
+      </div>
     </>
   );
 };

@@ -10,6 +10,8 @@ import ActivitySelectors from "../components/ActivitySelectors";
 import ReassignmentSelectionDialog from "../components/AttendanceReassignDialog";
 import fetchWithToken from "../fetchWithToken";
 import AttendanceSearch from "../components/AttendanceSearch";
+import { Skeleton } from "@mui/material";
+import { Stack } from "@mui/system";
 
 // rate at which to update
 const refreshRate = 1000 * 2;
@@ -34,6 +36,11 @@ const AttendanceDisplay = () => {
     const periodJson = await data.json();
     setPeriod(periodJson);
   }, [periodId, auth]);
+
+  // Set period to undefined any time id changes
+  useEffect(() => {
+    setPeriod(undefined);
+  }, [periodId])
 
   // User input boolean value meaans nothing, in is just a switch to indicate that input has happened
   const [userInput, setUserInput] = useState(false);
@@ -158,7 +165,17 @@ const AttendanceDisplay = () => {
 
   return (
     <>
-      <div tw="mb-32">
+      <div tw="pb-32">
+        {!period && (
+          <Stack spacing={1} width="100%" tw="mt-4">
+            <Skeleton variant="rectangular" height={50} />
+            <Skeleton variant="rectangular" height={100} />
+            <Skeleton variant="rectangular" height={400} />
+            <Skeleton variant="rectangular" height={400} />
+            <Skeleton variant="rectangular" height={400} />
+            <Skeleton variant="rectangular" height={400} />
+          </Stack>
+        )}
         {period && (
           <>
             <AttendanceSearch
