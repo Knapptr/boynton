@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import useGetDataOnMount from "../hooks/useGetData";
 import { MenuSelector } from "../components/styled";
 import toTitleCase from "../toTitleCase";
@@ -133,6 +133,7 @@ const AttendanceIndex = () => {
           </div>
         </AccordionDetails>
       </Accordion>
+      <Outlet />
     </>
   );
 };

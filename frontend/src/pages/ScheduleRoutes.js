@@ -7,16 +7,18 @@ import Attendance from "./Attendance";
 const ScheduleRoutes = () => {
     return (
         <>
-            <AttendanceIndex />
             <Routes>
                 <Route path="sign-up" element={<SignUpIndex />}></Route>
                 <Route
                     path="sign-up/:cabin/:weekNumber"
                     element={<CreateSchedulePage />}
                 ></Route>
-                <Route path="attendance/:periodId"
-                    element={<Attendance />}
-                />
+
+                <Route path="attendance" element={<AttendanceIndex />}>
+                    <Route path=":periodId"
+                        element={<Attendance />}
+                    />
+                </Route>
                 {/*<Route index element={<AttendanceIndex />}></Route>*/}
             </Routes>
             <Outlet />
