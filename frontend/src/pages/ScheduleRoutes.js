@@ -8,18 +8,19 @@ const ScheduleRoutes = () => {
     return (
         <>
             <Routes>
-                <Route path="sign-up" element={<SignUpIndex />}></Route>
-                <Route
-                    path="sign-up/:cabin/:weekNumber"
-                    element={<CreateSchedulePage />}
-                ></Route>
+                <Route path="sign-up" element={<SignUpIndex />}>
+                    <Route
+                        path=":cabin/:weekNumber"
+                        element={<CreateSchedulePage />}
+                    />
+
+                </Route>
 
                 <Route path="attendance" element={<AttendanceIndex />}>
                     <Route path=":periodId"
                         element={<Attendance />}
                     />
                 </Route>
-                {/*<Route index element={<AttendanceIndex />}></Route>*/}
             </Routes>
             <Outlet />
         </>
