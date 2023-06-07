@@ -22,9 +22,7 @@ const userValidation = {
 	}),
 
 	validateUpdateUsernameUnique: () => body("username").custom(async (bodyUsername, { req }) => {
-		console.log("From Validator:", { params: req.params }, { bodyUsername });
 		if (bodyUsername !== req.params.username) {
-			console.log("not equal");
 			const userResult = await User.get(bodyUsername);
 			if (userResult) {
 				throw new Error("User already exists.");

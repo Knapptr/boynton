@@ -1,3 +1,4 @@
+const pool = require("../db");
 const { fetchMany, fetchOne } = require("../utils/pgWrapper");
 const MAX_DAILY_ASSIGNMENTS = process.env.MAX_DAILY_ASSIGNMENTS || 2;
 const StaffSession = {
@@ -29,6 +30,35 @@ const StaffSession = {
             firstYear: response.first_year,
             staffSessionId: response.staff_session_id
         }
+    },
+    async getSome(idList) {
+        const query = `SELECT 
+        ss.id as staff_session_id,
+        u.username,
+        u.last_name,
+        u.first_name,
+        u.archery,
+        u.ropes,
+        u.senior,
+        u.first_year
+        FROM staff_sessions ss
+        JOIN users u ON u.username = ss.username
+        WHERE ss.id = ANY ($1)`
+        const values = [idList];
+        console.log({ query, values });
+        const response = await pool.query(query, values);
+        console.log("GET SOME");
+        console.log({ r: response.rows });
+        return response.rows.map(r => ({
+            staffSessionId: r.staff_session_id,
+            username: r.username,
+            lastName: r.last_name,
+            firstName: r.first_name,
+            archery: r.archery,
+            ropes: r.ropes,
+            senior: r.senior,
+            firstYear: r.first_year,
+        }))
     },
     async getAvailablePeriod(periodId) {
         const query = `

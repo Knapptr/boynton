@@ -8,7 +8,8 @@ const handleValidation = (req, res, next) => {
 		next();
 		return;
 	}
-	next(ApiError.validation(result.errors, "Invalid fields."))
+	console.log("Not Empty Validation");
+	next(ApiError.validation(result.errors, "Invalid Input"))
 	return;
 }
 

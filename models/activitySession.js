@@ -160,7 +160,7 @@ class ActivitySession {
             const camperActivities = results.map(r => {
                 return {
                     periodId: r.rows[0].period_id,
-                    activitySessiionId: r.rows[0].activity_id,
+                    activitySessionId: r.rows[0].activity_id,
                     id: r.rows[0].id
                 }
             })
@@ -174,23 +174,27 @@ class ActivitySession {
             client.release();
         }
     }
-    async addStaff(staffMember) {
-        const query = `
-        INSERT INTO staff_activities (staff_session_id, period_id, activity_session_id)
-        VALUES ($1,$2,$3)
-        ON CONFLICT ON CONSTRAINT "one staff assignment per period" 
-        DO UPDATE SET staff_session_id = $1, period_id = $2, activity_session_id = $3
-        RETURNING *
-        `
-        const values = [staffMember.staffSessionId, this.periodId, this.id]
-        console.log({ values });
-        const response = await fetchOne(query, values);
-        return response
-        if (!response) {
-            throw new Error("Could not add staff member to activity");
+    async addStaff(staff) {
+        const client = await pool.connect();
+        try {
+            client.query("BEGIN");
+            const allQueries = staff.map(staffer => client.query(`INSERT INTO staff_activities (activity_session_id, staff_session_id,period_id) VALUES ($1, $2, $3) ON CONFLICT ON CONSTRAINT "one staff assignment per period" DO UPDATE SET activity_session_id = $1  returning *`, [this.id, staffer.staffSessionId, this.periodId]));
+            const results = await Promise.all(allQueries);
+            await client.query("COMMIT");
+            const staffActivitySessions = results.map(r => r.rows.map(dbSession => ({
+                activitySessionId: dbSession.activity_session_id,
+                staffSessionId: dbSession.staff_session_id,
+                id: dbSession.id
+            })))
+            return staffActivitySessions;
+        } catch (e) {
+            client.query("ROLLBACK");
+            console.log("ERROR", e);
+            throw DbError.transactionFailure("Staff add transaction failed");
+        } finally {
+            client.release();
         }
     }
-
 }
 
 module.exports = ActivitySession;

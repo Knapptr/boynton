@@ -5,12 +5,15 @@ const {
     fetchMany,
 } = require("../utils/pgWrapper");
 const Camper = require("./camper");
+const pool = require("../db");
+const DbError = require("../utils/DbError");
 
 class Activity {
-    constructor({ name, description, id }) {
+    constructor({ name, description, id, sessions }) {
         this.name = name;
         this.id = id;
         this.description = description || "none";
+        this.sessions = sessions || []
     }
     static _parseResults(dbr) {
         return {
@@ -39,49 +42,31 @@ ORDER BY act.name
         return [];
     }
     static async get(id) {
-        const query = `
-SELECT
-act.name AS name,
-act.id,
-act.period_id,
-act.description,
-cw.id AS camper_session_id,
-cw.camper_id AS camper_id,
-c.first_name,
-ca.id AS camper_activity_id,
-ca.is_present,
-c.last_name
-FROM activities act
-LEFT JOIN camper_activities ca ON ca.activity_id = act.id
-LEFT JOIN camper_weeks cw ON cw.id = ca.camper_week_id
-LEFT JOIN campers c ON cw.camper_id = c.id
-WHERE act.id = $1 `;
-        const values = [id];
-        const results = await fetchMany(query, values);
-        if (results) {
-            const parsedResults = results.map((result) =>
-                Activity._parseResults(result)
-            );
-            const mappedResults = mapManyToOne({
-                array: parsedResults,
-                identifier: "id",
-                newField: "campers",
-                fieldsToMap: [
-                    "sessionID",
-                    "camperID",
-                    "firstName",
-                    "lastName",
-                    "isPresent",
-                    "camperActivityId",
-                ],
-                fieldsToRemain: ["name", "id", "periodID", "description"],
-            });
-            const activities = mappedResults.map((act) => new Activity(act));
+        const client = await pool.connect();
+        try {
+            // get activity data
+            const activityResult = await client.query("SELECT * from activities act WHERE act.id = $1 ", [id]);
+            const activity = activityResult.rows.map(r => ({
+                id: r.id,
+                name: r.name,
+                description: r.description
+            }))[0];
 
-            console.log(activities[0].campers);
-            return activities[0];
+            const sessionsResult = await client.query("SELECT * from activity_sessions acts WHERE acts.activity_id = $1", [activity.id]);
+            const sessions = sessionsResult.rows.map(s => ({
+                id: s.id,
+                periodId: s.period_id
+            }))
+            const createdActivity = new Activity({ name: activity.name, id: activity.id, description: activity.description, sessions: sessions })
+            await client.query("COMMIT");
+            return createdActivity;
+
+        } catch (e) {
+            client.query("ROLLBACK");
+            throw DbError.transactionFailure("Could not get activity");
+        } finally {
+            client.release()
         }
-        return [];
     }
     static async create({ name, description }) {
         const query =

@@ -163,7 +163,6 @@ module.exports = {
     // }[]}
     const oneRes = results[0];
     const period = { id: oneRes.period_id, dayId: oneRes.day_id, number: oneRes.period_number, activities: [] }
-    console.log({ period });
     for (const data of results) {
       //check if current activity is == to last activity
       if (data.activity_id === null) { continue; }
