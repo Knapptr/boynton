@@ -32,24 +32,6 @@ const SelectActivities = ({
     setLists,
     refresh
   } = useActivityAttendance(periodId, cabinName);
-  // const [periodData, setPeriodData] = useState(null);
-
-  // const getPeriodData = useCallback(async () => {
-  //   const url = `/api/periods/${periodId}`;
-  //   const response = await fetchWithToken(url, {}, auth);
-  //   const period = await response.json();
-  //   setPeriodData(period);
-
-  // }, [periodId])
-
-  // useEffect(() => {
-  //   getPeriodData()
-  // }, [getPeriodData])
-
-  useEffect(() => {
-    console.log("running effect");
-    console.log({ activitiesLoading });
-  }, [activitiesLoading])
 
   const auth = useContext(UserContext)
 
@@ -69,7 +51,8 @@ const SelectActivities = ({
   };
 
   const handleSubmit = async (activitySessionId) => {
-    if (selectedCampers.length > 0) {
+
+    if (selectedCampers.length > 0 && selectedCampers.some(c => c.sourceId !== activitySessionId)) {
       const campersToAdd = [...selectedCampers];
       try {
         const response = await addCamperActivitiesToDb(campersToAdd.map(c => c.camper), activitySessionId);
@@ -89,7 +72,6 @@ const SelectActivities = ({
       setLists(newState);
 
     }
-
   }
 
 

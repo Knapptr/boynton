@@ -14,6 +14,7 @@ import { Accordion, AccordionDetails, AccordionSummary } from "@mui/material";
 
 const SignUpIndex = () => {
 	const location = useLocation();
+	const navigate = useNavigate();
 	const [cabins] = useGetDataOnMount({
 		url: "/api/cabins",
 		initialState: [],
@@ -46,6 +47,14 @@ const SignUpIndex = () => {
 	const handleNewSelection = () => {
 		setShowAccordion(false);
 	}
+
+	useEffect(() => {
+		if (selected.cabin && selected.week) {
+
+			setShowAccordion(false);
+			navigate(`/schedule/sign-up/${selected.cabin}/${selected.week}`)
+		}
+	}, [selected.cabin, selected.week])
 	return (
 		<>
 			{!(weeks.length > 0 && cabins.length > 0) ? (
@@ -72,46 +81,6 @@ const SignUpIndex = () => {
 							<header tw="my-2">
 								<h1>Select Week</h1>
 							</header>
-							{selected.cabin && selected.week && (
-								<PopOut
-									shouldDisplay={true}
-									onClick={() => {
-										setSelected({
-											cabin: undefined,
-											week: undefined,
-										});
-									}}
-								>
-									<div tw=" relative flex flex-col justify-center border bg-stone-300 max-w-md shadow-2xl rounded-lg px-4 py-2 w-10/12">
-										<button
-											tw="self-end mr-2 absolute top-0 text-gray-500"
-											onClick={() => {
-												setSelected({
-													cabin: undefined,
-													week: undefined,
-												});
-											}}
-										>
-											<FontAwesomeIcon icon={faCircleXmark} />
-										</button>
-										<header tw="text-xl">
-											<h1 tw="text-base">Sign-Up</h1>
-											<h2>Cabin {toTitleCase(selected.cabin)}</h2>
-											<p tw="text-base font-light">for</p>{" "}
-											<h2>Week {selected.week}?</h2>
-										</header>
-										<div tw="flex justify-center w-10/12 mx-auto mt-3">
-											<Link
-												tw="bg-green-300 rounded border border-stone-800 py-1 px-6"
-												onClick={handleNewSelection}
-												to={`${selected.cabin}/${selected.week}`}
-											>
-												Go!
-											</Link>
-										</div>
-									</div>
-								</PopOut>
-							)}
 							<ul tw="flex gap-1 flex-wrap flex-col">
 								{weeks.map((w, wIndex) => (
 									<MenuSelector

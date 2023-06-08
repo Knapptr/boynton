@@ -27,27 +27,30 @@ const StaffSchedule = () => {
 
   /** Add all selected staff to activity */
   const addSelectedToActivity = async (activity, activityIndex) => {
-    const url = `/api/activity-sessions/${activity.sessionId}/staff`
-    const options = {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ staff: selectedStaff.map(s => ({ staffSessionId: s.staffer.staffSessionId })) })
-    }
-    //// DO EAGER UPDATE
-    eagerUpdateInsertion(selectedStaff, activityIndex);
-    // Clear Selection after update
-    clearSelectedStaff();
-    //// On DB response
-    try {
-      await fetchWithToken(url, options, auth);
-      // Update accordingly
-      fetchViableStaff(selectedPeriod);
-      fetchActivities()
-    } catch (e) {
-      console.log("Something went wrong.")
-      console.log(e);
-    }
+    if (selectedStaff.length > 0 && selectedStaff.some(s => s.sourceIndex !== activityIndex)) {
 
+      const url = `/api/activity-sessions/${activity.sessionId}/staff`
+      const options = {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ staff: selectedStaff.map(s => ({ staffSessionId: s.staffer.staffSessionId })) })
+      }
+      //// DO EAGER UPDATE
+      eagerUpdateInsertion(selectedStaff, activityIndex);
+      // Clear Selection after update
+      clearSelectedStaff();
+      //// On DB response
+      try {
+        await fetchWithToken(url, options, auth);
+        // Update accordingly
+        fetchViableStaff(selectedPeriod);
+        fetchActivities()
+      } catch (e) {
+        console.log("Something went wrong.")
+        console.log(e);
+      }
+
+    }
   }
 
   /** Remove individual staff from activity */

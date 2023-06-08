@@ -43,6 +43,11 @@ const CreateSchedulePage = () => {
 
 	const [selectedCampers, setSelectedCampers] = useState([]);
 
+	// clear selection on change in week/cabin
+	useEffect(() => {
+		clearSelection();
+	}, [weekNumber, cabin, selectedDay])
+
 	/** Add / remove selected camper and source id  to selected list. 
 	* @param {camperSession} camper The camper to add/remove from the selection list
 	* @param {any} sourceId the source of the camper (unassigned, or activitySessionId)
@@ -119,6 +124,7 @@ const CreateSchedulePage = () => {
 					previous
 					onClick={() => {
 						selectNext(-1);
+						clearSelection();
 					}}
 				>
 					<FontAwesomeIcon icon={faBackwardStep} />
@@ -134,6 +140,7 @@ const CreateSchedulePage = () => {
 					disabled={isTheLastPeriod()}
 					onClick={() => {
 						selectNext(1);
+						clearSelection();
 					}}
 				>
 					<FontAwesomeIcon icon={faForwardStep} />
