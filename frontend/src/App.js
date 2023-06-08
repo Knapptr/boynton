@@ -19,6 +19,12 @@ import AdminAccess from "./components/ProtectedAdminAccess";
 import UsersPage from "./pages/UsersPage";
 import StaffSchedule from "./pages/StaffSchedule";
 import ProfilePage from "./pages/ProfilePage";
+import CreateAward from "./pages/CreateAward";
+import '@fontsource/roboto/300.css';
+import '@fontsource/roboto/400.css';
+import '@fontsource/roboto/500.css';
+import '@fontsource/roboto/700.css';
+
 
 function App() {
   const userState = useUserData();
@@ -48,6 +54,7 @@ function App() {
                 </Route>
                 <Route path="profile/" element={<ProfilePage />} />
 
+                <Route path="award" element={<CreateAward />} />
                 <Route path="cabins/">
                   {CabinAssignmentRoutes()}{" "}
                   <Route path="list/">

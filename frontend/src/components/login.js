@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import tw from "twin.macro";
 import "styled-components/macro";
 import logo from "../cl.png";
+import { Button } from "@mui/material";
 const storeToken = (token) => {
 	localStorage.setItem("bearerToken", token);
 };
@@ -88,7 +89,7 @@ const Login = () => {
 					placeholder="password"
 					value={formInputs.password}
 				/>
-				<SubmitButton type="submit">Login</SubmitButton>
+				<SubmitButton>Login</SubmitButton>
 			</div>
 		</form>
 
