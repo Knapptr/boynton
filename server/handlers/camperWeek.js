@@ -1,4 +1,7 @@
+const { param, body } = require("express-validator");
+const CabinSession = require("../../models/cabinSession");
 const CamperWeek = require("../../models/camperWeek");
+const handleValidation = require("../../validation/validationMiddleware");
 const areas = { ba: "Male", ga: "Female" };
 module.exports = {
 	async getAll(req, res, next) {
@@ -26,19 +29,41 @@ module.exports = {
 		}
 		res.json(camperWeeks);
 	},
-	async getOne(req, res, next) {
-		const { camperWeekID } = req.params;
-		const camperWeek = await CamperWeek.getOne(camperWeekID);
-		res.json(camperWeek);
-	},
-	async assignCabin(req, res, next) {
-		console.log("assigning Cabin");
-		const { camperSessionID } = req.params;
-		const { cabinSessionID } = req.body;
-		const camperWeek = await CamperWeek.getOne(camperSessionID);
-		console.log({ camperWeek });
-		const assignedCabin = await camperWeek.assignCabin(cabinSessionID);
-		console.log({ assignedCabin });
-		res.json(assignedCabin);
-	},
+	getOne: [
+		param("camperWeekID").exists().isInt().custom(async (id, { req }) => {
+			const camperWeek = await CamperWeek.getOne(id);
+			if (!camperWeek) {
+				throw new Error("Camper Session does not exist")
+			}
+			req.camperSession = camperWeek;
+		}),
+		handleValidation,
+		async (req, res, next) => {
+			const camperWeek = req.camperSession
+			res.json(camperWeek);
+		}],
+
+	assignCabin: [
+		body("cabinSessionID").exists().isInt().custom(async (id, { req }) => {
+			const cabinSession = await CabinSession.getOne(id);
+			if (!cabinSession) {
+				throw new Error("Invalid Cabin Session");
+			}
+			req.cabinSession = cabinSession;
+		}),
+		param("camperWeekID").exists().isInt().custom(async (id, { req }) => {
+			const camperWeek = await CamperWeek.getOne(id);
+			if (!camperWeek) {
+				throw new Error("Camper Session does not exist")
+			}
+			req.camperSession = camperWeek;
+		}),
+		handleValidation,
+		async (req, res, next) => {
+			console.log("validated, assigning");
+			const camperWeek = req.camperSession;
+			const cabinSession = req.cabinSession;
+			const assignedCabin = await camperWeek.assignCabin(cabinSession.id);
+			res.json(assignedCabin);
+		}],
 };
