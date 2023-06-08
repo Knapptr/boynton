@@ -31,6 +31,8 @@ const dayRepo = require("./repositories/day");
 const periodRepo = require("./repositories/period");
 const scoreRepo = require("./repositories/score");
 const weekRepo = require("./repositories/week");
+const programAreaRepo = { init: init(queries.programAreas) };
+const awardRepo = { init: init(queries.awards) };
 
 //order matters here
 const repos = [
@@ -48,6 +50,8 @@ const repos = [
   camperWeekRepo,
   camperActivityRepo,
   scoreRepo,
+  programAreaRepo,
+  awardRepo
 ];
 
 module.exports = async () => {

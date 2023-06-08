@@ -148,7 +148,28 @@ module.exports = {
     ON UPDATE CASCADE
     ON DELETE CASCADE
   )
-`
+`,
+
+  programAreas: `
+  CREATE TABLE IF NOT EXISTS program_areas(
+    id serial NOT NULL PRIMARY KEY,
+    name CHARACTER VARYING NOT NULL
+  )
+  `,
+  awards: `
+  CREATE TABLE IF NOT EXISTS awards(
+    id serial NOT NULL PRIMARY KEY,
+    camper_session_id INTEGER NOT NULL,
+    program_area_id INTEGER NOT NULL,
+    reason CHARACTER VARYING NOT NULL,
+    CONSTRAINT fk_camper_session_id FOREIGN KEY (camper_session_id) REFERENCES camper_weeks(id)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE ,
+    CONSTRAINT fk_program_area FOREIGN KEY (program_area_id) REFERENCES program_areas(id)
+    ON DELETE SET NULL
+    ON UPDATE CASCADE
+  )
+  `
 
 }
 

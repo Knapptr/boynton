@@ -89,6 +89,12 @@ const weekHandler = {
 		const week = await Week.get(weekNumber);
 		const response = await week.clearCabins(area);
 		res.json(response);
+	},
+
+	async getCampers(req, res, next) {
+		const { weekNumber } = req.params;
+		const campers = await Camper.getByWeek(weekNumber);
+		res.json(campers);
 	}
 };
 

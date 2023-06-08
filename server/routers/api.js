@@ -13,27 +13,9 @@ const activitySessionRouter = require("./activitySession");
 const camperActivityRouter = require("./camperActivity");
 const usersRouter = require("./users");
 const staffSessionRouter = require("./staffSessions");
+const programAreaRouter = require("./programAreas");
+const awardsRouter = require("./awards");
 
-const errorHandling = (err, req, res, next) => {
-	if (err.type) {
-		switch (err.type) {
-			case "API":
-				if (err.reason === "VALIDATION") {
-					res.status(err.status).json(err.errors);
-					return;
-				}
-				res.status(err.status).json(err);
-				break;
-			case "DB":
-				res.status(400).send(err.message);
-
-		}
-	} else {
-		console.log("Unhandleable error. Sending 500");
-		console.log({ err });
-		res.status(500).send("Server Error");
-	}
-}
 router.use(passport.authenticate("jwt", { session: false }));
 //log all api requs
 router.use((req, res, next) => {
@@ -53,6 +35,27 @@ router.use("/cabins", cabinRouter);
 router.use("/camper-weeks", camperWeekRouter);
 router.use("/weeks", weekRouter);
 router.use("/users", usersRouter);
-router.use(errorHandling)
+router.use("/program-areas", programAreaRouter);
+router.use("/awards", awardsRouter);
+router.use((err, req, res, next) => {
+	if (err.type) {
+		switch (err.type) {
+			case "API":
+				if (err.reason === "VALIDATION") {
+					res.status(err.status).json(err.errors);
+					return;
+				}
+				res.status(err.status).json(err);
+				break;
+			case "DB":
+				res.status(400).send(err.message);
+
+		}
+	} else {
+		console.log("Unhandleable error. Sending 500");
+		console.log({ err });
+		res.status(500).send("Server Error");
+	}
+})
 
 module.exports = router;
