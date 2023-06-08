@@ -158,6 +158,7 @@ class CamperWeek {
 		`;
         const values = [id];
         const dbResult = await fetchMany(query, values);
+        if (!dbResult) { return false };
         const parsedResult = dbResult.map((oneResult) =>
             CamperWeek._parseResults(oneResult)
         );

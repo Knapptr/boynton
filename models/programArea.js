@@ -41,6 +41,15 @@ class ProgramArea {
         //TODO error handling
         return result.rows.map(pa => new ProgramArea(pa));
     }
+    static async getOne(id) {
+        const query = `SELECT * from program_areas WHERE id = $1`;
+        const values = [id]
+        const result = await pool.query(query, values);
+        console.log({ id, res: result.rows });
+        if (result.rows.length === 0) { return false }
+        //TODO error handling
+        return result.rows.map(pa => new ProgramArea(pa));
+    }
 }
 
 module.exports = ProgramArea;
