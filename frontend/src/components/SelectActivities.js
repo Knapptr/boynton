@@ -1,7 +1,7 @@
 import useActivityAttendance from "../hooks/useActivityAttendance";
 import { useContext, useEffect } from 'react'
 import lodash from "lodash";
-import fetchWithToken from "../fetchWithToken";
+import { postCampersToActivity } from "../requests/activity";
 import tw, { styled } from "twin.macro";
 import "styled-components/macro";
 import toTitleCase from "../toTitleCase";
@@ -35,27 +35,13 @@ const SelectActivities = ({
 
   const auth = useContext(UserContext)
 
-  const addCamperActivitiesToDb = async (campers, activitySessionId) => {
-    const reqConfig = {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ campers }),
-    };
-    const result = await fetchWithToken(
-      `/api/activity-sessions/${activitySessionId}/campers`,
-      reqConfig,
-      auth
-    );
-    const data = await result.json();
-    return data;
-  };
 
   const handleSubmit = async (activitySessionId) => {
 
     if (selectedCampers.length > 0 && selectedCampers.some(c => c.sourceId !== activitySessionId)) {
       const campersToAdd = [...selectedCampers];
       try {
-        const response = await addCamperActivitiesToDb(campersToAdd.map(c => c.camper), activitySessionId);
+        const response = await postCampersToActivity(campersToAdd.map(c => c.camper), activitySessionId, auth);
       } catch (e) {
         console.log("Something went wrong assigning campers to db", e); refresh();
       }

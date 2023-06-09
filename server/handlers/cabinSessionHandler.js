@@ -70,7 +70,8 @@ module.exports = {
 		param("camperSessionId").exists().isInt().custom(async (camperSessionId, { req }) => {
 			const camperSession = await CamperWeek.getOne(camperSessionId);
 			if (!camperSession) { throw new Error("Camper Session does not exist"); }
-			if (camperSession.cabinSessionId !== req.cabinSession.id) {
+			console.log({ cabinSession: req.cabinSession, camperSession })
+			if (camperSession.cabinSessionID !== req.cabinSession.id) {
 				throw new Error("Camper not in cabin")
 			}
 			req.camperSession = camperSession;

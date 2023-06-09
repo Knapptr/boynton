@@ -4,6 +4,7 @@ import { Route } from "react-router-dom";
 import { useState, useContext, useEffect, useCallback } from "react";
 import UserContext from "../components/UserContext";
 import tw from "twin.macro";
+import { assignCabins } from "../requests/assignCabins";
 import "styled-components/macro";
 import useCabinSessions from "../hooks/useCabinSessions";
 import CabinAssignmentIndex from "./cabinAssignmentIndex";
@@ -93,7 +94,7 @@ const CabinAssignment = ({ area, weekNumber }) => {
 
   useEffect(() => {
     getCampers();
-  }, [weekNumber, area, auth])
+  }, [getCampers])
 
 
   /** Check if all campers are assigned **/
@@ -155,22 +156,7 @@ const CabinAssignment = ({ area, weekNumber }) => {
     removeSelectedFromUnassigned();
     updateCabinUI(cabinSession.name, [...selectedCampers]);
 
-    const url = `/api/cabin-sessions/${cabinSession.id}/campers`
-    const requestConfig = {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-
-      },
-      body: JSON.stringify({
-        campers: camperSessions
-      }),
-    };
-    const results = await fetch(
-      url,
-      requestConfig
-    );
+    await assignCabins(cabinSession, camperSessions, auth);
     //clear selected
     setSelected([]);
     // Update state from DB
