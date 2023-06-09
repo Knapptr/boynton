@@ -6,11 +6,9 @@ import "styled-components/macro";
 const NavWrapper = () => {
 	return (
 		<>
-			<div tw="mx-auto">
-				<HeaderBar />
-				<Outlet />
-				{/* <footer tw="mt-2 h-1"></footer> */}
-			</div>
+			<HeaderBar />
+			<Outlet />
+			{/* <footer tw="mt-2 h-1"></footer> */}
 		</>
 	);
 };

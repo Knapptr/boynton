@@ -5,7 +5,7 @@ import tw, { styled } from "twin.macro";
 import "styled-components/macro";
 import UserContext from "../components/UserContext";
 import ReassignModal from "../components/ReassignModal";
-import ActivityAttendance from "../components/ActivityAttendance";
+import ActivityAttendance, { AttendanceSummary } from "../components/ActivityAttendance";
 import ActivitySelectors from "../components/ActivitySelectors";
 import ReassignmentSelectionDialog from "../components/AttendanceReassignDialog";
 import fetchWithToken from "../fetchWithToken";
@@ -110,6 +110,9 @@ const AttendanceDisplay = () => {
       setSelectedCampers([]);
     },
   };
+  const allActivitiesClear = () => {
+    return period.activities.every(activity => activity.campers.every(camper => camper.isPresent))
+  }
   const toggleHere = (sessionId, camperSessionId) => {
     setUserInput(i => !i);
     const updatedActivities = [...period.activities];
@@ -170,12 +173,24 @@ const AttendanceDisplay = () => {
             <AttendanceSearch
               closeSearchModal={closeSearchModal}
               shouldDisplay={showSearchModal}
-              periodNumber={period.number}
+              period={period}
               activities={period.activities}
             />
             <div tw="mb-6">
-              <h1 tw="font-bold text-xl">Week {period.weekNumber} - {getDayName(period.dayName)} </h1>
-              <h2 tw="font-bold text-2xl">Activity Period {period.number}</h2>
+              <header tw="">
+                <div tw="">
+                  <h1 tw="font-bold text-xl">Week {period.weekNumber} - {getDayName(period.dayName)} </h1>
+                  <h2 tw="font-bold text-2xl">Activity Period {period.number}</h2>
+                </div>
+                <div tw="mx-2">
+                  <AttendanceSummary tw="" allHere={allActivitiesClear()}>
+                    {
+                      allActivitiesClear() ?
+                        <span tw="text-lg">Wait for Admin to give All Clear</span> : <span tw="text-lg">Not Clear</span>
+                    }
+                  </AttendanceSummary>
+                </div>
+              </header>
               <ActivitySelectors
                 selectAll={selectAll}
                 openSearchModal={openSearchModal}
@@ -187,8 +202,10 @@ const AttendanceDisplay = () => {
             </div>
           </>
         )}
-        {period && displayAll && renderAllActivities()}
-        {period && !displayAll && renderSelectedActivity()}
+        <div tw="flex flex-col lg:grid lg:grid-cols-2 gap-2">
+          {period && displayAll && renderAllActivities()}
+          {period && !displayAll && renderSelectedActivity()}
+        </div>
       </div>
       <ReassignmentSelectionDialog
         selectedCampers={selectedCampers}

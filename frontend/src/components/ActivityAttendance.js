@@ -21,8 +21,8 @@ const AttendanceName = tw.div`flex justify-start flex-grow px-4`;
 
 const AttendanceButton = styled.button(({ isPresent }) => [tw`px-2 ml-auto`]);
 
-const AttendanceSummary = styled.div(({ allHere }) => [
-  tw`z-50 text-sm py-px font-bold px-2 bg-red-500 text-white transition-colors rounded flex items-center w-2/5 justify-center`,
+export const AttendanceSummary = styled.div(({ allHere }) => [
+  tw`z-50 text-sm py-px font-bold px-2 bg-red-500 text-white transition-colors rounded flex items-center justify-center`,
   allHere && tw`bg-green-500`,
 ]);
 
@@ -101,7 +101,7 @@ const ActivityAttendance = ({
   return (
     <>
       <div tw="relative ">
-        <header tw="mb-4 bg-lightBlue-500 sticky top-0  justify-center py-2 px-3">
+        <header tw="mb-4 bg-lightBlue-500 sticky top-16  justify-center py-2 px-3">
           <div id="top-row" tw="flex" >
             <div tw="py-3 px-2 text-xl font-bold text-white w-1/2 sm:w-2/3 ">
               <h2 tw="">

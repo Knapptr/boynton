@@ -148,7 +148,7 @@ const CabinListIndex = () => {
           selected.cabins.filter(c => c.campers.length > 0).map((cabin) => {
             return (
               <li tw="mx-1" key={`cabin-${cabin.name}`}>
-                <header tw="bg-green-200 sticky top-0">
+                <header tw="bg-green-200 sticky top-16">
                   <h3 tw="font-bold text-xl">
                     {cabin.name}
                   </h3>
@@ -183,7 +183,7 @@ const CabinListIndex = () => {
         {selected.selectionName === "ALL" && unassignedCampers.length > 0 &&
 
           <li tw="mx-1" key={`cabin-unassigned`}>
-            <header tw="bg-green-200 sticky top-0">
+            <header tw="bg-green-200 sticky top-16">
               <h3 tw="font-bold text-xl">
                 Unassigned
               </h3>

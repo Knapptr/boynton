@@ -4,12 +4,13 @@ import { DialogBox, PopOut } from "./styled";
 import { useEffect, useState } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCircleXmark } from '@fortawesome/free-regular-svg-icons'
+import getDayName from "../utils/getDayname";
 
 const AttendanceSearch = ({
   shouldDisplay,
   activities,
   closeSearchModal,
-  periodNumber,
+  period,
 }) => {
   const [results, setResults] = useState([]);
   const [query, setQuery] = useState("");
@@ -22,7 +23,7 @@ const AttendanceSearch = ({
     const searchTerm = query.toUpperCase();
     const newResults = activities.reduce((activityAcc, activityCv) => {
       const campers = activityCv.campers.reduce((camperAcc, camperCv) => {
-        if (camperCv.firstName.includes(searchTerm) || camperCv.lastName.includes(searchTerm)) {
+        if (camperCv.firstName.toUpperCase().includes(searchTerm.toUpperCase()) || camperCv.lastName.toUpperCase().includes(searchTerm.toUpperCase())) {
           camperAcc.push({ activityName: activityCv.name, ...camperCv })
         }
         return camperAcc
@@ -51,7 +52,8 @@ const AttendanceSearch = ({
         close={closeSearchModal}
       >
         <header>
-          <h2 tw="text-2xl font-bold">Act {periodNumber} Camper Search</h2>
+          <h2 >Week {period.weekNumber} {getDayName(period.dayName)}</h2>
+          <h3 tw="text-2xl font-bold"> Act {period.number} Camper Search</h3>
         </header>
         <div tw="my-5">
           <input

@@ -67,9 +67,8 @@ function NavDrawer(props) {
   const container = window !== undefined ? () => window().document.body : undefined;
 
   return (
-    <Box sx={{ display: 'flex' }}>
-      <CssBaseline />
-      <AppBar component="nav" tw="bg-green-600">
+    <>
+      <AppBar position="sticky" component="nav" tw="bg-green-600">
         <Toolbar>
           <Link
             tw="mr-auto block"
@@ -115,10 +114,7 @@ function NavDrawer(props) {
           {drawer}
         </Drawer>
       </Box>
-      <Box component="main" sx={{ p: 3 }}>
-        <Toolbar />
-      </Box>
-    </Box >
+    </>
   );
 }
 

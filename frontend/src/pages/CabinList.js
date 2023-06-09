@@ -123,7 +123,7 @@ const CabinListPage = () => {
                         console.log({ displayedCabins, cabin })
                         return (
                             <li tw="mx-1" key={`cabin-${cabin.cabinName}`}>
-                                <header tw="bg-green-200 sticky top-0">
+                                <header tw="bg-green-200 sticky">
                                     <h3 tw="font-bold text-xl">
                                         {cabin.cabinName}
                                     </h3>
