@@ -98,7 +98,7 @@ const CabinListPage = () => {
 
     return (
         <>
-            <ul tw="flex justify-center gap-1 flex-wrap">
+            <ul tw="flex justify-center gap-1 flex-wrap print:hidden">
                 <MenuSelector
                     tw="px-2"
                     onClick={() => selectCabin("all")}

@@ -88,7 +88,7 @@ const CabinListIndex = () => {
 
   return (
     <>
-      <ul tw="flex justify-center sm:justify-evenly gap-2">
+      <ul tw="flex justify-center sm:justify-evenly gap-2 print:hidden">
         {weeks.map((week) => {
           return (
             <li onClick={() => { selectWeek(week) }} key={`week-${week.number}`}>
@@ -102,7 +102,7 @@ const CabinListIndex = () => {
       {selectedWeek && <h1>Week {selectedWeek.number}</h1>}
       {selectedWeek && <h2 tw="font-thin">{selectedWeek.title}</h2>}
 
-      <ul tw="flex justify-center gap-1 flex-wrap mb-4">
+      <ul tw="flex justify-center gap-1 flex-wrap mb-4 print:hidden">
         {cabinSessions.length > 0 &&
           <><MenuSelector
             tw="px-2"
