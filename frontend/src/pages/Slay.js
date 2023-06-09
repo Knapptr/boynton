@@ -7,7 +7,7 @@ const TIME = 100;
 
 const Slay = () => {
   const [speed, setSpeed] = useState(2000);
-  const [sliderValue, setSliderValue] = useState(2)
+  const [sliderValue, setSliderValue] = useState(1000)
   const handleUp = (e, value) => {
     setSpeed(value)
   }
