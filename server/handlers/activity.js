@@ -1,3 +1,4 @@
+const { param } = require("express-validator");
 const Activity = require("../../models/activity");
 const CamperActivity = require("../../models/CamperActivity");
 const ApiError = require("../../utils/apiError");
@@ -21,11 +22,19 @@ module.exports = {
                 next(e);
             }
         }],
-    async getOne(req, res, next) {
-        const id = req.params.activityID;
-        let activity = await Activity.get(id);
-        res.json(activity);
-    },
+    getOne: [
+        param("activityID").exists().custom(async (activityId, { req }) => {
+            const activity = await Activity.get(activityId);
+            if (!activity) {
+                throw new Error("Activity does not exist");
+            }
+            req.activity = activity;
+        }),
+        handleValidation,
+        async (req, res, next) => {
+            let activity = req.activity
+            res.json(activity);
+        }],
     async getAll(req, res, next) {
         let activities = await Activity.getAll();
         const { period } = req.query;

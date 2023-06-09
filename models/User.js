@@ -270,7 +270,18 @@ module.exports = class User {
     const values = [this.username];
     const response = await fetchOne(query, values);
     if (!response) { return false }
-    return true
+    return {
+      username: response.username,
+      firstName: response.first_name,
+      lastName: response.last_name,
+      role: response.role,
+      senior: response.senior,
+      firstYear: response.first_year,
+      lifeguard: response.lifeguard,
+      archery: response.archery,
+      ropes: response.ropes
+
+    }
   }
 
   async update({ sessions, username, firstName, lastName, role, lifeguard, archery, ropes, firstYear, senior }) {

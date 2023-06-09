@@ -25,6 +25,7 @@ class Week {
 	}
 	static async get(weekNumber, getStaff = false, weekRepository = defaultWeekRepository) {
 		const week = await weekRepository.get(weekNumber, getStaff);
+		if (!week) { return false }
 		return new Week(week)
 
 	}

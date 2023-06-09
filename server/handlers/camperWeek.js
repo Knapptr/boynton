@@ -60,7 +60,6 @@ module.exports = {
 		}),
 		handleValidation,
 		async (req, res, next) => {
-			console.log("validated, assigning");
 			const camperWeek = req.camperSession;
 			const cabinSession = req.cabinSession;
 			const assignedCabin = await camperWeek.assignCabin(cabinSession.id);

@@ -63,7 +63,8 @@ ORDER BY act.name
 
         } catch (e) {
             client.query("ROLLBACK");
-            throw DbError.transactionFailure("Could not get activity");
+            console.error("Error with activity transaction")
+            return false
         } finally {
             client.release()
         }

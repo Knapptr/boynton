@@ -1,9 +1,10 @@
-const { body, validationResult } = require("express-validator");
+const { body, validationResult, param } = require("express-validator");
 const User = require("../../models/User");
 const ApiError = require("../../utils/apiError");
 const DbError = require("../../utils/DbError");
 const handleValidation = require("../../validation/validationMiddleware");
 const userValidation = require("../../validation/user");
+const Week = require("../../models/week");
 
 const usersHandler = {
   async getAll(req, res, next) {
@@ -11,14 +12,20 @@ const usersHandler = {
     res.json(users);
   },
 
-  async get(req, res, next) {
-    {
-      const { username } = req.params;
-      const user = await User.get(username.trim());
-      if (!user) { next(ApiError.notFound("User not found")); return; }
-      res.json(user);
-    }
-  },
+  get: [
+    param("username").exists().trim().custom(async (username, { req }) => {
+      const user = await User.get(username);
+      if (!user) {
+        throw new Error("User does not exist");
+      }
+      req.routeUser = user;
+    }),
+    handleValidation,
+    async (req, res, next) => {
+      {
+        res.json(req.routeUser);
+      }
+    }],
 
 
   create: [
@@ -42,18 +49,26 @@ const usersHandler = {
       }
     }],
 
-  async delete(req, res, next) {
-    const { username } = req.params;
-    const user = await User.get(username);
-    if (!user) { next(new Error("Cannot create user")) }
-    try {
-      const result = await user.delete();
-      if (!result) { throw new Error("Error deleting user") }
-      res.sendStatus(200);
-    } catch (e) {
-      next(e)
-    }
-  },
+  delete: [
+    param("username").exists().trim().custom(async (username, { req }) => {
+      const user = await User.get(username);
+      if (!user) {
+        throw new Error("User does not exist");
+      }
+      req.routeUser = user;
+    }),
+    handleValidation,
+    async (req, res, next) => {
+      const { username } = req.params;
+      const user = req.routeUser
+      try {
+        const result = await user.delete();
+        if (!result) { next(DbError.notFound("Could not delete user")) }
+        res.json(result);
+      } catch (e) {
+        next(e)
+      }
+    }],
 
   update: [
     userValidation.validateUsername(),
@@ -80,13 +95,27 @@ const usersHandler = {
       }
     }],
 
-  async weekSchedule(req, res, next) {
-    const { username, weekNumber } = req.params;
-    const scheduleResponse = await User.weekSchedule(username, weekNumber);
-    if (!scheduleResponse) { next(ApiError.notFound("User or UserSession not found")); return; }
-    res.json(scheduleResponse);
+  weekSchedule: [
+    param("username").exists().custom(async (username) => {
+      const user = await User.get(username);
+      if (!user) {
+        throw new Error("User does not exist");
+      }
+    }),
+    param("weekNumber").exists().isInt().custom(async (weekNumber) => {
+      const week = await Week.get(weekNumber);
+      if (!week) {
+        throw new Error("Week does not exist");
+      }
+    }),
+    handleValidation,
+    async (req, res, next) => {
+      const { username, weekNumber } = req.params;
+      const scheduleResponse = await User.weekSchedule(username, weekNumber);
+      if (!scheduleResponse) { next(ApiError.notFound("User not scheduled for week")); return; }
+      res.json(scheduleResponse);
 
-  }
+    }]
 }
 
 module.exports = usersHandler;
