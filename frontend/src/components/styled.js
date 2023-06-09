@@ -53,7 +53,7 @@ export const PopOut = styled.div(({ shouldDisplay }) => [
   shouldDisplay && tw`flex`,
 ]);
 
-const DialogBoxBox = styled.div(({ scrollable, full }) => [tw`h-full sm:h-auto w-full bg-coolGray-100 p-5  lg:w-8/12 my-4 rounded shadow-lg  relative flex flex-col py-8 `, scrollable && tw`overflow-auto`, full && tw`flex-grow`])
+const DialogBoxBox = styled.div(({ scrollable, full }) => [tw`h-full sm:h-auto w-full bg-coolGray-100 p-5  mt-24 lg:w-8/12 my-4 rounded shadow-lg  relative flex flex-col py-8 `, scrollable && tw`overflow-auto`, full && tw`flex-grow`])
 
 export const DialogBox = ({ close, children, scrollable, full }) => <DialogBoxBox scrollable={scrollable} full={full} onClick={(e) => { e.stopPropagation() }}>
 
