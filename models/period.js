@@ -7,10 +7,12 @@ const {
 } = require("../utils/pgWrapper");
 
 class Period {
-	constructor({ number, dayId, id, activities }) {
+	constructor({ number, dayId, id, activities, weekNumber, dayName }) {
 		this.number = number,
 			this.dayId = dayId;
-		this.activities = activities || [];
+		this.weekNumber = weekNumber,
+			this.dayName = dayName,
+			this.activities = activities || [];
 		this.id = id;
 	}
 	static _parseResults(dbResponse) {

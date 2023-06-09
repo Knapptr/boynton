@@ -1,5 +1,5 @@
 // MOST RECENT
-import { useParams } from "react-router-dom";
+import { useOutletContext, useParams } from "react-router-dom";
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import tw, { styled } from "twin.macro";
 import "styled-components/macro";
@@ -12,6 +12,7 @@ import fetchWithToken from "../fetchWithToken";
 import AttendanceSearch from "../components/AttendanceSearch";
 import { Skeleton } from "@mui/material";
 import { Stack } from "@mui/system";
+import getDayName from "../utils/getDayname";
 
 // rate at which to update
 const refreshRate = 1000 * 2;
@@ -108,19 +109,6 @@ const AttendanceDisplay = () => {
     clear() {
       setSelectedCampers([]);
     },
-    async reassign(camperActivityId, destinationActivitySessionId) {
-      setUserInput(i => !i);
-      const url = `/api/camper-activities/${camperActivityId}`;
-      const options = {
-        method: "Put",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          activitySessionId: destinationActivitySessionId
-
-        }),
-      };
-      await fetchWithToken(url, options, auth);
-    },
   };
   const toggleHere = (sessionId, camperSessionId) => {
     setUserInput(i => !i);
@@ -168,6 +156,7 @@ const AttendanceDisplay = () => {
       <div tw="pb-32">
         {!period && (
           <Stack spacing={1} width="100%" tw="mt-4">
+            <Skeleton variant="rectangular" height={40} />
             <Skeleton variant="rectangular" height={50} />
             <Skeleton variant="rectangular" height={100} />
             <Skeleton variant="rectangular" height={400} />
@@ -185,6 +174,8 @@ const AttendanceDisplay = () => {
               activities={period.activities}
             />
             <div tw="mb-6">
+              <h1 tw="font-bold text-xl">Week {period.weekNumber} - {getDayName(period.dayName)} </h1>
+              <h2 tw="font-bold text-2xl">Activity Period {period.number}</h2>
               <ActivitySelectors
                 selectAll={selectAll}
                 openSearchModal={openSearchModal}

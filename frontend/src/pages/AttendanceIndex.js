@@ -23,7 +23,6 @@ const allHaveBeenSelected = (selected) => {
 
 const AttendanceIndex = () => {
   const location = useLocation();
-  console.log({ attendanceLocationMatch: location.pathname === "/schedule/attendance" });
   const [schedule, setSchedule] = useGetDataOnMount({
     url: "/api/weeks",
     useToken: true,
@@ -34,7 +33,6 @@ const AttendanceIndex = () => {
     week: "none",
     day: "none",
     period: "none",
-    activity: "none",
   });
   const selectWeek = (week) => {
     setSelected({ ...selected, week });
@@ -49,7 +47,9 @@ const AttendanceIndex = () => {
     if (selected.period !== "none") {
       const selectedPeriodId =
         schedule[selected.week].days[selected.day].periods[selected.period].id;
+      setShowAccordion(false);
       navigate(`/schedule/attendance/${selectedPeriodId}`);
+      setSelected({ week: "none", day: "none", period: "none" })
     }
   }, [selected, schedule, navigate]);
 
@@ -61,7 +61,7 @@ const AttendanceIndex = () => {
   return (
     <>
       <h1 tw="text-xl font-bold">Attendance</h1>
-      <Accordion tw="mb-6 shadow-none py-2 px-1 rounded bg-green-200" expanded={location.pathname === "/schedule/attendance" || showAccordion} onChange={handleAccordionChange}>
+      <Accordion tw="mb-6 shadow-none py-2 px-1 rounded bg-green-200 " expanded={location.pathname === "/schedule/attendance" || showAccordion} onChange={handleAccordionChange}>
         <AccordionSummary
           expandIcon={location.pathname === "/schedule/attendance" ? <></> : <ExpandMoreIcon />}
           aria-controls="panel1a-content"

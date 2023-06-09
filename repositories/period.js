@@ -69,12 +69,15 @@ module.exports = {
   },
   /** Get single period, and populate camper and staff lists 
   * @param id period id*/
+  // TODO rework this as a transaction
   async get(id) {
     const query = `
     SELECT * from
 ( SELECT 
       day_id,
       period_number,
+      cw.week_id as week_number,
+      d.name as day_name,
       p.id as period_id, 
       act.name as activity_name,
       act.description as activity_description,
@@ -98,6 +101,7 @@ module.exports = {
       null AS staff_session_id,
       null AS staff_activity_id
       FROM periods p 
+      JOIN days d ON p.day_id = d.id
       LEFT JOIN activity_sessions act_s ON act_s.period_id = p.id
       LEFT JOIN activities act ON act.id = act_s.activity_id
       LEFT JOIN camper_activities ca ON ca.activity_id = act_s.id
@@ -111,6 +115,8 @@ module.exports = {
       SELECT 
       day_id,
       period_number,
+      stafsess.week_number as week_number,
+      d.name as day_name,
       p.id as period_id,
       act.name as activity_name,
       act.description as activity_description,
@@ -134,6 +140,7 @@ module.exports = {
       stafsess.id AS staff_session_id,
       stafact.id AS staff_activity_id
       FROM periods p 
+      JOIN days d ON d.id = p.day_id
       LEFT JOIN activity_sessions act_s ON act_s.period_id = p.id
       LEFT JOIN activities act ON act.id = act_s.activity_id
       LEFT JOIN staff_activities stafact ON  stafact.activity_session_id = act_s.id
@@ -162,7 +169,7 @@ module.exports = {
     // campers {firstName,lastName,age,pronouns,sessionId}[]
     // }[]}
     const oneRes = results[0];
-    const period = { id: oneRes.period_id, dayId: oneRes.day_id, number: oneRes.period_number, activities: [] }
+    const period = { id: oneRes.period_id, dayId: oneRes.day_id, number: oneRes.period_number, dayName: oneRes.day_name, weekNumber: oneRes.week_number, activities: [] }
     for (const data of results) {
       //check if current activity is == to last activity
       if (data.activity_id === null) { continue; }
