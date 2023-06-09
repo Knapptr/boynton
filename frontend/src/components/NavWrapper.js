@@ -7,7 +7,9 @@ const NavWrapper = () => {
 	return (
 		<>
 			<HeaderBar />
-			<Outlet />
+			<div tw="max-w-4xl mx-auto">
+				<Outlet />
+			</div>
 			{/* <footer tw="mt-2 h-1"></footer> */}
 		</>
 	);

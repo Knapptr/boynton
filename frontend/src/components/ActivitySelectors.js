@@ -18,7 +18,7 @@ const ActivitySelectors = ({
     return selectedAct.sessionId === activity.sessionId;
   };
   return (
-    <ul tw="flex justify-center gap-2 flex-wrap">
+    <ul tw="flex justify-center gap-2 flex-wrap py-2">
       <MenuSelector onClick={selectAll} isSelected={displayAll}>
         <button>All</button>
       </MenuSelector>

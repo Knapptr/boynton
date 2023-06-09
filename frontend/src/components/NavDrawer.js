@@ -22,8 +22,8 @@ const navItems = [
 const regMenuItems = [
   { name: "Activity Sign-Up", url: "/schedule/sign-up" },
   { name: "Cabin Assignment", url: "/cabins/assignment", reqRole: "unit_head" },
-  { name: "Programming", url: "/programming-schedule/activities", reqRole: "admin" },
-  { name: "Staff Scheduling", url: "/programming-schedule/staff", reqRole: "programming" }
+  { name: "Programming", url: "/schedule/activities", reqRole: "admin" },
+  { name: "Staff Scheduling", url: "/schedule/staff", reqRole: "programming" }
 ]
 
 const TAILWIND = { greenBg: "#17A34A", darkBg: "#091929" }
@@ -101,7 +101,7 @@ const DrawerNav = ({ items, auth }) => {
   return (<List>
     {prepareRoleMenuItems(items, auth).map(item => {
       return (<ListItem tw="my-2" css={[tw`bg-green-700 w-11/12 mx-auto`]} key={item.name}>
-        <Link to={item.url} tw="w-full"><ListItemText primary={<p tw="text-center text-white font-bold">{item.name}</p>} /></Link>
+        <Link to={item.url} tw=""><ListItemText primary={<p tw="text-center text-white font-bold">{item.name}</p>} /></Link>
       </ListItem>)
     })}
   </List>
@@ -163,34 +163,36 @@ function NavDrawer(props) {
   return (
     <>
       <AppBar position="sticky" component="nav" tw="bg-green-600">
-        <Toolbar>
-          <Link
-            tw="mr-auto block"
-            to="/profile">
-            <Typography
-              variant="h5"
-              component="div"
+        <div tw="w-full max-w-7xl mx-auto flex justify-center">
+          <Toolbar tw="w-full">
+            <Link
+              tw="mr-auto block"
+              to="/">
+              <Typography
+                variant="h5"
+                component="div"
+              >
+                Boynton
+              </Typography>
+            </Link>
+            <IconButton
+              color="inherit"
+              aria-label="open drawer"
+              edge="start"
+              onClick={handleDrawerToggle}
+              tw="mr-2 block md:hidden"
             >
-              Boynton
-            </Typography>
-          </Link>
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            edge="start"
-            onClick={handleDrawerToggle}
-            tw="mr-2 block md:hidden"
-          >
-            <MenuIcon />
-          </IconButton>
-          <Box tw="ml-auto hidden md:block " >
-            {navItems.map((item) => (
-              <NavContextLinkButton key={`appbar-link-${item.name}`} item={item} active={location.pathname.startsWith(item.url)} to={item.url} />
-            ))}
-            <MenuNav auth={auth} title="Scheduling" items={regMenuItems} />
-            <NavMenuButton onClick={auth.logOut} >Log Out </NavMenuButton>
-          </Box>
-        </Toolbar>
+              <MenuIcon />
+            </IconButton>
+            <Box tw="ml-auto hidden md:block " >
+              {navItems.map((item) => (
+                <NavContextLinkButton key={`appbar-link-${item.name}`} item={item} active={location.pathname.startsWith(item.url)} to={item.url} />
+              ))}
+              <MenuNav auth={auth} title="Scheduling" items={regMenuItems} />
+              <NavMenuButton onClick={auth.logOut} >Log Out </NavMenuButton>
+            </Box>
+          </Toolbar>
+        </div>
       </AppBar>
       <Box component="nav">
         <Drawer

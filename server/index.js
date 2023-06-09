@@ -22,7 +22,10 @@ receiver.router.use("/action", actionRouter);
 receiver.router.use("/api", apiRouter);
 
 receiver.router.get("/*", (req, res, next) => {
-	res.sendFile(path.join(__dirname, "..", "frontend", "build", "404.html"));
+	res.sendFile(path.join(__dirname, "..", "frontend", "build", "index.html"));
 });
+// receiver.router.get("/*", (req, res, next) => {
+// 	res.sendFile(path.join(__dirname, "..", "frontend", "build", "404.html"));
+// });
 
 module.exports = receiver;
