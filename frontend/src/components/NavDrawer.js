@@ -1,12 +1,14 @@
 import tw, { styled } from "twin.macro";
 import "styled-components/macro";
-import { AppBar, CssBaseline, Divider, Drawer, List, ListItem, ListItemButton, ListItemText, Toolbar, Typography, Button } from "@mui/material";
+import { AppBar, CssBaseline, Divider, Drawer, List, ListItem, ListItemButton, ListItemText, Toolbar, Typography, Button, Menu, MenuItem } from "@mui/material";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { Box } from "@mui/system";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import MenuIcon from '@mui/icons-material/Menu';
 import IconButton from '@mui/material/IconButton';
 import { NavBarLink } from "./styled";
+import { isAdmin, isProgramming, isUnitHead } from "../utils/permissions";
+import UserContext from "./UserContext";
 
 const drawerWidth = 240;
 
@@ -14,30 +16,117 @@ const navItems = [
   { name: 'Attendance', url: "/schedule/attendance" },
   { name: 'Give Award', url: "/award" },
   { name: 'Cabin Lists', url: "/cabins/list" },
-  { name: 'Activity Sign-Up', url: "/schedule/sign-up" },
-  { name: 'Scores', url: "/scoreboard" },]
+  // { name: 'Scores', url: "/scoreboard" },
+]
+
+const regMenuItems = [
+  { name: "Activity Sign-Up", url: "/schedule/sign-up" },
+  { name: "Cabin Assignment", url: "/cabins/assignment", reqRole: "unit_head" },
+  { name: "Programming", url: "/programming-schedule/activities", reqRole: "admin" },
+  { name: "Staff Scheduling", url: "/programming-schedule/staff", reqRole: "programming" }
+]
 
 const TAILWIND = { greenBg: "#17A34A", darkBg: "#091929" }
 
 const NavContextLinkList = ({ active, to, item }) => {
   return (<Link to={to} >
-    <ListItem tw="my-2" css={[tw`bg-green-700`, active && tw`bg-amber-600`]} key={item.name} disablePadding>
+    <ListItem tw="my-2" css={[tw`bg-green-700 w-11/12 mx-auto`, active && tw`bg-amber-600`]} key={item.name}>
       <ListItemButton tw="text-center">
-        <ListItemText primary={item.name} tw="text-white" />
+        <ListItemText primary={<p tw="text-white font-bold">{item.name}</p>} />
       </ListItemButton>
     </ListItem>
   </Link>)
 }
 
+const DrawerItem = ({ children }) => {
+  return (<ListItem tw="my-2" css={[tw`bg-green-700`]} >
+    {children}
+  </ListItem>)
+}
+
 const NavContextLinkButton = ({ active, to, item }) => {
   return (<Link to={to} >
-    <Button tw="my-2 mx-2" sx={{ color: "black" }} disabled={active} key={item.name} disablePadding>
+    <Button tw="my-2 mx-2" sx={{ color: "black" }} disabled={active} key={item.name} >
       {item.name}
     </Button>
   </Link>)
 }
+const NavMenuButton = ({ children, onClick, background }) => {
+  return (<Button onClick={onClick} tw="my-2 mx-2" sx={{ color: "black", background }}>
+    {children}
+  </Button >)
+}
+
+const MenuNav = ({ title, items, auth }) => {
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  const handleMenu = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  return (
+
+    <>
+      <NavMenuButton onClick={handleMenu}>
+        <p>{title}</p>
+      </NavMenuButton>
+      <Menu
+        id="menu-appbar"
+        anchorEl={anchorEl}
+        anchorOrigin={{
+          vertical: 'top',
+          horizontal: 'left',
+        }}
+        keepMounted
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'left',
+        }}
+        open={Boolean(anchorEl)}
+        onClose={handleClose}
+      >
+        {prepareRoleMenuItems(items, auth).map(item =>
+          <MenuItem onClick={handleClose}><Link to={item.url}>{item.name}</Link></MenuItem>
+        )}
+      </Menu>
+    </>
+  )
+}
+
+const DrawerNav = ({ items, auth }) => {
+  return (<List>
+    {prepareRoleMenuItems(items, auth).map(item => {
+      return (<ListItem tw="my-2" css={[tw`bg-green-700 w-11/12 mx-auto`]} key={item.name}>
+        <Link to={item.url} tw="w-full"><ListItemText primary={<p tw="text-center text-white font-bold">{item.name}</p>} /></Link>
+      </ListItem>)
+    })}
+  </List>
+  )
+}
+
+const prepareRoleMenuItems = (items, auth) => {
+  return items.filter(item => {
+    switch (item.reqRole) {
+      case 'admin':
+        return isAdmin(auth);
+      case 'unit_head':
+        return isUnitHead(auth);
+      case 'programming':
+        return isProgramming(auth);
+      case undefined:
+        return item;
+      default: return false;
+    }
+  }
+  )
+}
 
 function NavDrawer(props) {
+  const auth = useContext(UserContext);
   const location = useLocation()
   console.log({ location });
   const { window } = props;
@@ -55,12 +144,17 @@ function NavDrawer(props) {
           Boynton
         </Typography>
       </Link>
-      <Divider />
+      <Divider tw="bg-green-500 my-4" />
       <List >
         {navItems.map((item) => (
           <NavContextLinkList key={`drawer-link-${item.name}`} item={item} active={location.pathname.startsWith(item.url)} to={item.url} />
         ))}
       </List>
+      <Divider tw="bg-green-500" />
+      <DrawerNav items={regMenuItems} auth={auth} />
+      <div tw="w-full flex justify-center mt-24">
+        <button tw=" rounded w-9/12 bg-red-600 py-4 text-white font-bold hover:bg-red-700" onClick={auth.logOut}><span >Log Out</span></button>
+      </div>
     </Box >
   );
 
@@ -93,6 +187,8 @@ function NavDrawer(props) {
             {navItems.map((item) => (
               <NavContextLinkButton key={`appbar-link-${item.name}`} item={item} active={location.pathname.startsWith(item.url)} to={item.url} />
             ))}
+            <MenuNav auth={auth} title="Scheduling" items={regMenuItems} />
+            <NavMenuButton onClick={auth.logOut} >Log Out </NavMenuButton>
           </Box>
         </Toolbar>
       </AppBar>
