@@ -4,8 +4,12 @@ const fetchWithToken = async (url, options = {}, auth) => {
 		...options,
 		headers: { ...options.headers, authorization: `Bearer ${auth.userData.token}` },
 	};
-	const response = await fetch(url, optionsWithToken);
-	return response;
+	try {
+		const response = await fetch(url, optionsWithToken);
+		return response;
+	} catch {
+		return { status: 400, message: `Failed to Fetch Data. Something Went Wrong. Check your network connection.` }
+	}
 };
 
 export default fetchWithToken

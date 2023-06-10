@@ -13,6 +13,13 @@ const weekHandler = {
 		const weeks = await Week.getAll(getStaff);
 		res.status(200).json(weeks);
 	},
+	getCurrent: async (req, res, next) => {
+		const date = new Date();
+		const week = await Week.getOnDate(date);
+		if (!week) { next(new Error("No Current Week")); return; };
+		res.json(week);
+
+	},
 	getOne: [
 		param("weekNumber").exists().isInt().custom(async (weekNumber, { req }) => {
 			const getStaff = req.query.staff === "true";

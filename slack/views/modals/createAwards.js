@@ -1,3 +1,5 @@
+const ProgramArea = require("../../../models/programArea");
+
 const awardModalHeader = {
 	type: "modal",
 	callback_id: "boyntonAward",
@@ -23,60 +25,21 @@ const updateView = async (index) => {
 	return { ...awardModalHeader, blocks };
 };
 
-const getBlocks = async (index = 0) => {
-	return [
-		{
-			type: "input",
-			block_id: "programArea",
-			element: {
-				type: "static_select",
-				placeholder: {
-					type: "plain_text",
-					text: "Select a Program Area",
-					emoji: true,
-				},
-				options: [
-					{
-						text: {
-							type: "plain_text",
-							text: "Creative Arts",
-							emoji: true,
-						},
-						value: "arts",
-					},
-					{
-						text: {
-							type: "plain_text",
-							text: "Challenge Activities",
-							emoji: true,
-						},
-						value: "challenge",
-					},
-					{
-						text: {
-							type: "plain_text",
-							text: "Waterfront",
-							emoji: true,
-						},
-						value: "waterfront",
-					},
-					{
-						text: {
-							type: "plain_text",
-							text: "Nature",
-							emoji: true,
-						},
-						value: "nature",
-					},
-				],
-				action_id: "select",
-			},
-			label: {
-				type: "plain_text",
-				text: "Program Area",
-				emoji: true,
-			},
+const awardTypeOpts = (awardTypes) => {
+	console.log({ awardTypes });
+	return awardTypes.map(area => ({
+		"text": {
+			"type": "plain_text",
+			"text": area.name
 		},
+		"value": `${area.id}`
+	}))
+
+}
+
+const getBlocks = async (index = 0) => {
+	const programAreas = await ProgramArea.getAll();
+	return [
 		{
 			type: "input",
 			block_id: "awardFor",
@@ -100,6 +63,16 @@ const getBlocks = async (index = 0) => {
 				action_id: "camper_options",
 			},
 		},
+		{
+			type: "input",
+			block_id: "programArea",
+			label: { type: "plain_text", text: "Award Type" },
+			element: {
+				type: "static_select",
+				placeholder: { type: "plain_text", text: "Select an award type" },
+				options: awardTypeOpts(programAreas)
+			},
+		}
 	];
 };
 

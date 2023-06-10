@@ -1,19 +1,25 @@
 const pool = require("../db");
+const weekRepository = require("../repositories/week");
 const defaultWeekRepository = require("../repositories/week");
+const { fetchOne } = require("../utils/pgWrapper");
 
 class Week {
-	constructor({ title, number, days = [] }, weekRepository = defaultWeekRepository) {
+	constructor({ title, begins, ends, number, days = [] }, weekRepository = defaultWeekRepository) {
 		if (!title || !number) { throw new Error("Cannot create Week, title,number required") }
 		this.title = title;
 		this.days = days;
 		this.number = number;
-		this._weekRepository = weekRepository
+		this._weekRepository = weekRepository;
+		this.begins = begins;
+		this.ends = ends;
 	}
 	toJSON() {
 		return {
 			title: this.title,
 			number: this.number,
 			days: this.days,
+			begins: this.begins,
+			ends: this.ends
 		}
 	}
 	async delete() {
@@ -22,6 +28,11 @@ class Week {
 			return true
 		}
 		return false
+	}
+
+	static async getOnDate(date, getStaff = false) {
+		const week = await weekRepository.getOnDate(date, getStaff)
+		return week;
 	}
 	static async get(weekNumber, getStaff = false, weekRepository = defaultWeekRepository) {
 		const week = await weekRepository.get(weekNumber, getStaff);
@@ -33,8 +44,8 @@ class Week {
 		const weeks = await weekRepository.getAll(getStaff);
 		return weeks.map(weekData => new Week(weekData));
 	}
-	static async create({ title, number }, weekRepository = defaultWeekRepository) {
-		const weekResponse = await weekRepository.create({ title, number })
+	static async create({ title, number, begins, ends }, weekRepository = defaultWeekRepository) {
+		const weekResponse = await weekRepository.create({ title, number, begins, ends })
 		return new Week(weekResponse);
 	}
 	async clearCabins(area) {

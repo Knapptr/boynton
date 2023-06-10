@@ -153,7 +153,7 @@ module.exports = {
   programAreas: `
   CREATE TABLE IF NOT EXISTS program_areas(
     id serial NOT NULL PRIMARY KEY,
-    name CHARACTER VARYING NOT NULL
+    name CHARACTER VARYING NOT NULL UNIQUE
   )
   `,
   awards: `

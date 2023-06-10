@@ -5,10 +5,10 @@ env.config();
 
 const queries = require("./initQueries");
 const { fetchOne } = require("./utils/pgWrapper");
-const init = (query) => {
+const init = (query, values) => {
   return async () => {
     try {
-      await fetchOne(query);
+      await fetchOne(query, values);
       return true;
     } catch (e) {
       console.log({ query });
@@ -31,6 +31,8 @@ const dayRepo = require("./repositories/day");
 const periodRepo = require("./repositories/period");
 const scoreRepo = require("./repositories/score");
 const weekRepo = require("./repositories/week");
+const pool = require("./db");
+const encrypt = require("./utils/encryptPassword");
 const programAreaRepo = { init: init(queries.programAreas) };
 const awardRepo = { init: init(queries.awards) };
 
@@ -72,6 +74,15 @@ module.exports = async () => {
       console.log("repo:", repo)
       throw new Error(e);
     }
+  }
+  // if there are no users, add default admin
+  const users = await pool.query("SELECT * from users");
+  if (users.rows.length === 0) {
+    const userQuery = "INSERT INTO users (username,password,role,first_name,last_name) VALUES ($1,$2,$3,$4,$5)";
+    // hash password
+    const hashedPw = await encrypt(process.env.DEFAULT_ADMIN_PASSWORD);
+    const values = [process.env.DEFAULT_ADMIN_USERNAME, hashedPw, "admin", process.env.DEFAULT_ADMIN_FIRSTNAME, process.env.DEFAULT_ADMIN_LASTNAME];
+    await pool.query(userQuery, values);
   }
   console.log("DB Initialized");
 };

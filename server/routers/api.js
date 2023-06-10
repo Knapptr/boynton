@@ -2,6 +2,7 @@ const router = require("express").Router();
 const activityRouter = require("./activity");
 const camperRouter = require("./campers");
 const periodRouter = require("./period");
+const configRouter = require("./config");
 const daysRouter = require("./days");
 const cabinSessionRouter = require("./cabinSession");
 const cabinRouter = require("./cabins");
@@ -15,6 +16,7 @@ const usersRouter = require("./users");
 const staffSessionRouter = require("./staffSessions");
 const programAreaRouter = require("./programAreas");
 const awardsRouter = require("./awards");
+const { adminOnly } = require("../middleware/authRole");
 
 router.use(passport.authenticate("jwt", { session: false }));
 //log all api requs
@@ -37,6 +39,12 @@ router.use("/weeks", weekRouter);
 router.use("/users", usersRouter);
 router.use("/program-areas", programAreaRouter);
 router.use("/awards", awardsRouter);
+
+// Admin Only Routes
+router.use(adminOnly);
+router.use("/config", configRouter);
+
+// Error handling
 router.use((err, req, res, next) => {
 	if (err.type) {
 		switch (err.type) {

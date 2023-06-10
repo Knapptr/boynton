@@ -9,6 +9,8 @@ const weekRepository = {
         (
         "number" integer NOT NULL,
         title character varying(255) COLLATE pg_catalog."default" NOT NULL,
+        begins DATE NOT NULL,
+        ends DATE NOT NULL,
         CONSTRAINT week_pkey PRIMARY KEY ("number"),
         CONSTRAINT "uniqueWeekName" UNIQUE (title),
         CONSTRAINT "uniqueWeekNumber" UNIQUE ("number")
@@ -30,6 +32,8 @@ const weekRepository = {
       const currentWeek = weeks.at(-1) && weeks.at(-1).number === response.number ? weeks.pop() : {
         title: response.title,
         number: response.number,
+        begins: response.begins,
+        ends: response.ends,
         days: []
       }
       //check if current respose is a new day
@@ -73,11 +77,69 @@ const weekRepository = {
     }
     return weeks
   },
+  async getOnDate(date, getStaff = false) {
+    console.log({ date });
+    const query = !getStaff ? `SELECT 
+    w.title AS title,
+      w.number AS number,
+      w.begins as begins,
+      w.ends as ends,
+      d.id AS day_id,
+      d.name AS day_name,
+      p.id AS period_id,
+      p.period_number AS period_number,
+      act.id AS activity_id,
+      act.name AS activity_name,
+      ases.id AS activity_session_id,
+      act.description AS activity_description
+    FROM weeks w
+    LEFT JOIN days d ON d.week_id = w.number
+    LEFT JOIN periods p ON p.day_id = d.id  
+    FULL JOIN activity_sessions ases ON ases.period_id = p.id
+    LEFT JOIN activities act ON ases.activity_id = act.id
+    WHERE w.begins <= $1 AND w.ends >= $1
+    ORDER BY w.number,d.id,p.period_number
+    `: `
+    SELECT 
+    w.title AS title,
+      w.number AS number,
+      w.begins as begins,
+      w.ends as ends,
+      d.id AS day_id,
+      d.name AS day_name,
+      p.id AS period_id,
+      p.period_number AS period_number,
+      act.id AS activity_id,
+      sta.id AS staff_activity_id,
+      act.name AS activity_name,
+      ases.id AS activity_session_id,
+      act.description AS activity_description,
+      us.username AS staff_username
+    FROM weeks w
+    LEFT JOIN days d ON d.week_id = w.number
+    LEFT JOIN periods p ON p.day_id = d.id  
+    FULL JOIN activity_sessions ases ON ases.period_id = p.id
+    LEFT JOIN activities act ON ases.activity_id = act.id
+    LEFT JOIN staff_activities sta ON sta.activity_session_id = ases.id
+    LEFT JOIN staff_sessions ss ON ss.id = sta.staff_session_id
+    LEFT JOIN users us ON ss.username = us.username
+    WHERE w.begins <= $1 AND w.ends >= $1
+    ORDER BY w.number,d.id,p.period_number,ases.id `;
+    const values = [date];
+    const responseData = await fetchMany(query, values);
+    if (!responseData) {
+      return false;
+    }
+    const mappedData = this._mapResponse(responseData, getStaff);
+    return mappedData[0];
+  },
   /** Returns all weeks with nested information for days and periods. Activities are not populated */
   async getAll() {
     const query = `SELECT 
     w.title AS title,
       w.number AS number,
+      w.begins as begins,
+      w.ends as ends,
       d.id AS day_id,
       d.name AS day_name,
       p.id AS period_id,
@@ -97,6 +159,8 @@ const weekRepository = {
     const query = !getStaff ? `SELECT 
     w.title AS title,
       w.number AS number,
+      w.begins as begins,
+      w.ends as ends,
       d.id AS day_id,
       d.name AS day_name,
       p.id AS period_id,
@@ -116,6 +180,8 @@ const weekRepository = {
     SELECT 
     w.title AS title,
       w.number AS number,
+      w.begins as begins,
+      w.ends as ends
       d.id AS day_id,
       d.name AS day_name,
       p.id AS period_id,
@@ -151,9 +217,9 @@ const weekRepository = {
     const deletedWeek = await fetchOne(query, values);
     return deletedWeek;
   },
-  async create({ title, number }) {
-    const weekQuery = `INSERT INTO weeks (title,number) VALUES ($1,$2) RETURNING *`;
-    const weekValues = [title, number];
+  async create({ title, number, begins, ends }) {
+    const weekQuery = `INSERT INTO weeks (title,number,begins,ends) VALUES ($1,$2,$3,$4) RETURNING *`;
+    const weekValues = [title, number, begins, ends];
     const insertWeekResponse = await fetchOne(weekQuery, weekValues);
     if (insertWeekResponse) {
       insertWeekResponse.days = [];

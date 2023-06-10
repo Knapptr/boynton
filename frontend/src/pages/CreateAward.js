@@ -1,17 +1,21 @@
 import tw from "twin.macro";
 import "styled-components/macro";
-
+import { useNavigate } from "react-router-dom";
+import catchErrors from "../utils/fetchErrorHandling";
 import { Button, Container, Autocomplete, Paper, TextField, Typography, Select, MenuItem, FormControl, InputLabel, CssBaseline, ToggleButtonGroup, ToggleButton } from "@mui/material"
 import { useState, useContext, useCallback, useEffect } from "react";
 import { Box, Stack } from "@mui/system";
 import UserContext from "../components/UserContext"
 import fetchWithToken from "../fetchWithToken";
+import useErrors from "../hooks/useErrors";
 
 const CAMPER_OPTIONS = [{ id: 1, label: "Tyler" }, { id: 2, label: "Anja" }, { id: 3, label: "Sokhna" }]
 const PROGRAM_AREAS = ["Challenge Activities", "Archery", "Ropes", "Waterfront", "Polar Bear Dip", "Creative Arts", "Superstar"]
 
 const CreateAward = () => {
+  const navigate = useNavigate();
   const auth = useContext(UserContext);
+  const { errors, setErrors, thereAreErrors, ErrorsBar, clearErrors } = useErrors();
 
   // Form Data
   const [fields, setOptions] = useState({
@@ -65,14 +69,18 @@ const CreateAward = () => {
 
   const handleFormSubmit = async () => {
     if (selectedField.length > 0 && fields.programAreaId && fields.reason) {
+      clearErrors();
       const url = "/api/awards";
       const options = {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ awards: selectedField.map(camper => ({ camperSessionId: camper.sessionId, reason: fields.reason, programAreaId: fields.programAreaId })) })
       }
-      const results = await fetchWithToken(url, options, auth);
-      console.log({ results });
+      const response = await fetchWithToken(url, options, auth);
+      const results = await catchErrors(response, (e) => { setErrors([e]) });
+      if (results) {
+        navigate("/")
+      }
     }
   }
 
@@ -125,10 +133,10 @@ const CreateAward = () => {
             </Stack>
           </Stack>
           <Box>
-            {/* WTF */}
             <button onClick={handleFormSubmit} tw="bg-green-600 rounded p-3 text-white font-bold">Award!</button>
           </Box>
         </Paper>}
+      <ErrorsBar />
     </Container>
   </>
 }

@@ -9,14 +9,14 @@ const getWeek = (dateArg) => {
 	const week = keys.find((key) => {
 		const start = Date.parse(weeks[key].start);
 		const end = Date.parse(weeks[key].end);
-    console.log({date,keys,start,end})
+		// console.log({ date, keys, start, end })
 		if (date >= start && date <= end) {
 			return true;
 		} else {
 			return false;
 		}
 	});
-  console.log({week})
+	// console.log({week})
 	return week || "non";
 };
 const formatmmddyyyy = (date) => {
