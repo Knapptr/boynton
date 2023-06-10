@@ -19,6 +19,10 @@ const navItems = [
   // { name: 'Scores', url: "/scoreboard" },
 ]
 
+const adminNavItems = [
+  { name: "Users", url: "/users" }
+]
+
 const regMenuItems = [
   { name: "Activity Sign-Up", url: "/schedule/sign-up" },
   { name: "Cabin Assignment", url: "/cabins/assignment", reqRole: "unit_head" },
@@ -100,9 +104,9 @@ const MenuNav = ({ title, items, auth }) => {
 const DrawerNav = ({ items, auth }) => {
   return (<List>
     {prepareRoleMenuItems(items, auth).map(item => {
-      return (<ListItem tw="my-2" css={[tw`bg-green-700 w-11/12 mx-auto`]} key={item.name}>
-        <Link to={item.url} tw=""><ListItemText primary={<p tw="text-center text-white font-bold">{item.name}</p>} /></Link>
-      </ListItem>)
+      return (<Link to={item.url} tw=""><ListItem tw="my-2" css={[tw`bg-green-700 w-11/12 mx-auto`]} key={item.name}>
+        <ListItemText primary={<p tw="text-center text-white font-bold">{item.name}</p>} />
+      </ListItem></Link>)
     })}
   </List>
   )
@@ -152,6 +156,8 @@ function NavDrawer(props) {
       </List>
       <Divider tw="bg-green-500" />
       <DrawerNav items={regMenuItems} auth={auth} />
+      <Divider tw="bg-green-500" />
+      <DrawerNav items={adminNavItems} auth={auth} />
       <div tw="w-full flex justify-center mt-24">
         <button tw=" rounded w-9/12 bg-red-600 py-4 text-white font-bold hover:bg-red-700" onClick={auth.logOut}><span >Log Out</span></button>
       </div>
@@ -189,6 +195,7 @@ function NavDrawer(props) {
                 <NavContextLinkButton key={`appbar-link-${item.name}`} item={item} active={location.pathname.startsWith(item.url)} to={item.url} />
               ))}
               <MenuNav auth={auth} title="Scheduling" items={regMenuItems} />
+              <MenuNav auth={auth} title="Admin" items={adminNavItems} />
               <NavMenuButton onClick={auth.logOut} >Log Out </NavMenuButton>
             </Box>
           </Toolbar>

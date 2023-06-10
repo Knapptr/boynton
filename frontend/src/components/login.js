@@ -5,6 +5,8 @@ import tw from "twin.macro";
 import "styled-components/macro";
 import logo from "../cl.png";
 import { Button } from "@mui/material";
+import useErrors from "../hooks/useErrors";
+import catchErrors from "../utils/fetchErrorHandling";
 const storeToken = (token) => {
 	localStorage.setItem("bearerToken", token);
 };
@@ -14,16 +16,13 @@ const SubmitButton = tw.button`bg-green-600 p-4 rounded-lg`;
 
 const Login = () => {
 	const auth = useContext(UserContext);
-	const [errors, setErrors] = useState([]);
 	const [formInputs, setFormInputs] = useState({
 		username: "",
 		password: "",
 	});
+	const { errors, thereAreErrors, clearErrors, setErrors, ErrorsBar } = useErrors()
 	const clearPassword = () => {
 		setFormInputs(f => ({ ...f, password: "" }))
-	}
-	const clearErrors = () => {
-		setErrors([]);
 	}
 	const location = useLocation();
 	const { cameFrom } = location.state || { cameFrom: null };
@@ -49,26 +48,15 @@ const Login = () => {
 				password: formInputs.password,
 			}),
 		};
-		const response = await fetch("/auth/login", reqOptions);
-		const data = await response.json();
-		if (response.status === 500) {
-			const error = { text: "Server Error. Tell an admin" }
-			clearPassword();
-			setErrors(e => [...e, error])
-		}
-		if (response.status === 400) {
-		}
-		if (response.status === 401) {
-			clearPassword();
-			const error = { text: "Incorrect Username or Password" }
-			setErrors(e => [...e, error])
-		}
-		if (response.status === 200) {
-			auth.logIn(data.token, data.user)
+		const result = await fetch("/auth/login", reqOptions);
+		const data = await catchErrors(result, (e) => { setErrors([e]) });
+		if (data) {
+			const userData = await data.json();
+			auth.logIn(userData.token, userData.user)
 			// storeToken(data.token);
 			navigate(cameFrom || "/");
 		}
-	};
+	}
 	return (
 		<><form onSubmit={handleSubmit} tw="w-4/5 sm:w-1/2 md:w-2/5 max-w-sm">
 			<div tw="flex flex-col">
@@ -93,11 +81,7 @@ const Login = () => {
 			</div>
 		</form>
 
-			{errors.length > 0 &&
-				<div>
-					<ul>{errors.map((e, eIndex) => <li tw="bg-red-400 p-3 rounded m-2 font-bold" key={`error-${eIndex}`}>{e.text}</li>)}</ul>
-				</div>
-			}
+			<ErrorsBar />
 		</>
 	);
 };

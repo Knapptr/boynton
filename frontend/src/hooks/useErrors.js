@@ -13,7 +13,7 @@ const useErrors = () => {
 	}
 	const ErrorsBar = () => {
 		return (<>
-			<Box tw="w-full relative mt-4">
+			<Box tw="w-full fixed bottom-10">
 				<Stack spacing={2} tw="w-9/12 mx-auto" >
 					{errors.map(err =>
 						<Alert severity="error" action={<IconButton onClick={clearErrors}> <CloseIcon /> </IconButton>}>
