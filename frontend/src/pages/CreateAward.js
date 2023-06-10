@@ -8,6 +8,7 @@ import { Box, Stack } from "@mui/system";
 import UserContext from "../components/UserContext"
 import fetchWithToken from "../fetchWithToken";
 import usePops from "../hooks/usePops";
+import useWeeks from "../hooks/useWeeks";
 
 
 const CreateAward = () => {
@@ -28,18 +29,16 @@ const CreateAward = () => {
   }
 
   // Requisite Data
-  const [weeks, setWeeks] = useState([]);
+  const { weeks, selectedWeek, WeekSelection } = useWeeks();
   const [programAreas, setProgramAreas] = useState([]);
   const [campers, setCampers] = useState([]);
-  const [selectedWeek, setSelectedWeek] = useState(null);
 
   // Fetch data on load
   const getData = useCallback(async () => {
-    const weekResponse = fetchWithToken("/api/weeks", {}, auth);
     const programAreaResponse = fetchWithToken("/api/program-areas", {}, auth);
-    const [weekRes, paRes] = await Promise.all([weekResponse, programAreaResponse]);
-    const [weekData, paData] = await Promise.all([weekRes.json(), paRes.json()])
-    setWeeks(weekData);
+    const paRes = await programAreaResponse;
+    const paData = await paRes.json();
+
     setProgramAreas(paData);
   }, [auth])
 
@@ -62,9 +61,6 @@ const CreateAward = () => {
     }
   }, [selectedWeek])
 
-  const handleWeekSelect = ((e, selectedWeek) => {
-    setSelectedWeek(selectedWeek)
-  })
   const handleFormChange = (event) => {
     setFields(o => ({ ...o, [event.target.name]: event.target.value }))
   }
@@ -92,17 +88,8 @@ const CreateAward = () => {
   }
 
   return <>
-    <Box>
-      <Stack direction="row" justifyContent="center" flexWrap="wrap" alignItems="center" width={1}>
-        <Typography variant="h5" marginX={4} component="h3">Select Week</Typography>
-        <ToggleButtonGroup onChange={handleWeekSelect} value={selectedWeek} exclusive>
-          {weeks && weeks.map(w => (
-            <ToggleButton key={`week-select-${w.number}`} tw="bg-green-600 hover:bg-green-400" value={w}>{w.number}</ToggleButton>
-          ))}
-        </ToggleButtonGroup>
-      </Stack>
-
-    </Box>
+    <WeekSelection labelElement={<Typography variant="h5" marginX={4} component="h3">Select Week</Typography>
+    } />
     <Container maxWidth="md" tw="mt-8">
       {selectedWeek && campers &&
         <Paper tw="py-4" elevation={4} >

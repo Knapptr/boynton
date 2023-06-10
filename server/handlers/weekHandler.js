@@ -6,6 +6,7 @@ const Camper = require("../../models/camper");
 const error = require("../../utils/jsonError");
 const handleValidation = require("../../validation/validationMiddleware");
 const { param } = require("express-validator");
+const Score = require("../../models/score");
 
 const weekHandler = {
 	async getAll(req, res, next) {
@@ -20,6 +21,22 @@ const weekHandler = {
 		res.json(week);
 
 	},
+	getScores: [
+		param("weekNumber").isInt().custom(async (weekNumber, { req }) => {
+			const week = Week.get(weekNumber);
+			if (!week) {
+				throw new Error("Invalid Week");
+			}
+			return weekNumber;
+		}),
+		handleValidation,
+		async (req, res, next) => {
+			const data = await Score.getForWeek(req.params.weekNumber);
+			// console.log({ data });
+			res.json(data);
+
+		}
+	],
 	getOne: [
 		param("weekNumber").exists().isInt().custom(async (weekNumber, { req }) => {
 			const getStaff = req.query.staff === "true";

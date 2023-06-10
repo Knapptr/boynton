@@ -4,6 +4,7 @@ import { useCallback, useContext, useEffect, useState } from "react";
 import { DialogBox, PopOut } from "../components/styled";
 import tw from "twin.macro";
 import "styled-components/macro";
+import useWeeks from "../hooks/useWeeks";
 
 const EditUserBox = ({ weeks, user, edits, editType, handleChange, closePopOut, onConfirm }) => {
   const [showStaffing, setShowStaffing] = useState(false);
@@ -88,7 +89,7 @@ const UsersPage = () => {
 
   const [edit, setEdit] = useState({ type: editTypes.NONE, user: null, edits: null, })
 
-  const [weeks, setWeeks] = useState([]);
+  const { weeks } = useWeeks()
 
   const handleChange = (event) => {
     // parse if checkbox and map data appropriately
@@ -203,17 +204,11 @@ const UsersPage = () => {
     setUsers(users);
   }, [auth])
 
-  const getWeeks = useCallback(async () => {
-    const weekResponse = await fetchWithToken("/api/weeks", {}, auth);
-    const weeks = await weekResponse.json();
-    setWeeks(weeks);
-  }, [auth])
 
-  // Get users and weeks on load
+  // Get users on load 
   useEffect(() => {
     getUsers();
-    getWeeks();
-  }, [getUsers, getWeeks])
+  }, [getUsers])
 
   return (
     <>

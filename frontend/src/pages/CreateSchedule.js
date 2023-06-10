@@ -113,7 +113,7 @@ const CreateSchedulePage = () => {
 	const getPeriod = () => week.days[selectedDay].periods[selectedPeriod]
 
 	return (
-		<div tw="flex flex-col justify-center min-h-screen">
+		<div tw="flex flex-col justify-center min-h-screen w-full">
 			<header tw="mb-3 flex items-center justify-around">
 				<h1 tw="font-bold text-3xl">Cabin {`${toTitleCase(cabin)}`}</h1>
 				<h5 tw="text-xl font-bold text-gray-600">Week {weekNumber}</h5>

@@ -60,13 +60,14 @@ export const DialogBox = ({ close, children, scrollable, full }) => <DialogBoxBo
   <button tw="absolute top-1 right-3" onClick={close}><FontAwesomeIcon size="xl" icon={faCircleXmark} /></button>
   {children}</DialogBoxBox>
 
-export const StaffBadge = styled.li(({ firstYear, senior, ropes, archery, lifeguard }) => [
-  tw`hidden rounded-full sm:inline text-xs bg-gray-50 font-bold p-1 `,
+export const StaffBadge = styled.li(({ hideSmall, firstYear, senior, ropes, archery, lifeguard }) => [
+  tw`inline rounded-full sm:inline text-xs bg-gray-50 font-bold p-1 `,
   firstYear && tw`text-green-500`,
   senior && tw`text-black`,
   lifeguard && tw`text-red-500`,
   ropes && tw`text-amber-500`,
-  archery && tw`text-yellow-500`
+  archery && tw`text-yellow-500`,
+  hideSmall && tw`hidden`
 ])
 
 export const StaffListing = ({ staffer, fullName, isSelected, removeable, remove, selectable }) => {

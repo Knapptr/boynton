@@ -162,7 +162,7 @@ const AttendanceDisplay = () => {
 
   return (
     <>
-      <div tw="pb-32">
+      <div tw="pb-32 w-full">
         {!period && (
           <Stack spacing={1} width="100%" tw="mt-4">
             <Skeleton variant="rectangular" height={40} />
