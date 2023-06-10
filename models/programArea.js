@@ -36,7 +36,7 @@ class ProgramArea {
     }
 
     static async getAll() {
-        const query = `SELECT * from program_areas`;
+        const query = `SELECT * from program_areas ORDER BY name`;
         const result = await pool.query(query);
         //TODO error handling
         return result.rows.map(pa => new ProgramArea(pa));

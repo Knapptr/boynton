@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import useGetDataOnMount from "../hooks/useGetData";
-import { MenuSelector } from "../components/styled";
+import { AssignmentHeader, MenuSelector } from "../components/styled";
 import toTitleCase from "../toTitleCase";
 import tw, { styled } from 'twin.macro';
 import 'styled-components/macro'
@@ -9,6 +9,7 @@ import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import getDayName from "../utils/getDayname";
 
 const allHaveBeenSelected = (selected) => {
   if (
@@ -21,35 +22,62 @@ const allHaveBeenSelected = (selected) => {
   return false;
 };
 
+const SelectionHeader = ({ fields }) => {
+
+  return (fields !== null ? <>
+    <div tw="mx-auto">
+      <h1 tw="font-bold text-xl">Week {fields.weekNumber} - {getDayName(fields.dayName)} </h1>
+      <h2 tw="font-bold text-2xl">Activity Period {fields.periodNumber}</h2>
+    </div></> :
+
+    <p tw="text-center w-full font-bold">Schedule Selection</p>
+  )
+}
+
 const AttendanceIndex = () => {
   const location = useLocation();
+
   const [schedule, setSchedule] = useGetDataOnMount({
     url: "/api/weeks",
     useToken: true,
     initialState: [],
   });
+
   const navigate = useNavigate();
+
   const [selected, setSelected] = useState({
     week: "none",
     day: "none",
     period: "none",
   });
+
+  const [headerFields, setHeaderFields] = useState(null);
+
   const selectWeek = (week) => {
     setSelected({ ...selected, week });
   };
+
   const selectDay = (day) => {
     setSelected({ ...selected, day });
   };
+
   const selectPeriod = (period) => {
     setSelected({ ...selected, period });
   };
+
   useEffect(() => {
     if (selected.period !== "none") {
       const selectedPeriodId =
         schedule[selected.week].days[selected.day].periods[selected.period].id;
       setShowAccordion(false);
       navigate(`/schedule/attendance/${selectedPeriodId}`);
+      setHeaderFields({
+        weekNumber: schedule[selected.week].number,
+        dayName: schedule[selected.week].days[selected.day].name,
+        periodNumber: schedule[selected.week].days[selected.day].periods[selected.period].number
+      })
       setSelected({ week: "none", day: "none", period: "none" })
+
     }
   }, [selected, schedule, navigate]);
 
@@ -67,7 +95,7 @@ const AttendanceIndex = () => {
           aria-controls="panel1a-content"
           id="panel1a-header"
         >
-          <p tw="text-center w-full font-bold">Schedule Selection</p>
+          <SelectionHeader fields={headerFields} />
         </AccordionSummary>
         <AccordionDetails>
           <div tw="flex flex-col items-center gap-2">
@@ -133,7 +161,7 @@ const AttendanceIndex = () => {
           </div>
         </AccordionDetails>
       </Accordion>
-      <Outlet />
+      <Outlet context={{ setHeaderFields }} />
     </>
   );
 };

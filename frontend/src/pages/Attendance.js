@@ -20,6 +20,7 @@ const refreshRate = 1000 * 2;
 const cancelIntervalTime = 1000 * 60 * 8;
 
 const AttendanceDisplay = () => {
+  const { setHeaderFields } = useOutletContext();
   const { periodId } = useParams();
   const auth = useContext(UserContext);
   const [selected, setSelected] = useState(null);
@@ -35,6 +36,11 @@ const AttendanceDisplay = () => {
     const url = `/api/periods/${periodId}`;
     const data = await fetchWithToken(url, {}, auth);
     const periodJson = await data.json();
+    setHeaderFields({
+      weekNumber: periodJson.weekNumber,
+      dayName: periodJson.dayName,
+      periodNumber: periodJson.number
+    })
     setPeriod(periodJson);
   }, [periodId, auth]);
 
@@ -178,10 +184,6 @@ const AttendanceDisplay = () => {
             />
             <div tw="mb-6">
               <header tw="">
-                <div tw="">
-                  <h1 tw="font-bold text-xl">Week {period.weekNumber} - {getDayName(period.dayName)} </h1>
-                  <h2 tw="font-bold text-2xl">Activity Period {period.number}</h2>
-                </div>
                 <div tw="mx-2">
                   <AttendanceSummary tw="" allHere={allActivitiesClear()}>
                     {

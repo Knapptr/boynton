@@ -4,12 +4,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import tw from "twin.macro";
 import "styled-components/macro";
 import logo from "../cl.png";
-import { Button } from "@mui/material";
-import useErrors from "../hooks/useErrors";
+import usePops from "../hooks/usePops";
 import catchErrors from "../utils/fetchErrorHandling";
-const storeToken = (token) => {
-	localStorage.setItem("bearerToken", token);
-};
 
 const LoginField = tw.input`rounded my-4 border-gray-200 border-2 p-4`;
 const SubmitButton = tw.button`bg-green-600 p-4 rounded-lg`;
@@ -20,7 +16,7 @@ const Login = () => {
 		username: "",
 		password: "",
 	});
-	const { errors, thereAreErrors, clearErrors, setErrors, ErrorsBar } = useErrors()
+	const { PopsBar, shamefulFailure, greatSuccess, clearPops } = usePops()
 	const clearPassword = () => {
 		setFormInputs(f => ({ ...f, password: "" }))
 	}
@@ -28,7 +24,7 @@ const Login = () => {
 	const { cameFrom } = location.state || { cameFrom: null };
 	const navigate = useNavigate();
 	const handleUpdate = (e) => {
-		clearErrors();
+		clearPops();
 		const field = e.target.name;
 		const value = e.target.value;
 		setFormInputs((f) => {
@@ -49,11 +45,10 @@ const Login = () => {
 			}),
 		};
 		const result = await fetch("/auth/login", reqOptions);
-		const data = await catchErrors(result, (e) => { setErrors([e]) });
+		const data = await catchErrors(result, (e) => { setFormInputs(f => ({ ...f, password: "" })); shamefulFailure("SHAME!", e.message) });
 		if (data) {
 			const userData = await data.json();
 			auth.logIn(userData.token, userData.user)
-			// storeToken(data.token);
 			navigate(cameFrom || "/");
 		}
 	}
@@ -68,10 +63,12 @@ const Login = () => {
 					placeholder="username"
 					onChange={handleUpdate}
 					value={formInputs.username}
+					required
 				/>
 				<LoginField
 					type="password"
 					onChange={handleUpdate}
+					required
 					name="password"
 					id="passwordInput"
 					placeholder="password"
@@ -81,7 +78,7 @@ const Login = () => {
 			</div>
 		</form>
 
-			<ErrorsBar />
+			<PopsBar />
 		</>
 	);
 };
