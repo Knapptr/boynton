@@ -11,7 +11,6 @@ module.exports = {
 			id integer NOT NULL,
 			pronouns character varying(255),
 			gender character varying(255) COLLATE pg_catalog."default",
-			sessions character varying(255) COLLATE pg_catalog."default",
 			age integer,
 			CONSTRAINT camper_pkey PRIMARY KEY (id)
 			)

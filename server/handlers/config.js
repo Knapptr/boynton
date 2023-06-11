@@ -1,4 +1,4 @@
-const { body, validationResult } = require("express-validator");
+const { body } = require("express-validator");
 const Cabin = require("../../models/cabin");
 const Config = require("../../models/config");
 const User = require("../../models/User");
@@ -8,6 +8,7 @@ module.exports = {
   create: [
     body("weeks").isArray(),
     body("weeks.*.number").isInt(),
+    body("weeks.*.display").optional().trim().isLength({ min: 1, max: 1 }),
     body("weeks.*.title").trim().notEmpty(),
     body("weeks.*.begins").trim().isDate({ format: "YYYY-MM-DD" }),
     body("weeks.*.ends").trim().isDate({ format: "YYYY-MM-DD" }),
@@ -39,6 +40,11 @@ module.exports = {
     body("programAreas.*.name").trim().notEmpty(),
     handleValidation,
     async (req, res, next) => {
+      // backwards compatibility for 2022 config
+      if (req.body.display === undefined) {
+        req.body.display = req.body.number - 1;
+      }
+
       const config = await Config.load(req.body);
       console.log({ config });
       res.json(config);

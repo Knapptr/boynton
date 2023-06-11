@@ -25,3 +25,5 @@ frontend/src/pages/CabinAssignment.js
 dummyReport.csv
 /config.js
 configToJson.js
+2022.config.js
+2023.config.js

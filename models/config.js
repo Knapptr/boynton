@@ -32,8 +32,8 @@ const userToQuery = async (client, user) => {
     *@returns {Promise} the week query
 */
 const weekToQuery = (client, week) => {
-    const weekQuery = "INSERT INTO weeks (title,number,begins,ends) VALUES ($1,$2,$3,$4) ON CONFLICT DO NOTHING RETURNING *";
-    const values = [week.title, week.number, week.begins, week.ends];
+    const weekQuery = "INSERT INTO weeks (title,number,begins,ends,display) VALUES ($1,$2,$3,$4,$5) ON CONFLICT DO NOTHING RETURNING *";
+    const values = [week.title, week.number, week.begins, week.ends, week.display || week.number - 1];
     return client.query(weekQuery, values);
 }
 

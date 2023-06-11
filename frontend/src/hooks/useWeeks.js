@@ -82,7 +82,7 @@ const useWeeks = () => {
 				<ToggleButtonGroup onChange={handleWeekSelect} value={selectedWeekIndex} exclusive>
 					{weeks && weeks.map((w, wIndex) => (
 						<ToggleButton key={`week-select-${w.number}`} tw="bg-green-600 hover:bg-green-400" value={wIndex}>
-							{w.number}
+							{w.display}
 						</ToggleButton>
 					))}
 				</ToggleButtonGroup>
@@ -92,18 +92,28 @@ const useWeeks = () => {
 	}
 
 	const DaySelection = ({ noLabel, labelElement }) => {
+		const [open, setOpen] = useState(false);
+		useEffect(() => {
+			if (selectedWeek()) {
+				setOpen(true)
+			} else {
+				setOpen(false)
+			}
+		})
 		return (<Box >
-			<Stack direction="row" justifyContent="center" flexWrap="wrap" alignItems="center" width={1}>
-				{!noLabel && <Typography variant="p" component="h4" >Day</Typography>}
-				{labelElement}
-				<ToggleButtonGroup onChange={handleDaySelect} value={selectedDayIndex} exclusive>
-					{selectedWeek() && selectedWeek().days.map((d, dIndex) => (
-						<ToggleButton key={`week-select-${d.id}`} tw="bg-green-600 hover:bg-green-400" value={dIndex}>
-							{d.name}
-						</ToggleButton>
-					))}
-				</ToggleButtonGroup>
-			</Stack>
+			<Fade in={open}>
+				<Stack direction="row" justifyContent="center" flexWrap="wrap" alignItems="center" width={1}>
+					{!noLabel && <Typography variant="p" component="h4" >Day</Typography>}
+					{labelElement}
+					<ToggleButtonGroup onChange={handleDaySelect} value={selectedDayIndex} exclusive>
+						{selectedWeek() && selectedWeek().days.map((d, dIndex) => (
+							<ToggleButton key={`week-select-${d.id}`} tw="bg-green-600 hover:bg-green-400" value={dIndex}>
+								{d.name}
+							</ToggleButton>
+						))}
+					</ToggleButtonGroup>
+				</Stack>
+			</Fade>
 
 		</Box>)
 	}

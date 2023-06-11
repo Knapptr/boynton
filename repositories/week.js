@@ -8,6 +8,7 @@ const weekRepository = {
         CREATE TABLE IF NOT EXISTS weeks
         (
         "number" integer NOT NULL,
+        display CHARACTER VARYING(1) NOT NULL,
         title character varying(255) COLLATE pg_catalog."default" NOT NULL,
         begins DATE NOT NULL,
         ends DATE NOT NULL,
@@ -32,6 +33,7 @@ const weekRepository = {
       const currentWeek = weeks.at(-1) && weeks.at(-1).number === response.number ? weeks.pop() : {
         title: response.title,
         number: response.number,
+        display: response.display,
         begins: response.begins,
         ends: response.ends,
         days: []
@@ -82,6 +84,7 @@ const weekRepository = {
     const query = !getStaff ? `SELECT 
     w.title AS title,
       w.number AS number,
+      w.display as display,
       w.begins as begins,
       w.ends as ends,
       d.id AS day_id,
@@ -103,6 +106,7 @@ const weekRepository = {
     SELECT 
     w.title AS title,
       w.number AS number,
+      w.display AS display,
       w.begins as begins,
       w.ends as ends,
       d.id AS day_id,
@@ -138,6 +142,7 @@ const weekRepository = {
     const query = `SELECT 
     w.title AS title,
       w.number AS number,
+      w.display AS display,
       w.begins as begins,
       w.ends as ends,
       d.id AS day_id,
@@ -159,6 +164,7 @@ const weekRepository = {
     const query = !getStaff ? `SELECT 
     w.title AS title,
       w.number AS number,
+      w.display AS display,
       w.begins as begins,
       w.ends as ends,
       d.id AS day_id,
@@ -180,6 +186,7 @@ const weekRepository = {
     SELECT 
     w.title AS title,
       w.number AS number,
+      w.display AS display,
       w.begins as begins,
       w.ends as ends
       d.id AS day_id,
@@ -217,9 +224,9 @@ const weekRepository = {
     const deletedWeek = await fetchOne(query, values);
     return deletedWeek;
   },
-  async create({ title, number, begins, ends }) {
-    const weekQuery = `INSERT INTO weeks (title,number,begins,ends) VALUES ($1,$2,$3,$4) RETURNING *`;
-    const weekValues = [title, number, begins, ends];
+  async create({ title, number, begins, ends, display }) {
+    const weekQuery = `INSERT INTO weeks (title,number,begins,ends,display) VALUES ($1,$2,$3,$4,$5) RETURNING *`;
+    const weekValues = [title, number, begins, ends, display];
     const insertWeekResponse = await fetchOne(weekQuery, weekValues);
     if (insertWeekResponse) {
       insertWeekResponse.days = [];

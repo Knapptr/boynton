@@ -4,9 +4,10 @@ const defaultWeekRepository = require("../repositories/week");
 const { fetchOne } = require("../utils/pgWrapper");
 
 class Week {
-	constructor({ title, begins, ends, number, days = [] }, weekRepository = defaultWeekRepository) {
+	constructor({ title, begins, ends, number, days = [], display }, weekRepository = defaultWeekRepository) {
 		if (!title || !number) { throw new Error("Cannot create Week, title,number required") }
 		this.title = title;
+		this.display = display || number - 1 // To handle "Taste of camp"
 		this.days = days;
 		this.number = number;
 		this._weekRepository = weekRepository;
@@ -19,7 +20,8 @@ class Week {
 			number: this.number,
 			days: this.days,
 			begins: this.begins,
-			ends: this.ends
+			ends: this.ends,
+			display: this.display
 		}
 	}
 	async delete() {
