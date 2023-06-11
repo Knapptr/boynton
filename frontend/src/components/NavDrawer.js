@@ -1,6 +1,6 @@
 import tw, { styled } from "twin.macro";
 import "styled-components/macro";
-import { Link, AppBar, CssBaseline, Divider, Drawer, List, ListItem, ListItemButton, ListItemText, Toolbar, Typography, Button, Menu, MenuItem } from "@mui/material";
+import { Link, AppBar, CssBaseline, Divider, Drawer, List, ListItem, ListItemButton, ListItemText, Toolbar, Typography, Button, Menu, Container, MenuItem } from "@mui/material";
 import { useLocation } from "react-router-dom";
 import ParkTwoToneIcon from '@mui/icons-material/ParkTwoTone';
 import { Box } from "@mui/system";
@@ -45,13 +45,13 @@ const NavContextLinkList = ({ active, to, item }) => {
 
 const NavContextLinkButton = ({ active, to, item }) => {
   return (
-    <Button href={to} tw="my-2 mx-2" sx={{ color: "white" }} disabled={active} key={item.name} >
+    <Button href={to} sx={{ color: "white" }} disabled={active} key={item.name} >
       {item.name}
     </Button>
   )
 }
 const NavMenuButton = ({ children, onClick }) => {
-  return (<Button sx={{ color: "white" }} onClick={onClick} tw="my-2 mx-2" >
+  return (<Button sx={{ color: "white" }} onClick={onClick}  >
     {children}
   </Button >)
 }
@@ -136,17 +136,24 @@ function NavDrawer(props) {
   };
 
   const drawer = (
-    <Box onClick={handleDrawerToggle} >
+    <Box onClick={handleDrawerToggle}  >
       <List >
         <DrawerNav items={navItems} />
       </List>
-      <Divider tw="" />
+      <Divider />
       <DrawerNav items={regMenuItems} auth={auth} />
-      <Divider tw="" />
+      <Divider />
       <DrawerNav items={adminNavItems} auth={auth} />
-      <div tw="w-full flex justify-center mt-24">
-        <button tw="" onClick={auth.logOut}><span >Log Out</span></button>
-      </div>
+      <Box
+        sx={{ display: 'flex', width: "100%", justifyContent: "center", marginTop: "4rem" }}
+      >
+        <Button
+          variant="outlined"
+          color="warning"
+          onClick={auth.logOut}>
+          Log Out
+        </Button>
+      </Box>
     </Box >
   );
 
@@ -154,25 +161,43 @@ function NavDrawer(props) {
 
   return (
     <>
-      <AppBar position="sticky" component="nav" >
-        <Box width={1}>
+      <AppBar position="sticky" component="nav" sx={{ marginBottom: "2rem" }}>
+        <Box width="100%">
           <Toolbar>
-            <Button href="/" size="large" sx={{ marginRight: "auto", color: "black", fontSize: "2rem" }} startIcon={<ParkTwoToneIcon />} >Boynton</Button>
+            <Button
+              href="/"
+              size="large"
+              sx={{
+                marginRight: "auto",
+                color: "black",
+                fontSize: "2rem",
+              }}
+              startIcon={<ParkTwoToneIcon />} >
+              Boynton
+            </Button>
+
             <IconButton
               color="inherit"
               aria-label="open drawer"
               edge="start"
               onClick={handleDrawerToggle}
+              sx={{ display: { md: 'none' } }}
             >
               <MenuIcon />
             </IconButton>
-            <Box >
+            <Box
+              sx={{ display: { xs: 'none', md: 'block' } }}
+            >
               {navItems.map((item) => (
                 <NavContextLinkButton key={`appbar-link-${item.name}`} item={item} active={location.pathname.startsWith(item.url)} to={item.url} />
               ))}
               <MenuNav auth={auth} title="Scheduling" items={regMenuItems} />
               <MenuNav auth={auth} title="Admin" items={adminNavItems} />
-              <Button onClick={auth.logOut} variant="outlined" color="warning" >Log Out </Button>
+              <Button
+                sx={{ marginLeft: "2rem" }}
+                onClick={auth.logOut}
+                variant="outlined"
+                color="warning" >Log Out </Button>
             </Box>
           </Toolbar>
         </Box>

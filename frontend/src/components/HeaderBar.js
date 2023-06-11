@@ -11,7 +11,6 @@ import NavDrawer from "./NavDrawer";
 const HeaderBar = () => {
   return (<>
     <NavDrawer />
-    <h1 tw="z-50 text-white bg-red-600 font-bold"> DEV FRONTEND</h1>
   </>)
 }
 const OldHeaderBar = () => {
