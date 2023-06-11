@@ -1,8 +1,6 @@
-import tw from "twin.macro";
-import "styled-components/macro";
 import { useNavigate } from "react-router-dom";
 import catchErrors from "../utils/fetchErrorHandling";
-import { Container, Autocomplete, Paper, TextField, Typography, Select, MenuItem, FormControl, InputLabel, ToggleButtonGroup, ToggleButton } from "@mui/material"
+import { Container, Autocomplete, Paper, TextField, Typography, Select, MenuItem, FormControl, InputLabel, ToggleButtonGroup, ToggleButton, Button } from "@mui/material"
 import { useState, useContext, useCallback, useEffect } from "react";
 import { Box, Stack } from "@mui/system";
 import UserContext from "../components/UserContext"
@@ -89,17 +87,19 @@ const CreateAward = () => {
 
   return <>
     <WeekSelection />
-    <Container maxWidth="md" tw="mt-8">
+    <Container maxWidth="md">
       {selectedWeek && campers &&
-        <Paper tw="py-4" elevation={4} >
+        <Paper elevation={4} sx={{ paddingY: 4, paddingX: 2 }} >
           <Box component="header">
             <Typography variant="h4" component="h1">Give an Award</Typography>
             <Typography variant="h6" component="h2">A Camper really excelled.</Typography>
             <Typography variant="h6" component="h2"> Celebrate their achievement! </Typography>
+            <Typography variant="subtitle2" color="gray" component="p">You may award multiple campers the same award. You do not need to submit 1 form per camper.</Typography>
           </Box>
-          <Stack tw="px-4 py-2" spacing={2}>
+          <Box sx={{ mb: 4, width: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
             <Autocomplete
               multiple
+              sx={{ width: 11 / 12 }}
               options={campers}
               getOptionLabel={(opt) => `${opt.firstName} ${opt.lastName}`}
               value={selectedField}
@@ -112,31 +112,28 @@ const CreateAward = () => {
               }}
               renderInput={(params) => <TextField {...params} variant="standard" placeholder="Camper(s)" label="Awarded To" />}
             />
-            <Box component="div">
-              <Typography variant="subtitle2" component="p">You may award multiple campers the same award. You do not need to submit 1 form per camper.</Typography>
-            </Box>
-            <Stack spacing={2} direction={{ xs: "column", sm: "row" }}>
-              <TextField label="Awarded For" name="reason" onChange={handleFormChange} value={fields.reason} variant="outlined" tw="w-full" />
-              <FormControl tw="w-full">
-                <InputLabel id="awardTypeSelect" > Award Type </InputLabel>
-                <Select
-                  labelId="awardTypeSelect"
-                  label="Award Type"
-                  name="awardType"
-                  id="awardTSelect"
-                  onChange={handleFormChange}
-                  value={fields.awardType}
-                  tw="w-full text-left"
-                >
-                  {programAreas.map(a => {
-                    return <MenuItem key={`program-area-${a.id}`} value={a.id}>{a.name}</MenuItem>
-                  })}
-                </Select>
-              </FormControl>
-            </Stack>
+          </Box>
+          <Stack spacing={2} direction={{ xs: "column", sm: "row" }}>
+            <TextField label="Awarded For" name="reason" onChange={handleFormChange} value={fields.reason} variant="outlined" sx={{ width: 1 }} />
+            <FormControl >
+              <InputLabel id="awardTypeSelect" > Award Type </InputLabel>
+              <Select
+                labelId="awardTypeSelect"
+                label="Award Type"
+                name="awardType"
+                id="awardTSelect"
+                onChange={handleFormChange}
+                value={fields.awardType}
+
+              >
+                {programAreas.map(a => {
+                  return <MenuItem key={`program-area-${a.id}`} value={a.id}>{a.name}</MenuItem>
+                })}
+              </Select>
+            </FormControl>
           </Stack>
-          <Box>
-            <button onClick={handleFormSubmit} tw="bg-green-600 rounded p-3 text-white font-bold">Award!</button>
+          <Box marginTop={4}>
+            <Button onClick={handleFormSubmit} variant="contained" color="success">Award!</Button>
           </Box>
         </Paper>}
       <PopsBar />
