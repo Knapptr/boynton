@@ -12,7 +12,6 @@ import fetchWithToken from "../fetchWithToken";
 import AttendanceSearch from "../components/AttendanceSearch";
 import { Skeleton } from "@mui/material";
 import { Stack } from "@mui/system";
-import getDayName from "../utils/getDayname";
 
 // rate at which to update
 const refreshRate = 1000 * 2;
@@ -42,7 +41,7 @@ const AttendanceDisplay = () => {
       periodNumber: periodJson.number
     })
     setPeriod(periodJson);
-  }, [periodId, auth]);
+  }, [periodId, auth, setHeaderFields]);
 
   // Set period to undefined any time id changes
   useEffect(() => {

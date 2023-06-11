@@ -8,6 +8,8 @@ import { MenuSelector } from "../components/styled";
 import fetchWithToken from "../fetchWithToken";
 import { CabinGrid, CamperCol, CamperItem, PronounBadge } from "./CabinList";
 import sortCabins from "../sortCabins";
+import useWeeks from "../hooks/useWeeks";
+import { Typography } from "@mui/material";
 
 /** A helper to deal with the cabin list */
 const cabinSelections = {
@@ -19,13 +21,7 @@ const cabinSelections = {
 }
 
 const CabinListIndex = () => {
-  const [weeks] = useGetDataOnMount({
-    url: "/api/weeks",
-    useToken: true,
-    initialState: [],
-  });
-
-  const [selectedWeek, setSelectedWeek] = useState(null);
+  const { weeks, selectedWeek, WeekSelection } = useWeeks();
 
   const [cabinSessions, setCabinSessions] = useState([]);
 
@@ -35,13 +31,6 @@ const CabinListIndex = () => {
   const [unassignedCampers, setUnassignedCampers] = useState([]);
 
   const auth = useContext(UserContext);
-  /** Select a week */
-  const selectWeek = (week) => {
-    setCabinSessions([]);
-    setSelected(cabinSelections.none());
-    setSelectedWeek(week);
-  }
-
   /** Select cabin */
   const selectCabin = (selection) => {
     setSelected(s => (selection));
@@ -57,12 +46,12 @@ const CabinListIndex = () => {
   }
   /** Handle the selection of a week  */
   useEffect(() => {
-    if (selectedWeek !== null) {
+    if (selectedWeek() !== null) {
       /** Fetch cabin-sessions from api Defined here because of useEffect dependencies */
       const getCabinSessions = async () => {
 
         const csResponse = await fetchWithToken(
-          `/api/cabin-sessions?week=${selectedWeek.number}`,
+          `/api/cabin-sessions?week=${selectedWeek().number}`,
           {},
           auth
         );
@@ -88,19 +77,9 @@ const CabinListIndex = () => {
 
   return (
     <>
-      <ul tw="flex justify-center sm:justify-evenly gap-2 print:hidden">
-        {weeks.map((week) => {
-          return (
-            <li onClick={() => { selectWeek(week) }} key={`week-${week.number}`}>
-              <MenuSelector isSelected={selectedWeek && week.number === selectedWeek.number} >
-                <h2><span tw="hidden  sm:block">Week</span> {week.number} </h2><span tw="hidden sm:block text-xs font-thin">{week.title}</span>
-              </MenuSelector>
-            </li>
-          )
-        })}
-      </ul>
-      {selectedWeek && <h1>Week {selectedWeek.number}</h1>}
-      {selectedWeek && <h2 tw="font-thin">{selectedWeek.title}</h2>}
+      <WeekSelection />
+      {selectedWeek() && <h1>Week {selectedWeek().number}</h1>}
+      {selectedWeek() && <h2 tw="font-thin">{selectedWeek().title}</h2>}
 
       <ul tw="flex justify-center gap-1 flex-wrap mb-4 print:hidden">
         {cabinSessions.length > 0 &&

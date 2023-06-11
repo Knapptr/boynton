@@ -56,10 +56,10 @@ const CreateAward = () => {
   }, [auth])
 
   useEffect(() => {
-    if (selectedWeek) {
-      getCampers(selectedWeek);
+    if (selectedWeek()) {
+      getCampers(selectedWeek());
     }
-  }, [selectedWeek])
+  }, [selectedWeek, getCampers])
 
   const handleFormChange = (event) => {
     setFields(o => ({ ...o, [event.target.name]: event.target.value }))
@@ -88,8 +88,7 @@ const CreateAward = () => {
   }
 
   return <>
-    <WeekSelection labelElement={<Typography variant="h5" marginX={4} component="h3">Select Week</Typography>
-    } />
+    <WeekSelection />
     <Container maxWidth="md" tw="mt-8">
       {selectedWeek && campers &&
         <Paper tw="py-4" elevation={4} >

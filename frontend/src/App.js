@@ -39,7 +39,7 @@ function App() {
       <UserContext.Provider value={userState}>
         <BrowserRouter>
           <Routes>
-            <Route path="/login" element={<LoginPage />} />
+            <Route path="login" element={<LoginPage />} />
             <Route path="slay" element={<Slay />} />
             <Route
               path=""

@@ -10,17 +10,8 @@ import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import getDayName from "../utils/getDayname";
+import useWeeks from "../hooks/useWeeks";
 
-const allHaveBeenSelected = (selected) => {
-  if (
-    selected.week !== "none" &&
-    selected.day !== "none" &&
-    selected.period !== "none"
-  ) {
-    return true;
-  }
-  return false;
-};
 
 const SelectionHeader = ({ fields }) => {
 
@@ -36,50 +27,28 @@ const SelectionHeader = ({ fields }) => {
 
 const AttendanceIndex = () => {
   const location = useLocation();
-
-  const [schedule, setSchedule] = useGetDataOnMount({
-    url: "/api/weeks",
-    useToken: true,
-    initialState: [],
-  });
-
   const navigate = useNavigate();
-
-  const [selected, setSelected] = useState({
-    week: "none",
-    day: "none",
-    period: "none",
-  });
 
   const [headerFields, setHeaderFields] = useState(null);
 
-  const selectWeek = (week) => {
-    setSelected({ ...selected, week });
-  };
+  const { selectedWeek, clearSelection, selectedDay, selectedPeriod, WeekSelection, DaySelection, PeriodSelection } = useWeeks();
 
-  const selectDay = (day) => {
-    setSelected({ ...selected, day });
-  };
 
-  const selectPeriod = (period) => {
-    setSelected({ ...selected, period });
-  };
+
 
   useEffect(() => {
-    if (selected.period !== "none") {
-      const selectedPeriodId =
-        schedule[selected.week].days[selected.day].periods[selected.period].id;
+    if (selectedPeriod() !== null) {
       setShowAccordion(false);
-      navigate(`/schedule/attendance/${selectedPeriodId}`);
+      navigate(`/schedule/attendance/${selectedPeriod().id}`);
       setHeaderFields({
-        weekNumber: schedule[selected.week].number,
-        dayName: schedule[selected.week].days[selected.day].name,
-        periodNumber: schedule[selected.week].days[selected.day].periods[selected.period].number
+        weekNumber: selectedWeek().number,
+        dayName: selectedDay().name,
+        periodNumber: selectedPeriod().number
       })
-      setSelected({ week: "none", day: "none", period: "none" })
+      clearSelection();
 
     }
-  }, [selected, schedule, navigate]);
+  }, [clearSelection, selectedDay, selectedWeek, selectedPeriod, navigate]);
 
   const [showAccordion, setShowAccordion] = useState(false);
 
@@ -89,7 +58,7 @@ const AttendanceIndex = () => {
   return (
     <>
       <h1 tw="text-xl font-bold">Attendance</h1>
-      <Accordion tw="mb-6 shadow-none py-2 px-1 rounded bg-green-200 " expanded={location.pathname === "/schedule/attendance" || showAccordion} onChange={handleAccordionChange}>
+      <Accordion tw="mb-6 shadow-none py-2 px-1 rounded bg-green-200 w-8/12 " expanded={location.pathname === "/schedule/attendance" || showAccordion} onChange={handleAccordionChange}>
         <AccordionSummary
           expandIcon={location.pathname === "/schedule/attendance" ? <></> : <ExpandMoreIcon />}
           aria-controls="panel1a-content"
@@ -98,67 +67,9 @@ const AttendanceIndex = () => {
           <SelectionHeader fields={headerFields} />
         </AccordionSummary>
         <AccordionDetails>
-          <div tw="flex flex-col items-center gap-2">
-            <div tw="flex gap-2 items-center">
-              <h2>Week</h2>
-              <ul tw="flex justify-center gap-1" >
-                {schedule.map((week, weekIndex) => (
-                  <MenuSelector
-                    tw="px-4"
-                    onClick={() => selectWeek(weekIndex)}
-                    isSelected={selected.week === weekIndex}
-                  >
-                    <button>{week.number}</button>
-                  </MenuSelector>
-                ))}
-              </ul>
-            </div>
-            {selected.week !== "none" &&
-              (
-                <>
-
-                  <div tw="flex gap-2 items-center">
-                    <h2 tw="inline">Day</h2>
-                    <ul tw="flex gap-1 justify-center">
-                      {
-                        schedule[selected.week].days.map((day, dayIndex) => (
-                          <MenuSelector
-                            isSelected={selected.day === dayIndex}
-                            onClick={() => {
-                              selectDay(dayIndex);
-                            }}
-                          >
-                            <button>{toTitleCase(day.name)}</button>
-                          </MenuSelector>
-                        ))}
-                    </ul>
-                  </div>
-                </>
-              )}
-            {selected.day !== "none" &&
-              (
-                <>
-                  <div tw="flex gap-2 justify-center">
-                    <h2>Period</h2>
-                    <ul tw="flex justify-center gap-2">
-                      {
-                        schedule[selected.week].days[selected.day].periods.map(
-                          (period, periodIndex) => (
-                            <MenuSelector
-                              onClick={() => {
-                                selectPeriod(periodIndex);
-                              }}
-                              isSelected={periodIndex === selected.period}
-                            >
-                              <button>{period.number}</button>
-                            </MenuSelector>
-                          ))
-                      }
-                    </ul>
-                  </div>
-                </>
-              )}
-          </div>
+          <WeekSelection />
+          <DaySelection />
+          <PeriodSelection />
         </AccordionDetails>
       </Accordion>
       <Outlet context={{ setHeaderFields }} />

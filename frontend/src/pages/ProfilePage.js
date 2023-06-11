@@ -12,7 +12,7 @@ import useWeeks from "../hooks/useWeeks";
 const ScorePane = () => {
   const auth = useContext(UserContext);
   const [scores, setScores] = useState(null);
-  const { weeks, selectedWeek, WeekSelection } = useWeeks();
+  const { weeks, DaySelection, selectedWeek, WeekSelection, PeriodSelection } = useWeeks();
 
   const getScore = useCallback(async (weekNumber) => {
     const url = `/api/weeks/${weekNumber}/scores`;
@@ -22,8 +22,8 @@ const ScorePane = () => {
   }, [auth])
 
   useEffect(() => {
-    if (selectedWeek) {
-      getScore(selectedWeek.number);
+    if (selectedWeek()) {
+      getScore(selectedWeek().number);
     }
   }, [selectedWeek, getScore])
 
@@ -52,7 +52,7 @@ const ScorePane = () => {
         <Card>
           <Typography variant="h5" component="h4">Score Board</Typography>
           <WeekSelection labelElement={<Typography variant="p" component="h5" marginX={2}>Week</Typography>} />
-          {!scores && <Skeleton variant="rectangular" animation={false} height={400} />}
+
           {scores &&
             <>
               <TableContainer component={Paper}>

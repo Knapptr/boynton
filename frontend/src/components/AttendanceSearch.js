@@ -1,7 +1,7 @@
 import tw from "twin.macro";
 import "styled-components/macro";
 import { DialogBox, PopOut } from "./styled";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCircleXmark } from '@fortawesome/free-regular-svg-icons'
 import getDayName from "../utils/getDayname";
@@ -14,6 +14,13 @@ const AttendanceSearch = ({
 }) => {
   const [results, setResults] = useState([]);
   const [query, setQuery] = useState("");
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    if (shouldDisplay) {
+      inputRef.current.focus()
+    }
+  }, [shouldDisplay]);
 
   useEffect(() => {
     if (query === "") {
@@ -57,6 +64,7 @@ const AttendanceSearch = ({
         </header>
         <div tw="my-5">
           <input
+            ref={inputRef}
             placeholder="Enter Camper Name"
             onChange={handleChange}
             value={query}
