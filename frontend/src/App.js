@@ -35,7 +35,7 @@ import AttendanceIndex from "./pages/AttendanceIndex";
 function App() {
   const userState = useUserData();
   return (
-    <div className="App">
+    <div className="App" >
       <UserContext.Provider value={userState}>
         <BrowserRouter>
           <Routes>

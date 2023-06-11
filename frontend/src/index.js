@@ -3,11 +3,13 @@ import ReactDOM from "react-dom/client";
 import "./index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
-import { GlobalStyles } from "twin.macro";
 import CssBaseline from "@mui/material/CssBaseline";
+import { GlobalStyles } from "twin.macro";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "./theme"
 
+import { createTheme } from '@mui/material/styles';
+import { createGlobalStyle } from "styled-components";
 
 
 
@@ -17,11 +19,11 @@ root.render(
 	<>
 
 		<ThemeProvider theme={theme}>
-			<GlobalStyles />
 			<CssBaseline />
 			<App />
-
+			{/*<GlobalStyles /> */}
 		</ThemeProvider>
+
 
 	</>
 );

@@ -1,14 +1,84 @@
 import { useCallback, useContext, useEffect, useState } from "react";
+import AddIcon from '@mui/icons-material/Add';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import UserContext from "../components/UserContext";
 import fetchWithToken from "../fetchWithToken";
 import tw, { styled } from "twin.macro";
-import { Accordion, AccordionDetails, AccordionSummary, Box, Button, Card, Divider, List, ListItem, ListItemText, Paper, Skeleton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
+import { Accordion, AccordionDetails, AccordionSummary, Box, Button, Card, Dialog, DialogContent, DialogTitle, Divider, Fab, Fade, FormControl, FormGroup, List, ListItem, ListItemText, MenuItem, Paper, ScopedCssBaseline, Skeleton, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
 import "styled-components/macro";
-import { MenuSelector, NavBarLink, StaffBadge } from "../components/styled";
+import { CancelButton, ConfirmButton, MenuSelector, NavBarLink, StaffBadge } from "../components/styled";
 import useWeeks from "../hooks/useWeeks";
 
 
+const AddScoreDialog = ({ onClose, show, week }) => {
+  const TEAMS = ["Naumkeag", "Tahattawan"];
+  const auth = useContext(UserContext);
+
+  const fetchAddPoints = async () => {
+    const reqBody = { ...fields, weekNumber: week.number }
+    const url = "/api/scores";
+    const options = {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(reqBody)
+    }
+    const response = await fetchWithToken(url, options, auth)
+    const data = await response.json();
+  }
+
+  const handleSubmit = async () => {
+    await fetchAddPoints();
+    handleClose();
+  }
+
+  const initFields = { awardedFor: "", awardedTo: TEAMS[0], points: 0 }
+  const [fields, setFields] = useState(initFields)
+
+  const handleChange = (e) => {
+    setFields(f => ({ ...f, [e.target.name]: e.target.value }))
+  }
+
+  const allFieldsFilled = () => {
+    return fields.awardedFor.trim().length > 0 && fields.points > 0 && fields.awardedTo.trim().length > 0
+  }
+  const handleClose = () => {
+    onClose();
+    setFields(initFields);
+  }
+
+  return (week && <Dialog onClose={handleClose} open={show}>
+    <DialogTitle>Award Points: Week {week.display}</DialogTitle>
+    <DialogContent>
+
+      <Box component="form" autoComplete="off">
+        <FormControl>
+          <Stack direction="row" paddingY={2} gap={2}>
+            <TextField tw="min-w-[10rem]" value={fields.awardedTo} onChange={handleChange} name="awardedTo" id="outlined-basic" label="Team" variant="outlined" select
+
+            >
+              {TEAMS.map(team => <MenuItem value={team} key={`team-select-${team}`}>{team}</MenuItem>)}
+            </TextField>
+
+            <TextField name="points" value={fields.points} onChange={handleChange} inputProps={{ min: 1 }} id="outlined-basic" label="Points" type="number" variant="outlined" />
+
+          </Stack>
+          <div tw="w-full">
+            <TextField tw="w-full" name="awardedFor" value={fields.awardedFor} onChange={handleChange} id="outlined-basic" label="Reason" variant="outlined" />
+          </div>
+        </FormControl>
+      </Box>
+      <Box display="flex" justifyContent="space-around" marginY={2}>
+        <CancelButton onClick={handleClose}>Cancel</CancelButton>
+        <ConfirmButton
+          enabled={allFieldsFilled()}
+          onClick={() => { if (allFieldsFilled()) { handleSubmit() } }}>
+          Score!
+        </ConfirmButton>
+      </Box>
+    </DialogContent>
+
+  </Dialog >)
+}
 const ScorePane = () => {
   const auth = useContext(UserContext);
   const [scores, setScores] = useState(null);
@@ -46,13 +116,28 @@ const ScorePane = () => {
     return data;
   }
 
+  const [showAdd, setShowAdd] = useState(false);
+  const handleOpen = () => {
+    setShowAdd(true);
+  }
+  const handleClose = () => {
+    setShowAdd(false);
+  }
   return (
     <>
       <Box>
         <Card>
-          <Typography variant="h5" component="h4">Score Board</Typography>
-          <WeekSelection labelElement={<Typography variant="p" component="h5" marginX={2}>Week</Typography>} />
+          <Typography variant="h5" component="h4">2023 Scoreboard</Typography>
+          <Stack direction="row" alignItems="center" paddingX={2} marginBottom={1}>
+            <WeekSelection />
+            {/*Clashing MUI and Twin.macro wont allow for a 'Fab' (MUI) here as far as I can tell*/}
+            <button onClick={selectedWeek() && handleOpen} css={[tw`cursor-default bg-gray-100 rounded-full p-4 text-white ml-auto`, selectedWeek() && tw`cursor-pointer bg-green-600 hover:bg-green-800`]}><AddIcon /></button>
 
+          </Stack>
+          <AddScoreDialog show={showAdd} onClose={() => {
+            getScore(selectedWeek().number);
+            handleClose();
+          }} week={selectedWeek()} />
           {scores &&
             <>
               <TableContainer component={Paper}>
@@ -121,7 +206,7 @@ const ScorePane = () => {
             </>
           }
         </Card>
-      </Box>
+      </Box >
     </>
   )
 }
@@ -144,7 +229,7 @@ const ProfilePage = () => {
 
   useEffect(() => { handleGetUser() }, [handleGetUser]);
   return (
-    <div id="profilePage" tw="w-full">
+    <div id="profilePage" tw="w-full py-4 px-2 bg-coolGray-200">
       {userData &&
         <>
           <div id="userInfo" tw="mb-4">
@@ -158,9 +243,11 @@ const ProfilePage = () => {
               {userData.archery && <StaffBadge archery >Archery</StaffBadge>}
             </ul>
           </div>
-          <div tw="grid grid-cols-1 gap-1 sm:grid-cols-2">
-            <UserSchedule user={userData} sessions={userData.sessions} />
-            <div>
+          <div tw="flex gap-3 flex-col md:flex-row  ">
+            <div tw="w-full md:w-3/5">
+              <UserSchedule user={userData} sessions={userData.sessions} />
+            </div>
+            <div tw="w-full md:w-2/5">
               <ScorePane />
             </div>
           </div></>
@@ -174,14 +261,15 @@ const UserSchedule = ({ sessions, user }) => {
   const [selectedSession, setSelectedSession] = useState(null);
   const [currentSchedule, setCurrentSchedule] = useState(null);
 
-  const selectSession = (session) => {
-    setSelectedSession(session);
+  const handleSessionSelect = (e, value) => {
+    setSelectedSession(value)
   }
 
   useEffect(() => {
+    console.log({ selectedSession });
     if (selectedSession !== null) {
       const fetchSelected = async () => {
-        const url = `/api/users/${user.username}/schedule/${selectedSession.weekNumber}`
+        const url = `/api/users/${user.username}/schedule/${selectedSession}`
         const results = await fetchWithToken(url, {}, auth);
         if (results.status !== 200 && results.status !== 304) { console.log("Error handling needed profile schedule"); return; }
         const data = await results.json();
@@ -193,27 +281,50 @@ const UserSchedule = ({ sessions, user }) => {
 
   return (
     <>
-      <div>
-        <h1>My Schedule</h1>
-        <ul id="sessionSelect" tw="flex gap-1">
-          {sessions.map(session => (
-            <MenuSelector isSelected={selectedSession && selectedSession.id === session.id} onClick={() => { selectSession(session) }} >Week {session.weekNumber}</MenuSelector>
-          ))}
-        </ul>
-        {currentSchedule &&
-          <ul tw="flex flex-row flex-wrap gap-2 bg-stone-400 p-4">
-            {currentSchedule.map(day => (
-              <li><h2 tw="bg-amber-600 font-bold text-white">{day.name}</h2>
-                <ul tw="flex flex-col gap-1">
-                  {day.periods.map(p => (
-                    <li tw="even:bg-sky-200 odd:bg-sky-100 flex gap-2 p-1"><h3>Act {p.number}</h3><p tw="font-bold">{p.activityName}</p></li>
-                  ))}
-                </ul>
-              </li>
+      <Box>
+        <Card>
+          <Typography variant="h5" component="h4">My Schedule</Typography>
+          <ToggleButtonGroup
+            exclusive
+            onChange={handleSessionSelect}
+            value={selectedSession}
+          >
+            {sessions.map(session => (
+              <ToggleButton
+                key={`session-select-${session.weekNumber}}`}
+                value={session.weekNumber}
+              >
+                Week {session.weekNumber}
+              </ToggleButton>
             ))}
-          </ul>
-        }
-      </div>
+          </ToggleButtonGroup>
+          {currentSchedule &&
+            <Fade in={currentSchedule}>
+              <ul tw="flex flex-row flex-wrap gap-2 bg-green-800 p-4">
+                {currentSchedule.map(day => (
+                  <li tw="w-full">
+                    <TableContainer component={Paper}>
+                      <header><Typography variant="h5" component="h6">{day.name}</Typography></header>
+                      <Table>
+                        <TableHead>
+                          <TableRow>
+                            {day.periods.map(p => <TableCell>Act {p.number}</TableCell>)}
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          <TableRow>
+                            {day.periods.map(p => <TableCell>{p.activityName}</TableCell>)}
+                          </TableRow>
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  </li>
+                ))}
+              </ul>
+            </Fade>
+          }
+        </Card>
+      </Box>
     </>
   )
 }

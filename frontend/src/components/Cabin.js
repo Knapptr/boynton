@@ -26,6 +26,9 @@ const Cabin = ({ assign, session, allOpenState, unassignCamper, cabinsOnly }) =>
 
   /** Get min and max ages in cabin, ignoring FLs */
   const getMinMaxAge = () => {
+    if (session.campers.every(c => c.fl)) {
+      return { min: "FL", max: "ONLY" }
+    };
     // Cabins are sorted by age in the response, so iterate through until a non FL is found on each end
     let i = 0;
     let j = session.campers.length - 1;

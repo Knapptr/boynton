@@ -140,11 +140,15 @@ module.exports = {
     id serial NOT NULL,
     week_number integer NOT NULL,
     username CHARACTER VARYING NOT NULL,
+    cabin_assignment integer,
     CONSTRAINT pkey_staff_session PRIMARY KEY (id),
     CONSTRAINT week_relation FOREIGN KEY (week_number) REFERENCES weeks (number)
     ON UPDATE CASCADE
     ON DELETE CASCADE,
     CONSTRAINT user_relation FOREIGN KEY (username) REFERENCES users (username)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE,
+    CONSTRAINT fkey_cabin_assignment FOREIGN KEY (cabin_assignment) REFERENCES cabin_sessions (id)
     ON UPDATE CASCADE
     ON DELETE CASCADE
   )

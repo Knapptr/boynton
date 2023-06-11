@@ -42,8 +42,15 @@ module.exports = class User {
 
   static async get(username) {
     const query = `
-    SELECT u.*, ss.week_number as week_number, ss.id as staff_session_id from users u
+    SELECT 
+    u.*, 
+    cab.name as cabin_assignment,
+    cs.id as cabin_session_id,
+    ss.week_number as week_number, 
+    ss.id as staff_session_id from users u
     LEFT JOIN staff_sessions ss ON ss.username = u.username
+    LEFT JOIN cabin_sessions cs ON cs.id = ss.cabin_assignment
+    LEFT JOIN cabins cab ON cab.name = cs.cabin_name
     WHERE u.username = $1
     `;
     const values = [username];
@@ -83,7 +90,9 @@ module.exports = class User {
         mappedUser.sessions.push(
           {
             id: db.staff_session_id,
-            weekNumber: db.week_number
+            weekNumber: db.week_number,
+            cabinAssignment: db.cabin_assignment,
+            cabinSessionId: db.cabin_session_id
           }
         )
       }
@@ -99,9 +108,13 @@ module.exports = class User {
     SELECT 
     u.*,
     ss.id as staff_session_id,
-    ss.week_number as week_number
+    ss.week_number as week_number,
+    cab.name as cabin_assignment,
+    cs.id as cabin_session_id
     FROM users u
     LEFT JOIN staff_sessions ss ON ss.username = u.username
+    LEFT JOIN cabin_sessions cs ON cs.id = ss.cabin_assignment
+    LEFT JOIN cabins cab ON cab.name = cs.cabin_name
     ORDER BY last_name, first_name, username, ss.week_number
     `
     const results = await fetchMany(query);
@@ -125,7 +138,7 @@ module.exports = class User {
       };
 
       if (row.staff_session_id !== null) {
-        const session = { id: row.staff_session_id, weekNumber: row.week_number }
+        const session = { id: row.staff_session_id, weekNumber: row.week_number, cabinAssignment: row.cabin_assignment, cabinSessionId: row.cabin_session_id }
         currentUser.sessions.push(session);
       }
 

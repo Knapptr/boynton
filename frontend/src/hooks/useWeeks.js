@@ -12,14 +12,12 @@ const useWeeks = () => {
 	const [selectedPeriodIndex, setSelectedPeriodIndex] = useState(null);
 
 	const selectedWeek = useCallback(() => {
-		console.log({ selectedWeekIndex });
 		if (selectedWeekIndex === null) { return null };
 		return weeks[selectedWeekIndex];
 	}, [selectedWeekIndex, weeks])
 
 	const selectedDay = useCallback(() => {
 		if (selectedWeekIndex === null || selectedDayIndex === null) { return null };
-		console.log({ data: selectedWeek().days })
 		return selectedWeek().days[selectedDayIndex]
 	}, [selectedDayIndex, selectedWeekIndex, selectedWeek])
 
@@ -59,7 +57,7 @@ const useWeeks = () => {
 
 	//select current on load
 	useEffect(() => {
-		console.log("Running automagic")
+		// console.log("Running automagic")
 		/** Select the current week on load, if it exists
 			* @param weeks the weeks
 			* @returns the week OR false
@@ -77,7 +75,7 @@ const useWeeks = () => {
 	const WeekSelection = ({ noLabel, labelElement }) => {
 		return (<Box >
 			<Stack direction="row" justifyContent="center" flexWrap="wrap" alignItems="center" width={1}>
-				{!noLabel && <Typography variant="p" component="h4" >Week</Typography>}
+				{!noLabel && <Typography variant="p" component="h4" paddingX={2}>Week</Typography>}
 				{labelElement}
 				<ToggleButtonGroup onChange={handleWeekSelect} value={selectedWeekIndex} exclusive>
 					{weeks && weeks.map((w, wIndex) => (

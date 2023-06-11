@@ -46,7 +46,7 @@ class Score {
       const weekTotalQuery = "SELECT awarded_to, SUM(points) as total FROM scores  WHERE week_number = $1 GROUP BY awarded_to";
       const weekTotalResp = client.query(weekTotalQuery, values);
 
-      const weekEventsQuery = "SELECT awarded_at, awarded_to, awarded_for, points FROM scores  WHERE week_number = $1";
+      const weekEventsQuery = "SELECT awarded_at, awarded_to, awarded_for, points FROM scores  WHERE week_number = $1 ORDER BY id DESC";
       const weekEventsResp = client.query(weekEventsQuery, values);
 
       const [summerRes, weekTRes, weekLRes] = await Promise.all([summerResp, weekTotalResp, weekEventsResp]);

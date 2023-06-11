@@ -1,7 +1,8 @@
 import tw, { styled } from "twin.macro";
 import "styled-components/macro";
-import { AppBar, CssBaseline, Divider, Drawer, List, ListItem, ListItemButton, ListItemText, Toolbar, Typography, Button, Menu, MenuItem } from "@mui/material";
-import { Link, NavLink, useLocation } from "react-router-dom";
+import { Link, AppBar, CssBaseline, Divider, Drawer, List, ListItem, ListItemButton, ListItemText, Toolbar, Typography, Button, Menu, MenuItem } from "@mui/material";
+import { useLocation } from "react-router-dom";
+import ParkTwoToneIcon from '@mui/icons-material/ParkTwoTone';
 import { Box } from "@mui/system";
 import { useContext, useState } from "react";
 import MenuIcon from '@mui/icons-material/Menu';
@@ -30,33 +31,27 @@ const regMenuItems = [
   { name: "Staff Scheduling", url: "/schedule/staff", reqRole: "programming" }
 ]
 
-const TAILWIND = { greenBg: "#17A34A", darkBg: "#091929" }
 
 const NavContextLinkList = ({ active, to, item }) => {
-  return (<Link to={to} >
-    <ListItem tw="my-2" css={[tw`bg-green-700 w-11/12 mx-auto`, active && tw`bg-amber-600`]} key={item.name}>
-      <ListItemButton tw="text-center">
-        <ListItemText primary={<p tw="text-white font-bold">{item.name}</p>} />
+  return (
+    <ListItem key={`link-${item.name}`}>
+      <ListItemButton hrey={item.url} >
+        <ListItemText color="success" primary={item.name} />
       </ListItemButton>
     </ListItem>
-  </Link>)
+  )
 }
 
-const DrawerItem = ({ children }) => {
-  return (<ListItem tw="my-2" css={[tw`bg-green-700`]} >
-    {children}
-  </ListItem>)
-}
 
 const NavContextLinkButton = ({ active, to, item }) => {
-  return (<Link to={to} >
-    <Button tw="my-2 mx-2" sx={{ color: "black" }} disabled={active} key={item.name} >
+  return (
+    <Button href={to} tw="my-2 mx-2" sx={{ color: "white" }} disabled={active} key={item.name} >
       {item.name}
     </Button>
-  </Link>)
+  )
 }
-const NavMenuButton = ({ children, onClick, background }) => {
-  return (<Button onClick={onClick} tw="my-2 mx-2" sx={{ color: "black", background }}>
+const NavMenuButton = ({ children, onClick }) => {
+  return (<Button sx={{ color: "white" }} onClick={onClick} tw="my-2 mx-2" >
     {children}
   </Button >)
 }
@@ -76,13 +71,13 @@ const MenuNav = ({ title, items, auth }) => {
 
     <>
       <NavMenuButton onClick={handleMenu}>
-        <p>{title}</p>
+        <Typography >{title}</Typography>
       </NavMenuButton>
       <Menu
         id="menu-appbar"
         anchorEl={anchorEl}
         anchorOrigin={{
-          vertical: 'top',
+          vertical: 'bottom',
           horizontal: 'left',
         }}
         keepMounted
@@ -94,7 +89,7 @@ const MenuNav = ({ title, items, auth }) => {
         onClose={handleClose}
       >
         {prepareRoleMenuItems(items, auth).map(item =>
-          <MenuItem onClick={handleClose}><Link to={item.url}>{item.name}</Link></MenuItem>
+          <MenuItem key={`menu-item-${item.name}`} onClick={handleClose}><Button href={item.url}>{item.name}</Button></MenuItem>
         )}
       </Menu>
     </>
@@ -104,9 +99,9 @@ const MenuNav = ({ title, items, auth }) => {
 const DrawerNav = ({ items, auth }) => {
   return (<List>
     {prepareRoleMenuItems(items, auth).map(item => {
-      return (<Link to={item.url} tw=""><ListItem tw="my-2" css={[tw`bg-green-700 w-11/12 mx-auto`]} key={item.name}>
-        <ListItemText primary={<p tw="text-center text-white font-bold">{item.name}</p>} />
-      </ListItem></Link>)
+      return (<ListItem key={item.name}>
+        <ListItemButton component={Button} href={item.url} ><ListItemText primary={item.name} /></ListItemButton>
+      </ListItem>)
     })}
   </List>
   )
@@ -141,25 +136,16 @@ function NavDrawer(props) {
   };
 
   const drawer = (
-    <Box sx={{ background: TAILWIND.darkBg }} onClick={handleDrawerToggle} >
-
-      <Link to="/">
-        <Typography variant="h6" align="center" tw="mx-2 text-white font-bold">
-          Boynton
-        </Typography>
-      </Link>
-      <Divider tw="bg-green-500 my-4" />
+    <Box onClick={handleDrawerToggle} >
       <List >
-        {navItems.map((item) => (
-          <NavContextLinkList key={`drawer-link-${item.name}`} item={item} active={location.pathname.startsWith(item.url)} to={item.url} />
-        ))}
+        <DrawerNav items={navItems} />
       </List>
-      <Divider tw="bg-green-500" />
+      <Divider tw="" />
       <DrawerNav items={regMenuItems} auth={auth} />
-      <Divider tw="bg-green-500" />
+      <Divider tw="" />
       <DrawerNav items={adminNavItems} auth={auth} />
       <div tw="w-full flex justify-center mt-24">
-        <button tw=" rounded w-9/12 bg-red-600 py-4 text-white font-bold hover:bg-red-700" onClick={auth.logOut}><span >Log Out</span></button>
+        <button tw="" onClick={auth.logOut}><span >Log Out</span></button>
       </div>
     </Box >
   );
@@ -168,38 +154,28 @@ function NavDrawer(props) {
 
   return (
     <>
-      <AppBar position="sticky" component="nav" tw="bg-green-600">
-        <div tw="w-full max-w-7xl mx-auto flex justify-center">
-          <Toolbar tw="w-full">
-            <Link
-              tw="mr-auto block"
-              to="/">
-              <Typography
-                variant="h5"
-                component="div"
-              >
-                Boynton
-              </Typography>
-            </Link>
+      <AppBar position="sticky" component="nav" >
+        <Box width={1}>
+          <Toolbar>
+            <Button href="/" size="large" sx={{ marginRight: "auto", color: "black", fontSize: "2rem" }} startIcon={<ParkTwoToneIcon />} >Boynton</Button>
             <IconButton
               color="inherit"
               aria-label="open drawer"
               edge="start"
               onClick={handleDrawerToggle}
-              tw="mr-2 block md:hidden"
             >
               <MenuIcon />
             </IconButton>
-            <Box tw="ml-auto hidden md:block " >
+            <Box >
               {navItems.map((item) => (
                 <NavContextLinkButton key={`appbar-link-${item.name}`} item={item} active={location.pathname.startsWith(item.url)} to={item.url} />
               ))}
               <MenuNav auth={auth} title="Scheduling" items={regMenuItems} />
               <MenuNav auth={auth} title="Admin" items={adminNavItems} />
-              <NavMenuButton onClick={auth.logOut} >Log Out </NavMenuButton>
+              <Button onClick={auth.logOut} variant="outlined" color="warning" >Log Out </Button>
             </Box>
           </Toolbar>
-        </div>
+        </Box>
       </AppBar>
       <Box component="nav">
         <Drawer
@@ -211,9 +187,8 @@ function NavDrawer(props) {
           ModalProps={{
             keepMounted: true, // Better open performance on mobile.
           }}
-          tw="block md:hidden"
           sx={{
-            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth, background: TAILWIND.darkBg },
+            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
           }}
         >
           {drawer}

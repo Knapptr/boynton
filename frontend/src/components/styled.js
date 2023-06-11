@@ -7,7 +7,7 @@ export const AssignmentHeader = styled.header(() => [
 ]);
 
 export const CancelButton = styled.button(() => [tw`bg-red-400 py-2 px-4 rounded`]);
-export const ConfirmButton = styled.button(({ enabled }) => [tw`cursor-default bg-gray-400 py-2 px-4 rounded`, enabled && tw`bg-green-400 cursor-pointer`]);
+export const ConfirmButton = styled.button(({ enabled, ml }) => [tw`cursor-default bg-gray-400 py-2 px-4 rounded`, enabled && tw`bg-green-400 cursor-pointer`, ml && tw`ml-auto`]);
 
 const NavBarLinkColors = {
   blue: tw`bg-blue-300`,

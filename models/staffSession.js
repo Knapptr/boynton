@@ -5,6 +5,8 @@ const StaffSession = {
     async get(id) {
         const query = `SELECT 
         ss.id as staff_session_id,
+        cab.name as cabin_assignment_name,
+        cs.id as cabin_session_id,
         u.username,
         u.last_name,
         u.first_name,
@@ -14,6 +16,8 @@ const StaffSession = {
         u.first_year
         FROM staff_sessions ss
         JOIN users u ON u.username = ss.username
+        LEFT JOIN cabin_sessions cs ON ss.cabin_assignment = cs.id
+        LEFT JOIN cabins cab ON cab.name = cs.cabin_name
         WHERE ss.id = $1
         `
         const values = [id];
@@ -28,12 +32,15 @@ const StaffSession = {
             ropes: response.ropes,
             senior: response.senior,
             firstYear: response.first_year,
+            cabinAssignment: response.cabin_assignment,
             staffSessionId: response.staff_session_id
         }
     },
     async getSome(idList) {
         const query = `SELECT 
         ss.id as staff_session_id,
+        cs.id as cabin_session_id,
+        cab.name as cabin_assignment_name,
         u.username,
         u.last_name,
         u.first_name,
@@ -43,6 +50,8 @@ const StaffSession = {
         u.first_year
         FROM staff_sessions ss
         JOIN users u ON u.username = ss.username
+        LEFT JOIN cabin_sessions cs ON cs.id = ss.cabin_assignment
+        LEFT JOIN cabins cab ON cab.name = cs.cabin_name
         WHERE ss.id = ANY ($1)`
         const values = [idList];
         console.log({ query, values });
@@ -65,6 +74,8 @@ const StaffSession = {
             SELECT 
             ss.id AS staff_session_id,
             u.username,
+            cab.name as cabin_assignment_name,
+            cs.id as cabin_session_id,
             u.first_name,
             u.last_name,
             u.lifeguard,
@@ -74,6 +85,8 @@ const StaffSession = {
             u.first_year
             FROM staff_sessions ss
             JOIN users u ON u.username = ss.username
+            LEFT JOIN cabin_sessions cs ON cs.id = ss.cabin_assignment
+            LEFT JOIN cabins cab ON cab.name = cs.cabin_name
             WHERE ss.week_number IN
             (SELECT d.week_id FROM days d JOIN periods p ON p.day_id = d.id WHERE p.id=$1)
             AND ss.id NOT IN
@@ -109,6 +122,8 @@ const StaffSession = {
         return results.map(r => ({
             username: r.username,
             firstName: r.first_name,
+            cabinAssignment: r.cabin_assignment_name,
+            cabinSessionId: r.cabin_session_id,
             lastName: r.last_name,
             lifeguard: r.lifeguard,
             archery: r.archery,
