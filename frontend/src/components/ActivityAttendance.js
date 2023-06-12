@@ -24,14 +24,14 @@ import RemoveCircleFilledIcon from "@mui/icons-material/RemoveCircleOutlined";
 import RemoveCircleEmptyIcon from "@mui/icons-material/RemoveCircleOutlineOutlined";
 
 const AttendantWrapper = styled(Box)(
-  ({ theme, children, isSelected, isChecked, index }) => ({
-    backgroundColor: isChecked
+  ({ theme, children, selected, checked, index }) => ({
+    backgroundColor: checked
       ? theme.palette.primary.main
       : index % 2 === 0
       ? theme.palette.background.paper
       : theme.palette.background.alt,
     marginTop: 3,
-    color: isChecked ? "white" : "black",
+    color: checked ? "white" : "black",
     fontWeight: "bold",
   })
 );
@@ -88,8 +88,8 @@ const CamperAttendant = ({
   return (
     <AttendantWrapper
       index={camperIndex}
-      isChecked={camper.isPresent}
-      isSelected={camperSelection.isSelected(camper)}
+      checked={camper.isPresent}
+      selected={camperSelection.isSelected(camper)}
     >
       <Container maxWidth="sm">
         <Grid container>
@@ -186,12 +186,11 @@ const ActivityAttendance = ({
             <Box mt={1}>
               <Grid container>
                 {activity.staff.map((staffer) => (
-                  <Grid item xs={4}>
+                  <Grid key={`staffer-${staffer.staffSessionId}`} item xs={4}>
                     <Chip
                       label={`${staffer.firstName} ${staffer.lastName[0]}`}
                       size="small"
                       color="primary"
-                      key={`staff-chip-${staffer.id}`}
                     />
                   </Grid>
                 ))}

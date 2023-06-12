@@ -45,7 +45,6 @@ const ActivitySelectors = ({
     All
     </ActivityToggleButton>
       {period.activities.map((act, index) => (
-        <>
         <ActivityToggleButton
 
         value={index}
@@ -57,7 +56,6 @@ const ActivitySelectors = ({
         >
           {act.name}
         </ActivityToggleButton>
-        </>
       ))}
     </ToggleButtonGroup>
     </Badge>

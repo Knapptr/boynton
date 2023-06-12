@@ -98,6 +98,7 @@ const AttendanceDisplay = () => {
     return () => {
       clearInterval(intervalRef.current);
       clearTimeout(timeoutRef.current);
+      abortControllerRef.current?.abort();
     };
   }, [startTimer, userInput]);
 
@@ -245,16 +246,16 @@ const AttendanceDisplay = () => {
         selectedCampers={selectedCampers}
         camperSelection={camperSelection}
         setDisplayModal={setShowReassignModal}
+        displayModal = {showReassignModal}
       />
-      {showReassignModal && selectedCampers.length > 0 && (
         <ReassignModal
           selectedCampers={selectedCampers}
+          show={showReassignModal && selectedCampers.length > 0}
           period={period}
           setDisplayModal={setShowReassignModal}
           updatePeriod={getPeriod}
           camperSelection={camperSelection}
         />
-      )}
     </>
   );
 };
