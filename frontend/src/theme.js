@@ -61,7 +61,9 @@ const theme = createTheme({
       //default: "#E2EEE7",
       default: "#D3E8D7",
       paper: '#ccd6ac',
-      alt: "#D6D0AC"
+      alt: "#D6D0AC",
+      alt2: "#9f9538"
+      
     },
     warning: {
       main: '#ed7002',

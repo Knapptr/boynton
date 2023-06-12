@@ -143,7 +143,7 @@ const useWeeks = () => {
 		</Box>)
 	}
 
-	return { weeks, clearSelection, WeekSelection, DaySelection, PeriodSelection, selectedWeek, selectedDay, selectedPeriod, setWeeks, };
+	return {isSelected: selectedWeekIndex !== null, weeks, clearSelection, WeekSelection, DaySelection, PeriodSelection, selectedWeek, selectedDay, selectedPeriod, setWeeks, };
 }
 
 export default useWeeks;

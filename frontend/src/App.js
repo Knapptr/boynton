@@ -8,9 +8,6 @@ import NavWrapper from "./components/NavWrapper";
 import Protected from "./components/Protected";
 import Dashboard from "./pages/dashboard";
 import UserContext, { useUserData } from "./components/UserContext";
-import CabinListPage from "./pages/CabinList";
-import tw from "twin.macro";
-import "styled-components/macro";
 import CabinListIndex from "./pages/CabinListIndex";
 import Scoreboard from "./pages/Scoreboard";
 import Score from "./components/Score"
