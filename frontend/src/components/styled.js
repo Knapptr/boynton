@@ -2,6 +2,7 @@ import tw, { styled } from "twin.macro";
 import "styled-components/macro";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleXmark } from "@fortawesome/free-regular-svg-icons";
+import { Chip } from "@mui/material";
 export const AssignmentHeader = styled.header(() => [
   tw`sticky top-0 items-center flex justify-between flex-grow md:flex-grow-0 rounded p-2 text-white align-baseline bg-sky-500`,
 ]);
@@ -60,15 +61,10 @@ export const DialogBox = ({ close, children, scrollable, full }) => <DialogBoxBo
   <button tw="absolute top-1 right-3" onClick={close}><FontAwesomeIcon size="xl" icon={faCircleXmark} /></button>
   {children}</DialogBoxBox>
 
-export const StaffBadge = styled.li(({ hideSmall, firstYear, senior, ropes, archery, lifeguard }) => [
-  tw`inline rounded-full sm:inline text-xs bg-gray-50 font-bold p-1 `,
-  firstYear && tw`text-green-500`,
-  senior && tw`text-black`,
-  lifeguard && tw`text-red-500`,
-  ropes && tw`text-amber-500`,
-  archery && tw`text-yellow-500`,
-  hideSmall && tw`hidden`
-])
+export const StaffBadge = styled(Chip)(({theme,type, firstYear, senior, ropes, archery, lifeguard }) => ({
+  color: theme.palette.badges[type],
+  fontWeight: "bold",
+}))
 
 export const StaffListing = ({ staffer, fullName, isSelected, removeable, remove, selectable }) => {
   return (

@@ -3,7 +3,6 @@ import AddIcon from "@mui/icons-material/Add";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import UserContext from "../components/UserContext";
 import fetchWithToken from "../fetchWithToken";
-import tw, { styled } from "twin.macro";
 import {
   Accordion,
   AccordionDetails,
@@ -11,6 +10,8 @@ import {
   Box,
   Button,
   Card,
+  CardContent,
+  Container,
   Dialog,
   DialogContent,
   DialogTitle,
@@ -18,14 +19,9 @@ import {
   Fab,
   Fade,
   FormControl,
-  FormGroup,
-  List,
-  ListItem,
-  ListItemText,
+  Grid,
   MenuItem,
   Paper,
-  ScopedCssBaseline,
-  Skeleton,
   Stack,
   Table,
   TableBody,
@@ -38,14 +34,7 @@ import {
   ToggleButtonGroup,
   Typography,
 } from "@mui/material";
-import "styled-components/macro";
-import {
-  CancelButton,
-  ConfirmButton,
-  MenuSelector,
-  NavBarLink,
-  StaffBadge,
-} from "../components/styled";
+import { StaffBadge } from "../components/styled";
 import useWeeks from "../hooks/useWeeks";
 
 const AddScoreDialog = ({ onClose, show, week }) => {
@@ -128,7 +117,6 @@ const AddScoreDialog = ({ onClose, show, week }) => {
               </Stack>
               <Box width={1}>
                 <TextField
-                  tw="w-full"
                   name="awardedFor"
                   value={fields.awardedFor}
                   onChange={handleChange}
@@ -225,16 +213,15 @@ const ScorePane = () => {
           >
             <WeekSelection />
             {/*Clashing MUI and Twin.macro wont allow for a 'Fab' (MUI) here as far as I can tell*/}
-            <button
+            <Fab
+              size="small"
+              color="success"
+              sx={{ marginLeft: "2rem" }}
+              disabled={!selectedWeek()}
               onClick={selectedWeek() && handleOpen}
-              css={[
-                tw`cursor-default bg-gray-100 rounded-full p-4 text-white ml-auto`,
-                selectedWeek() &&
-                  tw`cursor-pointer bg-green-600 hover:bg-green-800`,
-              ]}
             >
               <AddIcon />
-            </button>
+            </Fab>
           </Stack>
           <AddScoreDialog
             show={showAdd}
@@ -277,7 +264,7 @@ const ScorePane = () => {
                   <Typography>Week Details</Typography>
                 </AccordionSummary>
                 <AccordionDetails>
-                  <TableContainer tw="w-full max-h-32">
+                  <TableContainer>
                     <Table size="small" stickyHeader>
                       <TableHead>
                         <TableRow>
@@ -320,6 +307,21 @@ const ProfilePage = () => {
   const auth = useContext(UserContext);
   const [userData, setUserData] = useState(undefined);
 
+  const userBadges = () => {
+    if (!userData) {
+      return [];
+    }
+    const badges = [
+      { type: "senior", has: userData.senior, label: "Senior Staff" },
+      { type: "firstYear", has: userData.firstYear, label: "First Year" },
+      { type: "lifeguard", has: userData.lifeguard, label: "Lifeguard" },
+      { type: "ropes", has: userData.ropes, label: "Ropes Certified" },
+      { type: "archery", has: userData.archery, label: "Archery Certified" },
+    ];
+
+    return badges.filter((b) => b.has);
+  };
+
   const getUserData = useCallback(async () => {
     const url = `api/users/${auth.userData.user.username}`;
     const response = await fetchWithToken(url, {}, auth);
@@ -339,37 +341,64 @@ const ProfilePage = () => {
     handleGetUser();
   }, [handleGetUser]);
   return (
-    <div id="profilePage" tw="w-full py-4 px-2 bg-coolGray-200">
+    <Box id="profilePage" width={1} py={2} px={1}>
       {userData && (
         <>
-          <div id="userInfo" tw="mb-4">
-            <header tw="my-2">
-              <h1 tw="text-3xl font-bold">Hello, {userData.firstName}!</h1>
-            </header>
-
-            <ul tw="flex mx-auto w-fit [&>*]:bg-sky-100">
-              {userData.firstYear && (
-                <StaffBadge firstYear>First Year Staff</StaffBadge>
-              )}
-              {userData.senior && <StaffBadge senior>Senior Staff</StaffBadge>}
-              {userData.lifeguard && (
-                <StaffBadge lifeguard>Lifeguard</StaffBadge>
-              )}
-              {userData.ropes && <StaffBadge ropes>Ropes</StaffBadge>}
-              {userData.archery && <StaffBadge archery>Archery</StaffBadge>}
-            </ul>
-          </div>
-          <div tw="flex gap-3 flex-col md:flex-row  ">
-            <div tw="w-full md:w-3/5">
+          <Container maxWidth="md">
+            <Box component="header" marginBottom={4}>
+              <Card sx={{ paddingBottom: 1 }} elevation={4}>
+                <CardContent>
+                  <Box marginBottom={1}>
+                    <Typography
+                      variant="subtitle1"
+                      color="text.secondary"
+                      textAlign="left"
+                      component="h3"
+                    >
+                      {userData.username}
+                    </Typography>
+                    <Typography variant="h5" textAlign="left" component="h3">
+                      {userData.firstName} {userData.lastName}
+                    </Typography>
+                  </Box>
+                  <Divider color="secondary" sx={{ marginY: 1 }} />
+                  <Stack
+                    id="badgesList"
+                    direction="row"
+                    spacing={1}
+                    useFlexGap
+                    flexWrap="wrap"
+                    justifyContent="center"
+                    paddingX={2}
+                  >
+                    {userBadges().map((badge) => (
+                      <StaffBadge
+                        size="small"
+                        variant="outlined"
+                        type={badge.type}
+                        label={badge.label}
+                      />
+                    ))}
+                  </Stack>
+                </CardContent>
+              </Card>
+            </Box>
+          </Container>
+          <Grid
+            container
+            spacing={{ xs: 2, sm: 1, md: 2, lg: 3 }}
+            justifyContent="center"
+          >
+            <Grid item xs={12} sm={8} md={6} lg={8}>
               <UserSchedule user={userData} sessions={userData.sessions} />
-            </div>
-            <div tw="w-full md:w-2/5">
+            </Grid>
+            <Grid item xs={12} sm={8} md={6} lg={4}>
               <ScorePane />
-            </div>
-          </div>
+            </Grid>
+          </Grid>
         </>
       )}
-    </div>
+    </Box>
   );
 };
 
@@ -401,60 +430,56 @@ const UserSchedule = ({ sessions, user }) => {
 
   return (
     <>
-      <Box>
-        <Card>
-          <Typography variant="h5" component="h4">
-            My Schedule
-          </Typography>
-          <ToggleButtonGroup
-            exclusive
-            onChange={handleSessionSelect}
-            value={selectedSession}
-          >
-            {sessions.map((session) => (
-              <ToggleButton
-                key={`session-select-${session.weekNumber}}`}
-                value={session.weekNumber}
-              >
-                Week {session.weekNumber}
-              </ToggleButton>
-            ))}
-          </ToggleButtonGroup>
-          {currentSchedule && (
-            <Fade in={currentSchedule}>
-              <ul tw="flex flex-row flex-wrap gap-2 bg-green-800 p-4">
-                {currentSchedule.map((day) => (
-                  <li tw="w-full">
-                    <TableContainer component={Paper}>
-                      <header>
-                        <Typography variant="h5" component="h6">
-                          {day.name}
-                        </Typography>
-                      </header>
-                      <Table>
-                        <TableHead>
-                          <TableRow>
-                            {day.periods.map((p) => (
-                              <TableCell>Act {p.number}</TableCell>
-                            ))}
-                          </TableRow>
-                        </TableHead>
-                        <TableBody>
-                          <TableRow>
-                            {day.periods.map((p) => (
-                              <TableCell>{p.activityName}</TableCell>
-                            ))}
-                          </TableRow>
-                        </TableBody>
-                      </Table>
-                    </TableContainer>
-                  </li>
-                ))}
-              </ul>
-            </Fade>
-          )}
-        </Card>
-      </Box>
+      <Card sx={{ paddingY: 2, paddingX: 1 }}>
+        <Typography variant="h5" component="h4">
+          My Schedule
+        </Typography>
+        <ToggleButtonGroup
+          exclusive
+          onChange={handleSessionSelect}
+          value={selectedSession}
+        >
+          {sessions.map((session) => (
+            <ToggleButton
+              key={`session-select-${session.weekNumber}}`}
+              value={session.weekNumber}
+            >
+              Week {session.weekNumber}
+            </ToggleButton>
+          ))}
+        </ToggleButtonGroup>
+        {currentSchedule && (
+          <Fade in={currentSchedule}>
+            <Box>
+              {currentSchedule.map((day) => (
+                <TableContainer component={Paper}>
+                  <header>
+                    <Typography variant="h5" component="h6">
+                      {day.name}
+                    </Typography>
+                  </header>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        {day.periods.map((p) => (
+                          <TableCell>Act {p.number}</TableCell>
+                        ))}
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      <TableRow>
+                        {day.periods.map((p) => (
+                          <TableCell>{p.activityName}</TableCell>
+                        ))}
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              ))}
+            </Box>
+          </Fade>
+        )}
+      </Card>
     </>
   );
 };

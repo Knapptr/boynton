@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { Link as RouterLink, MemoryRouter } from 'react-router-dom';
 import { StaticRouter } from 'react-router-dom/server';
 import { createTheme } from '@mui/material/styles';
-import { green, grey, red } from "@mui/material/colors";
+import { brown, green, grey, red, yellow } from "@mui/material/colors";
 
 // Make The Button / MUI link work with React router nicely for fast page changes
 const LinkBehavior = React.forwardRef((props, ref) => {
@@ -70,7 +70,14 @@ const theme = createTheme({
     },
     error: {
       main: "#f44336"
-    }
+    },
+    badges: {
+      lifeguard: red[700],
+      archery: yellow[900],
+      ropes: brown[700],
+      firstYear: green[800],
+      senior: "black"
+    },
   },
   components: {
     MuiLink: { defaultProps: { component: LinkBehavior } },
