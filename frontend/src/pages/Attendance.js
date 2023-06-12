@@ -20,8 +20,10 @@ const refreshRate = 1000 * 2;
 // 8 Minutes after last user input, cancel updates
 const cancelIntervalTime = 1000 * 60 * 8;
 
+  
 const AttendanceDisplay = () => {
-  const { setHeaderFields } = useOutletContext();
+  const { setHeaderFields, hasHeaderFields } = useOutletContext();
+  const abortControllerRef = useRef(null);
   const { periodId } = useParams();
   const auth = useContext(UserContext);
   const [selected, setSelected] = useState(null);
@@ -34,16 +36,26 @@ const AttendanceDisplay = () => {
   const intervalRef = useRef(null);
 
   const getPeriod = useCallback(async () => {
+    abortControllerRef.current = new AbortController();
+    const {signal} = abortControllerRef.current;
     const url = `/api/periods/${periodId}`;
-    const data = await fetchWithToken(url, {}, auth);
+    const data = await fetchWithToken(url, {signal}, auth);
+    console.log({data});
+    if(data.ok){
     const periodJson = await data.json();
-    setHeaderFields({
-      weekNumber: periodJson.weekNumber,
-      dayName: periodJson.dayName,
-      periodNumber: periodJson.number,
-    });
+    //set fields if not set. This updates the Index component
+    if (!hasHeaderFields) {
+      setHeaderFields({
+        weekNumber: periodJson.weekNumber,
+        dayName: periodJson.dayName,
+          periodNumber: periodJson.number
+      });
+    }
     setPeriod(periodJson);
-  }, [periodId, auth, setHeaderFields]);
+    }else{
+      console.log("Error avoided")
+    }
+  }, [periodId, auth, setHeaderFields, hasHeaderFields]);
 
   // Set period to undefined any time id changes
   useEffect(() => {
@@ -59,6 +71,8 @@ const AttendanceDisplay = () => {
     if (intervalRef.current !== null && timeoutRef.current !== null) {
       clearInterval(intervalRef.current);
       clearTimeout(timeoutRef.current);
+      // make initial request
+      getPeriod();
       // start new timer
       intervalRef.current = setInterval(() => {
         getPeriod();
@@ -79,6 +93,7 @@ const AttendanceDisplay = () => {
   }, [getPeriod]);
 
   useEffect(() => {
+    abortControllerRef.current?.abort();
     startTimer();
     return () => {
       clearInterval(intervalRef.current);
@@ -119,6 +134,12 @@ const AttendanceDisplay = () => {
       setSelectedCampers([]);
     },
   };
+  const countUnaccounted = (campers) => {
+    return campers.reduce((acc,cv)=>acc + (cv.isPresent?0:1),0)
+  }
+  const totalUnaccounted = () => {
+    return period.activities.reduce((acc,cv)=>acc + countUnaccounted(cv.campers),0)
+  }
   const allActivitiesClear = () => {
     return period.activities.every((activity) =>
       activity.campers.every((camper) => camper.isPresent)
@@ -160,11 +181,13 @@ const AttendanceDisplay = () => {
 
   const renderSelectedActivity = () => {
     return (
+      <Grid item xs={12} >
       <ActivityAttendance
         camperSelection={camperSelection}
         activity={period.activities[selected]}
         toggleHere={toggleHere}
       />
+      </Grid>
     );
   };
 
@@ -191,32 +214,25 @@ const AttendanceDisplay = () => {
               activities={period.activities}
             />
             <Box>
-          <Box>
-              <ActivitySelectors
-          
-                selectAll={selectAll}
-                openSearchModal={openSearchModal}
-                selectSpecific={selectSpecific}
-                period={period}
-                displayAll={displayAll}
-                selected={selected}
-              />
-      <Button 
-          color="success"
-          variant = "contained"
-          sx={{ml:2}}
-        onClick={openSearchModal}>
-          Search
-      </Button>
-              <Box my={0.2} component="header">
-                  <AttendanceSummary
-                    allHere={allActivitiesClear()}
-                    clearText="Attendance finished. Wait for Admin."
-                    unaccountedText="Unaccounted Campers"
-                    title="All Activities"
-                  />
+              <Box my={1}>
+                <ActivitySelectors
+                  selectAll={selectAll}
+          getTotalUnaccounted = {totalUnaccounted}
+                  openSearchModal={openSearchModal}
+                  selectSpecific={selectSpecific}
+                  period={period}
+                  displayAll={displayAll}
+                  selected={selected}
+                />
+                <Button
+                  color="success"
+                  variant="contained"
+                  sx={{ ml: 2 }}
+                  onClick={openSearchModal}
+                >
+                  Search
+                </Button>
               </Box>
-          </Box>
             </Box>
           </>
         )}

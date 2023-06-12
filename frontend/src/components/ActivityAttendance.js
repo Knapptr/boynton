@@ -15,6 +15,7 @@ import {
   Stack,
   Chip,
   Divider,
+  Container,
   IconButton,
   AlertTitle,
 } from "@mui/material";
@@ -90,44 +91,48 @@ const CamperAttendant = ({
       isChecked={camper.isPresent}
       isSelected={camperSelection.isSelected(camper)}
     >
-      <Grid container paddingX={2}>
-        <Grid item xs={1}>
-          <IconButton
-            size="small"
-            onClick={() => {
-              if (camperSelection.isSelected(camper)) {
-                camperSelection.deselect(camper);
-                return;
-              }
-              camperSelection.select(camper);
-            }}
-          >
-            {camperSelection.isSelected(camper) ? (
-              <RemoveCircleFilledIcon fontSize="inherit" />
-            ) : (
-              <RemoveCircleEmptyIcon fontSize="inherit" />
-            )}
-          </IconButton>
+      <Container maxWidth="sm">
+        <Grid container>
+          <Grid item xs={1}>
+            <IconButton
+              size="small"
+              onClick={() => {
+                if (camperSelection.isSelected(camper)) {
+                  camperSelection.deselect(camper);
+                  return;
+                }
+                camperSelection.select(camper);
+              }}
+            >
+              {camperSelection.isSelected(camper) ? (
+                <RemoveCircleFilledIcon fontSize="inherit" />
+              ) : (
+                <RemoveCircleEmptyIcon fontSize="inherit" />
+              )}
+            </IconButton>
+          </Grid>
+          <Grid item xs={9}>
+            <Stack>
+              <Typography variant="subtite1" component="p">
+                {" "}
+                {camper.firstName} {camper.lastName}{" "}
+              </Typography>
+              <Typography variant="caption">
+                Cabin {camper.cabinName}
+              </Typography>
+            </Stack>
+          </Grid>
+          <Grid item xs={2}>
+            <IconButton size="large" onClick={assignHere}>
+              {camper.isPresent ? (
+                <CheckedIcon fontSize="inherit" />
+              ) : (
+                <UncheckedIcon fontSize="inherit" />
+              )}
+            </IconButton>
+          </Grid>
         </Grid>
-        <Grid item xs={9}>
-          <Stack>
-            <Typography variant="subtite1" component="p">
-              {" "}
-              {camper.firstName} {camper.lastName}{" "}
-            </Typography>
-            <Typography variant="caption">Cabin {camper.cabinName}</Typography>
-          </Stack>
-        </Grid>
-        <Grid item xs={2}>
-          <IconButton size="large" onClick={assignHere}>
-            {camper.isPresent ? (
-              <CheckedIcon fontSize="inherit" />
-            ) : (
-              <UncheckedIcon fontSize="inherit" />
-            )}
-          </IconButton>
-        </Grid>
-      </Grid>
+      </Container>
     </AttendantWrapper>
   );
 };

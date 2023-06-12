@@ -76,7 +76,7 @@ module.exports = {
 ( SELECT 
       day_id,
       period_number,
-      cw.week_id as week_number,
+      w.display as week_number,
       d.name as day_name,
       p.id as period_id, 
       act.name as activity_name,
@@ -103,6 +103,7 @@ module.exports = {
       null AS staff_activity_id
       FROM periods p 
       JOIN days d ON p.day_id = d.id
+      JOIN weeks w ON w.number = d.week_id
       LEFT JOIN activity_sessions act_s ON act_s.period_id = p.id
       LEFT JOIN activities act ON act.id = act_s.activity_id
       LEFT JOIN camper_activities ca ON ca.activity_id = act_s.id
@@ -118,7 +119,7 @@ module.exports = {
       SELECT 
       day_id,
       period_number,
-      stafsess.week_number as week_number,
+  w.display as week_number,
       d.name as day_name,
       p.id as period_id,
       act.name as activity_name,
@@ -145,6 +146,7 @@ module.exports = {
       stafact.id AS staff_activity_id
       FROM periods p 
       JOIN days d ON d.id = p.day_id
+      JOIN weeks w ON w.number = d.week_id
       LEFT JOIN activity_sessions act_s ON act_s.period_id = p.id
       LEFT JOIN activities act ON act.id = act_s.activity_id
       LEFT JOIN staff_activities stafact ON  stafact.activity_session_id = act_s.id

@@ -161,7 +161,7 @@ function NavDrawer(props) {
 
   return (
     <>
-      <AppBar position="sticky" component="nav" sx={{ marginBottom: "2rem" }}>
+      <AppBar position="sticky" component="nav">
         <Box width="100%">
           <Toolbar>
             <Button

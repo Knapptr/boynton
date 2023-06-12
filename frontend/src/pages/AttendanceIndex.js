@@ -3,27 +3,35 @@ import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import useGetDataOnMount from "../hooks/useGetData";
 import { AssignmentHeader, MenuSelector } from "../components/styled";
 import toTitleCase from "../toTitleCase";
-import tw, { styled } from 'twin.macro';
-import 'styled-components/macro'
-import Accordion from '@mui/material/Accordion';
-import AccordionSummary from '@mui/material/AccordionSummary';
-import AccordionDetails from '@mui/material/AccordionDetails';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import tw, { styled } from "twin.macro";
+import "styled-components/macro";
+import Accordion from "@mui/material/Accordion";
+import AccordionSummary from "@mui/material/AccordionSummary";
+import AccordionDetails from "@mui/material/AccordionDetails";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import getDayName from "../utils/getDayname";
 import useWeeks from "../hooks/useWeeks";
-
+import { Box, Typography } from "@mui/material";
+import { Stack } from "@mui/system";
 
 const SelectionHeader = ({ fields }) => {
-
-  return (fields !== null ? <>
-    <div tw="mx-auto">
-      <h1 tw="font-bold text-xl">Week {fields.weekNumber} - {getDayName(fields.dayName)} </h1>
-      <h2 tw="font-bold text-2xl">Activity Period {fields.periodNumber}</h2>
-    </div></> :
-
-    <p tw="text-center w-full font-bold">Schedule Selection</p>
-  )
-}
+  return (
+    <>
+      <Stack width={1} direction="column" alignItems="center" justifyContent="center" >
+    {fields!==null?(
+      <>
+        <Typography variant="body1">
+          Week {fields.weekNumber} - {getDayName(fields.dayName)}{" "}
+        </Typography>
+        <Typography variant="h6">Activity Period {fields.periodNumber}</Typography>
+      </>
+    ):
+    (<Typography >Schedule Selection</Typography>)
+    }
+      </Stack>
+    </>
+  );
+};
 
 const AttendanceIndex = () => {
   const location = useLocation();
@@ -31,10 +39,15 @@ const AttendanceIndex = () => {
 
   const [headerFields, setHeaderFields] = useState(null);
 
-  const { selectedWeek, clearSelection, selectedDay, selectedPeriod, WeekSelection, DaySelection, PeriodSelection } = useWeeks();
-
-
-
+  const {
+    selectedWeek,
+    clearSelection,
+    selectedDay,
+    selectedPeriod,
+    WeekSelection,
+    DaySelection,
+    PeriodSelection,
+  } = useWeeks();
 
   useEffect(() => {
     if (selectedPeriod() !== null) {
@@ -43,10 +56,9 @@ const AttendanceIndex = () => {
       setHeaderFields({
         weekNumber: selectedWeek().number,
         dayName: selectedDay().name,
-        periodNumber: selectedPeriod().number
-      })
+        periodNumber: selectedPeriod().number,
+      });
       clearSelection();
-
     }
   }, [clearSelection, selectedDay, selectedWeek, selectedPeriod, navigate]);
 
@@ -54,25 +66,40 @@ const AttendanceIndex = () => {
 
   const handleAccordionChange = (e, state) => {
     setShowAccordion(state);
-  }
+  };
   return (
     <>
-      <h1 tw="text-xl font-bold">Attendance</h1>
-      <Accordion tw="mb-6 shadow-none py-2 px-1 rounded bg-green-200 w-8/12 " expanded={location.pathname === "/schedule/attendance" || showAccordion} onChange={handleAccordionChange}>
+    <Box width={1}>
+      <Accordion
+    
+        expanded={location.pathname === "/schedule/attendance" || showAccordion}
+        onChange={handleAccordionChange}
+    sx={{marginBottom: 2}}
+      >
         <AccordionSummary
-          expandIcon={location.pathname === "/schedule/attendance" ? <></> : <ExpandMoreIcon />}
+          expandIcon={
+            location.pathname === "/schedule/attendance" ? (
+              <></>
+            ) : (
+              <ExpandMoreIcon />
+            )
+          }
           aria-controls="panel1a-content"
           id="panel1a-header"
         >
           <SelectionHeader fields={headerFields} />
         </AccordionSummary>
-        <AccordionDetails>
+        <AccordionDetails
+    sx={{py:0}}
+    >
           <WeekSelection />
           <DaySelection />
           <PeriodSelection />
         </AccordionDetails>
       </Accordion>
-      <Outlet context={{ setHeaderFields }} />
+    </Box>
+
+      <Outlet context={{ setHeaderFields,hasHeaderFields: headerFields !== null }} />
     </>
   );
 };

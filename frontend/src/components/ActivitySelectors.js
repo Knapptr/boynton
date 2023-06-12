@@ -1,8 +1,10 @@
 import tw from "twin.macro";
+import CheckedIcon from "@mui/icons-material/TaskAltOutlined";
 import "styled-components/macro";
 import { MenuSelector } from "./styled";
 import { Stack } from "@mui/system";
-import { Divider, styled, ToggleButton, ToggleButtonGroup } from "@mui/material";
+import { Badge, Box, Divider, styled, ToggleButton, ToggleButtonGroup } from "@mui/material";
+
 
 const ActivityToggleButton = styled(ToggleButton)(({theme,selected,disabled})=>( {
   backgroundColor: theme.palette.primary.main,
@@ -21,6 +23,7 @@ const ActivityToggleButton = styled(ToggleButton)(({theme,selected,disabled})=>(
 
 const ActivitySelectors = ({
   openSearchModal,
+  getTotalUnaccounted,
   selectAll,
   selectSpecific,
   period,
@@ -35,8 +38,12 @@ const ActivitySelectors = ({
     return selectedAct.sessionId === activity.sessionId;
   };
   return (
+    <>
+    <Badge badgeContent={getTotalUnaccounted()||<CheckedIcon fontSize="inherit" />} color={getTotalUnaccounted()===0?"success":"error"} anchorOrigin={{vertical:"top",horizontal:"left"}} >
     <ToggleButtonGroup exclusive >
-    <ActivityToggleButton value="all" onClick={selectAll} selected={displayAll}>All</ActivityToggleButton>
+    <ActivityToggleButton value="all" onClick={selectAll} selected={displayAll}>
+    All
+    </ActivityToggleButton>
       {period.activities.map((act, index) => (
         <>
         <ActivityToggleButton
@@ -53,6 +60,8 @@ const ActivitySelectors = ({
         </>
       ))}
     </ToggleButtonGroup>
+    </Badge>
+    </>
   );
 };
 
