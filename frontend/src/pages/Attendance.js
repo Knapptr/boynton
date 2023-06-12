@@ -10,7 +10,7 @@ import ActivitySelectors from "../components/ActivitySelectors";
 import ReassignmentSelectionDialog from "../components/AttendanceReassignDialog";
 import fetchWithToken from "../fetchWithToken";
 import AttendanceSearch from "../components/AttendanceSearch";
-import { Skeleton } from "@mui/material";
+import { Box, Skeleton } from "@mui/material";
 import { Stack } from "@mui/system";
 
 // rate at which to update
@@ -161,10 +161,10 @@ const AttendanceDisplay = () => {
 
   return (
     <>
-      <div tw="pb-32 w-full">
+      <Box pb={32} width={11 / 12}>
         {!period && (
-          <Stack spacing={1} width="100%" tw="mt-4">
-            <Skeleton variant="rectangular" height={40} />
+          <Stack spacing={1} marginTop={8}>
+            <Skeleton variant="rectangular" width="100%" height={40} />
             <Skeleton variant="rectangular" height={50} />
             <Skeleton variant="rectangular" height={100} />
             <Skeleton variant="rectangular" height={400} />
@@ -207,7 +207,7 @@ const AttendanceDisplay = () => {
           {period && displayAll && renderAllActivities()}
           {period && !displayAll && renderSelectedActivity()}
         </div>
-      </div>
+      </Box>
       <ReassignmentSelectionDialog
         selectedCampers={selectedCampers}
         camperSelection={camperSelection}

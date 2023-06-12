@@ -1,10 +1,9 @@
-import tw from "twin.macro";
-import "styled-components/macro";
 import { DialogBox, PopOut } from "./styled";
 import { useEffect, useRef, useState } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCircleXmark } from '@fortawesome/free-regular-svg-icons'
 import getDayName from "../utils/getDayname";
+import { Box, Dialog, Button, List, ListItem, ListItemText, TextField, Typography, Stack } from "@mui/material";
 
 const AttendanceSearch = ({
   shouldDisplay,
@@ -16,11 +15,6 @@ const AttendanceSearch = ({
   const [query, setQuery] = useState("");
   const inputRef = useRef(null);
 
-  useEffect(() => {
-    if (shouldDisplay) {
-      inputRef.current.focus()
-    }
-  }, [shouldDisplay]);
 
   useEffect(() => {
     if (query === "") {
@@ -45,53 +39,47 @@ const AttendanceSearch = ({
     setQuery(e.target.value);
   };
   return (
-    <PopOut
-      tw="justify-start"
-      shouldDisplay={shouldDisplay}
-      onClick={closeSearchModal}
-    >
-      <DialogBox
-        full={true}
-        onClick={(e) => {
-          e.stopPropagation();
-        }}
-        scrollable={true}
-        close={closeSearchModal}
+    <Dialog open={shouldDisplay} onClose={closeSearchModal} maxWidth="sm" fullWidth   >
+      <Box
+        display="flex"
+        flexDirection="column"
+        py={4}
+        px={2}
       >
-        <header>
-          <h2 >Week {period.weekNumber} {getDayName(period.dayName)}</h2>
-          <h3 tw="text-2xl font-bold"> Act {period.number} Camper Search</h3>
-        </header>
-        <div tw="my-5">
-          <input
-            ref={inputRef}
-            placeholder="Enter Camper Name"
-            onChange={handleChange}
-            value={query}
-            type="search"
-            name="camperSearch"
-            id="camperSearch"
-            tw="text-xl md:text-3xl py-2 px-4"
-          />
-        </div>
-        <div tw="flex-grow flex flex-col">
-          <ul tw="bg-blueGray-300  w-full rounded flex-grow p-3">
-            {results.length === 0 && <li tw="text-3xl md:text-8xl text-coolGray-400">no campers found <span>:(</span></li>}
+        <Box component="header" sx={{ w: 1, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", textAlign: "center" }}>
+          <Typography variant="h6" component="h2">Week {period.weekNumber} {getDayName(period.dayName)}</Typography>
+          <Typography variant="h5" component="h3">Act {period.number} Camper Search</Typography>
+        </Box>
+        <TextField
+          placeholder="Enter Camper Name"
+          onChange={handleChange}
+          value={query}
+          name="camperSearch"
+        />
+        <Box backgroundColor="primary.main" my={2} height={300} minWidth={200} id="resultsBox" flexDirection="column" overflow="scroll" display="flex">
+          <Stack spacing={1} padding={1}>
+            {results.length === 0 &&
+              <Box>
+                <ListItemText primary="No campers found :(" />
+              </Box>}
             {results.map((camper, index) => {
               return (
-                <li tw="rounded my-1 text-lg md:text-xl bg-green-400 even:bg-green-300 w-full md:w-11/12  flex justify-between items-center mx-auto py-2 px-1">
-                  <span tw="w-1/2 font-bold ">
-                    {camper.firstName} {camper.lastName}
-                  </span>
-                  <span >{camper.activityName || "Unassigned"}</span>
-                </li>
+                <Stack paddingX={2} paddingY={1} direction="row" backgroundColor="background.paper" justifyContent="space-between">
+                  <Box>
+                    <Typography variant="p" component="h4">{camper.firstName} {camper.lastName} </Typography>
+                    <Typography variant="p" sx={{ fontStyle: "italic" }}>{camper.age}</Typography>
+                  </Box>
+                  <Box display="flex">
+                    <Typography variant="p" component="h4" sx={{ marginTop: "auto" }}>{camper.activityName || "Unassigned"}</Typography>
+                  </Box>
+                </Stack>
               );
             })}
-          </ul>
-          <button tw="bg-orange-500 py-2 rounded my-2" onClick={closeSearchModal}>Close Search</button>
-        </div>
-      </DialogBox>
-    </PopOut>
+          </Stack>
+        </Box>
+        <Button color="warning" variant="outlined" onClick={closeSearchModal}>Close Search</Button>
+      </Box>
+    </Dialog >
   );
 };
 
