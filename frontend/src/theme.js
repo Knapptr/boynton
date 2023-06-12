@@ -55,7 +55,10 @@ const theme = createTheme({
       main: '#714779',
     },
     background: {
-      default: '#e9f4ee',
+      // Other potential default bg colors
+      // default: '#e9f4ee',
+      //default: "#E2EEE7",
+      default: "#D3E8D7",
       paper: '#ccd6ac',
       alt: "#D6D0AC"
     },
