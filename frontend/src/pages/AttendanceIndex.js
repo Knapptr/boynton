@@ -3,8 +3,6 @@ import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import useGetDataOnMount from "../hooks/useGetData";
 import { AssignmentHeader, MenuSelector } from "../components/styled";
 import toTitleCase from "../toTitleCase";
-import tw, { styled } from "twin.macro";
-import "styled-components/macro";
 import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
@@ -21,7 +19,7 @@ const SelectionHeader = ({ fields }) => {
     {fields!==null?(
       <>
         <Typography variant="body1">
-          Week {fields.weekNumber} - {getDayName(fields.dayName)}{" "}
+      {fields.weekTitle} - {getDayName(fields.dayName)}{" "}
         </Typography>
         <Typography variant="h6">Activity Period {fields.periodNumber}</Typography>
       </>
@@ -55,6 +53,7 @@ const AttendanceIndex = () => {
       navigate(`/schedule/attendance/${selectedPeriod().id}`);
       setHeaderFields({
         weekNumber: selectedWeek().number,
+        weekTitle: selectedWeek().title,
         dayName: selectedDay().name,
         periodNumber: selectedPeriod().number,
       });

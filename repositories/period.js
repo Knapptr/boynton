@@ -76,7 +76,9 @@ module.exports = {
 ( SELECT 
       day_id,
       period_number,
-      w.display as week_number,
+      w.number as week_number,
+      w.display as week_display,
+      w.title as week_title,
       d.name as day_name,
       p.id as period_id, 
       act.name as activity_name,
@@ -119,7 +121,9 @@ module.exports = {
       SELECT 
       day_id,
       period_number,
-  w.display as week_number,
+      w.number as week_number,
+      w.display as week_display,
+      w.title as week_title,
       d.name as day_name,
       p.id as period_id,
       act.name as activity_name,
@@ -175,7 +179,7 @@ module.exports = {
     // campers {firstName,lastName,age,pronouns,sessionId}[]
     // }[]}
     const oneRes = results[0];
-    const period = { id: oneRes.period_id, dayId: oneRes.day_id, number: oneRes.period_number, dayName: oneRes.day_name, weekNumber: oneRes.week_number, activities: [] }
+    const period = { id: oneRes.period_id, dayId: oneRes.day_id, number: oneRes.period_number, dayName: oneRes.day_name, weekNumber: oneRes.week_number, weekTitle: oneRes.week_title, weekDisplay: oneRes.week_display, activities: [] }
     for (const data of results) {
       //check if current activity is == to last activity
       if (data.activity_id === null) { continue; }

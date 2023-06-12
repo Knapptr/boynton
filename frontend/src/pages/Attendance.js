@@ -48,7 +48,9 @@ const AttendanceDisplay = () => {
       setHeaderFields({
         weekNumber: periodJson.weekNumber,
         dayName: periodJson.dayName,
-          periodNumber: periodJson.number
+          periodNumber: periodJson.number,
+        weekTitle: periodJson.weekTitle,
+        weekDisplay: periodJson.weekDisplay
       });
     }
     setPeriod(periodJson);
@@ -182,7 +184,7 @@ const AttendanceDisplay = () => {
 
   const renderSelectedActivity = () => {
     return (
-      <Grid item xs={12} >
+      <Grid item xs={12} sm={6} md={4} >
       <ActivityAttendance
         camperSelection={camperSelection}
         activity={period.activities[selected]}
@@ -237,7 +239,7 @@ const AttendanceDisplay = () => {
             </Box>
           </>
         )}
-        <Grid container spacing={2}>
+        <Grid container spacing={2} justifyContent="center">
           {period && displayAll && renderAllActivities()}
           {period && !displayAll && renderSelectedActivity()}
         </Grid>
