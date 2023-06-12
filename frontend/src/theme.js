@@ -50,6 +50,7 @@ const theme = createTheme({
     mode: 'light',
     primary: {
       main: '#4f7947',
+      light: "#588350",
     },
     secondary: {
       main: '#714779',

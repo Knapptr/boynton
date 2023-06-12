@@ -5,12 +5,14 @@ import tw, { styled } from "twin.macro";
 import "styled-components/macro";
 import UserContext from "../components/UserContext";
 import ReassignModal from "../components/ReassignModal";
-import ActivityAttendance, { AttendanceSummary } from "../components/ActivityAttendance";
+import ActivityAttendance, {
+  AttendanceSummary,
+} from "../components/ActivityAttendance";
 import ActivitySelectors from "../components/ActivitySelectors";
 import ReassignmentSelectionDialog from "../components/AttendanceReassignDialog";
 import fetchWithToken from "../fetchWithToken";
 import AttendanceSearch from "../components/AttendanceSearch";
-import { Box, Grid, Skeleton } from "@mui/material";
+import { Box, Button, Grid, Skeleton } from "@mui/material";
 import { Stack } from "@mui/system";
 
 // rate at which to update
@@ -38,15 +40,15 @@ const AttendanceDisplay = () => {
     setHeaderFields({
       weekNumber: periodJson.weekNumber,
       dayName: periodJson.dayName,
-      periodNumber: periodJson.number
-    })
+      periodNumber: periodJson.number,
+    });
     setPeriod(periodJson);
   }, [periodId, auth, setHeaderFields]);
 
   // Set period to undefined any time id changes
   useEffect(() => {
     setPeriod(undefined);
-  }, [periodId])
+  }, [periodId]);
 
   // User input boolean value meaans nothing, in is just a switch to indicate that input has happened
   const [userInput, setUserInput] = useState(false);
@@ -64,24 +66,24 @@ const AttendanceDisplay = () => {
 
       timeoutRef.current = setTimeout(() => {
         clearInterval(intervalRef.current);
-      }, cancelIntervalTime)
+      }, cancelIntervalTime);
     } else {
       intervalRef.current = setInterval(() => {
         getPeriod();
-      }, refreshRate)
+      }, refreshRate);
 
       timeoutRef.current = setTimeout(() => {
         clearInterval(intervalRef.current);
-      }, cancelIntervalTime)
+      }, cancelIntervalTime);
     }
-  }, [getPeriod])
+  }, [getPeriod]);
 
   useEffect(() => {
-    startTimer()
+    startTimer();
     return () => {
       clearInterval(intervalRef.current);
       clearTimeout(timeoutRef.current);
-    }
+    };
   }, [startTimer, userInput]);
 
   const openSearchModal = () => {
@@ -103,7 +105,9 @@ const AttendanceDisplay = () => {
       setSelectedCampers((c) => [...c, camper]);
     },
     deselect(camper) {
-      const camperIndex = selectedCampers.findIndex((c) => c.sessionId === camper.sessionId);
+      const camperIndex = selectedCampers.findIndex(
+        (c) => c.sessionId === camper.sessionId
+      );
       const updatedCampers = [...selectedCampers];
       updatedCampers.splice(camperIndex, 1);
       setSelectedCampers(updatedCampers);
@@ -116,17 +120,21 @@ const AttendanceDisplay = () => {
     },
   };
   const allActivitiesClear = () => {
-    return period.activities.every(activity => activity.campers.every(camper => camper.isPresent))
-  }
+    return period.activities.every((activity) =>
+      activity.campers.every((camper) => camper.isPresent)
+    );
+  };
   const toggleHere = (sessionId, camperSessionId) => {
-    setUserInput(i => !i);
+    setUserInput((i) => !i);
     const updatedActivities = [...period.activities];
     const activityIndex = updatedActivities.findIndex(
       (a) => a.sessionId === sessionId
     );
     const updatedActivity = { ...updatedActivities[activityIndex] };
     const updatedCampers = [...updatedActivity.campers];
-    const updatedCamperIndex = updatedCampers.findIndex(c => c.sessionId === camperSessionId);
+    const updatedCamperIndex = updatedCampers.findIndex(
+      (c) => c.sessionId === camperSessionId
+    );
     const updatedCamper = { ...updatedCampers[updatedCamperIndex] };
     // console.log({ updatedCamper });
     updatedCamper.isPresent = !updatedCamper.isPresent;
@@ -139,14 +147,14 @@ const AttendanceDisplay = () => {
 
   const renderAllActivities = () => {
     return period.activities.map((a, aIndex) => (
-      <Grid item xs={12} sm={6} md={4} key={`act-atten-${a.sessionId}`} >
+      <Grid item xs={12} sm={6} md={4} key={`act-atten-${a.sessionId}`}>
         <ActivityAttendance
           camperSelection={camperSelection}
           activity={a}
           activityIndex={aIndex}
           toggleHere={toggleHere}
         />
-      </Grid >
+      </Grid>
     ));
   };
 
@@ -182,13 +190,10 @@ const AttendanceDisplay = () => {
               period={period}
               activities={period.activities}
             />
-            <Box >
-              <Box component="header">
-                <div>
-                  <AttendanceSummary allHere={allActivitiesClear()} clearText="Attendance finished. Wait for Admin." unaccountedText="Unaccounted Campers" />
-                </div>
-              </Box>
+            <Box>
+          <Box>
               <ActivitySelectors
+          
                 selectAll={selectAll}
                 openSearchModal={openSearchModal}
                 selectSpecific={selectSpecific}
@@ -196,13 +201,26 @@ const AttendanceDisplay = () => {
                 displayAll={displayAll}
                 selected={selected}
               />
+      <Button 
+          color="success"
+          variant = "contained"
+          sx={{ml:2}}
+        onClick={openSearchModal}>
+          Search
+      </Button>
+              <Box my={0.2} component="header">
+                  <AttendanceSummary
+                    allHere={allActivitiesClear()}
+                    clearText="Attendance finished. Wait for Admin."
+                    unaccountedText="Unaccounted Campers"
+                    title="All Activities"
+                  />
+              </Box>
+          </Box>
             </Box>
           </>
         )}
-        <Grid
-          container
-          spacing={2}
-        >
+        <Grid container spacing={2}>
           {period && displayAll && renderAllActivities()}
           {period && !displayAll && renderSelectedActivity()}
         </Grid>
