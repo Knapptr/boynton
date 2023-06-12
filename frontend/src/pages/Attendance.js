@@ -10,7 +10,7 @@ import ActivitySelectors from "../components/ActivitySelectors";
 import ReassignmentSelectionDialog from "../components/AttendanceReassignDialog";
 import fetchWithToken from "../fetchWithToken";
 import AttendanceSearch from "../components/AttendanceSearch";
-import { Box, Skeleton } from "@mui/material";
+import { Box, Grid, Skeleton } from "@mui/material";
 import { Stack } from "@mui/system";
 
 // rate at which to update
@@ -139,13 +139,14 @@ const AttendanceDisplay = () => {
 
   const renderAllActivities = () => {
     return period.activities.map((a, aIndex) => (
-      <ActivityAttendance
-        key={`act-atten-${a.sessionId}`}
-        camperSelection={camperSelection}
-        activity={a}
-        activityIndex={aIndex}
-        toggleHere={toggleHere}
-      />
+      <Grid item xs={12} sm={6} md={4} key={`act-atten-${a.sessionId}`} >
+        <ActivityAttendance
+          camperSelection={camperSelection}
+          activity={a}
+          activityIndex={aIndex}
+          toggleHere={toggleHere}
+        />
+      </Grid >
     ));
   };
 
@@ -181,17 +182,12 @@ const AttendanceDisplay = () => {
               period={period}
               activities={period.activities}
             />
-            <div tw="mb-6">
-              <header tw="">
-                <div tw="mx-2">
-                  <AttendanceSummary tw="" allHere={allActivitiesClear()}>
-                    {
-                      allActivitiesClear() ?
-                        <span tw="text-lg">Wait for Admin to give All Clear</span> : <span tw="text-lg">Not Clear</span>
-                    }
-                  </AttendanceSummary>
+            <Box >
+              <Box component="header">
+                <div>
+                  <AttendanceSummary allHere={allActivitiesClear()} clearText="Attendance finished. Wait for Admin." unaccountedText="Unaccounted Campers" />
                 </div>
-              </header>
+              </Box>
               <ActivitySelectors
                 selectAll={selectAll}
                 openSearchModal={openSearchModal}
@@ -200,13 +196,16 @@ const AttendanceDisplay = () => {
                 displayAll={displayAll}
                 selected={selected}
               />
-            </div>
+            </Box>
           </>
         )}
-        <div tw="flex flex-col lg:grid lg:grid-cols-2 gap-2">
+        <Grid
+          container
+          spacing={2}
+        >
           {period && displayAll && renderAllActivities()}
           {period && !displayAll && renderSelectedActivity()}
-        </div>
+        </Grid>
       </Box>
       <ReassignmentSelectionDialog
         selectedCampers={selectedCampers}

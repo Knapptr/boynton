@@ -1,5 +1,3 @@
-import tw, { styled } from "twin.macro";
-import "styled-components/macro";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCircleDot,
@@ -7,24 +5,21 @@ import {
   faSquare,
   faSquareCheck,
 } from "@fortawesome/free-regular-svg-icons";
-import { StaffListing } from "./styled";
+import { Alert, Typography, Box, Grid, Stack, Chip, Divider } from "@mui/material";
+import { styled } from "@mui/material/styles"
 
-const AttendantWrapper = styled.li(({ isChecked, isSelected }) => [
-  tw`bg-yellow-200 even:bg-yellow-300 font-bold py-3 select-none transition-colors border border-white`,
-  isChecked && tw`bg-green-300 even:bg-green-400`,
-  isSelected && tw`z-0 ring ring-inset ring-orange-500`,
-  isSelected && isChecked && tw`bg-green-600 even:bg-green-600`,
-  isSelected && !isChecked && tw`bg-yellow-600 even:bg-yellow-600`,
-]);
+const AttendantWrapper = styled(Box)(({ theme, children, isSelected, isChecked, index }) => ({
+  backgroundColor: isChecked ? theme.palette.primary.main : index % 2 === 0 ? theme.palette.background.paper : theme.palette.background.alt,
+  marginTop: 3,
+  color: isChecked ? "white" : "black",
+  fontWeight: "bold"
 
-const AttendanceName = tw.div`flex justify-start flex-grow px-4`;
 
-const AttendanceButton = styled.button(({ isPresent }) => [tw`px-2 ml-auto`]);
+}))
 
-export const AttendanceSummary = styled.div(({ allHere }) => [
-  tw`z-50 text-sm py-px font-bold px-2 bg-red-500 text-white transition-colors rounded flex items-center justify-center`,
-  allHere && tw`bg-green-500`,
-]);
+export const AttendanceSummary = ({ icon, allHere, clearText, unaccountedText }) => {
+  return <Alert icon={icon} padding={1} variant="filled" severity={allHere ? "success" : "error"} ><Typography variant="p" fontWeight={allHere ? "regular" : "bold"} borderRadius={2 / 1} color={allHere ? "white" : "black"}>{allHere ? clearText : unaccountedText}</Typography></Alert>
+}
 
 const CamperAttendant = ({
   camperIndex,
@@ -48,11 +43,12 @@ const CamperAttendant = ({
 
   return (
     <AttendantWrapper
+      index={camperIndex}
       isChecked={camper.isPresent}
       isSelected={camperSelection.isSelected(camper)}
     >
-      <div tw="flex mx-auto px-2 md:px-32">
-        <div tw="mr-auto">
+      <Box>
+        <Box mr="auto">
           <button
             onClick={() => {
               if (camperSelection.isSelected(camper)) {
@@ -68,20 +64,21 @@ const CamperAttendant = ({
               <FontAwesomeIcon icon={faCircle} />
             )}
           </button>
-        </div>
-        <AttendanceName isPresent={camper.isPresent}>
+        </Box>
+        <Box>
           <p>
             {camper.firstName} {camper.lastName}
           </p>
-          <span tw="font-light ml-3">{camper.cabinName}</span>
-        </AttendanceName>
-        <AttendanceButton isPresent={camper.isPresent} onClick={assignHere}>
+          <span >Cabin {camper.cabinName}</span>
+        </Box>
+        {/* This is a BUTTON and should be changed up */}
+        <div isPresent={camper.isPresent} onClick={assignHere}>
           {camper.isPresent && (
             <FontAwesomeIcon size="xl" icon={faSquareCheck} />
           )}
           {!camper.isPresent && <FontAwesomeIcon size="xl" icon={faSquare} />}
-        </AttendanceButton>
-      </div>
+        </div>
+      </Box>
     </AttendantWrapper>
   );
 };
@@ -100,50 +97,65 @@ const ActivityAttendance = ({
   };
   return (
     <>
-      <div tw="relative ">
-        <header tw="mb-4 bg-lightBlue-500 sticky top-16  justify-center py-2 px-3">
-          <div id="top-row" tw="flex" >
-            <div tw="py-3 px-2 text-xl font-bold text-white w-1/2 sm:w-2/3 ">
-              <h2 tw="">
-                {activity.name}
-                <span tw="text-gray-800 ml-3 font-thin">
+      <Box
+        display="flex"
+        flexDirection="column"
+        alignItems="center"
+      >
+        <Box component="header" backgroundColor="secondary.main" p={1} position="sticky" top={72} width={1} zIndex={100}>
+          <Box>
+            <Box id="titleInfo">
+              <Stack direction="row" color="white" alignItems="baseline" justifyContent="space-between" pr={4}>
+                <Typography variant="h6">
+                  {activity.name}
+                </Typography>
+                <Typography variant="subtitle1">
                   {activity.campers.length}
-                </span>
-              </h2>
-            </div>
-            <AttendanceSummary allHere={getUnaccountedFor() === 0}>
-              {getUnaccountedFor() ? (
-                <span>{getUnaccountedFor()} unaccounted</span>
-              ) : (
-                <span>All Here!</span>
-              )}
-            </AttendanceSummary>
-          </div>
-          <div id="bottom-row">
-            <ul tw="flex flex-col sm:flex-row text-black font-normal gap-3">{activity.staff.map(staffer => <StaffListing staffer={staffer}>{staffer.firstName}</StaffListing>)}</ul>
-          </div>
-        </header>
-        <ul tw="w-11/12 mx-auto my-3">
-          {activity.campers.length === 0 ? (
-            <li>no campers</li>
-          ) : (
-            [...activity.campers]
-              .sort((camper1, camper2) => camper1.lastName.localeCompare(camper2.lastName)
-              )
-              .map((camper, camperIndex) => (
-                <CamperAttendant
-                  camperSelection={camperSelection}
-                  key={`camper-${activity.name}-${camper.sessionId}`}
-                  toggleIsPresent={toggleHere}
-                  camperIndex={camperIndex}
-                  camper={camper}
-                  activityIndex={activityIndex}
-                  activity={activity}
-                ></CamperAttendant>
-              ))
-          )}
-        </ul>
-      </div>
+                </Typography>
+              </Stack>
+            </Box>
+            <Box >
+              <AttendanceSummary clearText="All Here" unaccountedText={`${getUnaccountedFor()} Unaccounted`} allHere={getUnaccountedFor() === 0} />
+            </Box>
+            <Box mt={1}>
+              <Grid container >
+                {activity.staff.map(staffer =>
+                  <Grid item xs={4}>
+                    <Chip
+                      label={`${staffer.firstName} ${staffer.lastName[0]}`}
+                      size="small"
+                      color="primary"
+                      key={`staff-chip-${staffer.id}`} />
+                  </Grid>
+                )}</Grid>
+            </Box>
+          </Box>
+        </Box>
+        {/* Camper Info */}
+        <Box width={11 / 12} >
+          <Stack>
+            {activity.campers.length === 0 ? (
+
+              <Box> <Typography>No Campers</Typography></Box>
+            ) : (
+              [...activity.campers]
+                .sort((camper1, camper2) => camper1.lastName.localeCompare(camper2.lastName)
+                )
+                .map((camper, camperIndex) => (
+                  <CamperAttendant
+                    camperSelection={camperSelection}
+                    key={`camper-${activity.name}-${camper.sessionId}`}
+                    toggleIsPresent={toggleHere}
+                    camperIndex={camperIndex}
+                    camper={camper}
+                    activityIndex={activityIndex}
+                    activity={activity}
+                  ></CamperAttendant>
+                ))
+            )}
+          </Stack>
+        </Box>
+      </Box>
     </>
   );
 };

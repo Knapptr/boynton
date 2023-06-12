@@ -87,6 +87,7 @@ module.exports = {
       camp.first_name AS camper_first_name,
       camp.pronouns AS camper_pronouns,
       camp.age AS camper_age,
+      cab.name AS camper_cabin_assignment,
       cw.id AS camper_session_id,
       ca.is_present AS camper_is_present,
       ca.id AS camper_activity_id,
@@ -106,6 +107,8 @@ module.exports = {
       LEFT JOIN activities act ON act.id = act_s.activity_id
       LEFT JOIN camper_activities ca ON ca.activity_id = act_s.id
       LEFT JOIN camper_weeks cw ON cw.id = ca.camper_week_id
+      LEFT JOIN cabin_sessions cabs ON cw.cabin_session_id = cabs.id
+      LEFT JOIN cabins cab ON cab.name = cabs.cabin_name
       LEFT JOIN campers camp ON camp.id = cw.camper_id
       WHERE p.id = $1
 
@@ -123,6 +126,7 @@ module.exports = {
       act.id as activity_id,
       act_s.id as activity_session_id,
       null AS camper_last_name,
+      null AS camper_cabin_assignment,
       null AS camper_first_name,
       null AS camper_pronouns,
       null AS camper_age,
@@ -184,6 +188,7 @@ module.exports = {
           {
             firstName: data.camper_first_name,
             lastName: data.camper_last_name,
+            cabinName: data.camper_cabin_assignment,
             age: data.camper_age,
             pronouns: data.camper_pronouns,
             sessionId: data.camper_session_id,

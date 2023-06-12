@@ -57,10 +57,17 @@ const theme = createTheme({
     background: {
       default: '#e9f4ee',
       paper: '#ccd6ac',
+      alt: "#D6D0AC"
     },
     warning: {
       main: '#ed7002',
     },
+    success: {
+      main: '#66bb6a'
+    },
+    error: {
+      main: "#f44336"
+    }
   },
   components: {
     MuiLink: { defaultProps: { component: LinkBehavior } },
