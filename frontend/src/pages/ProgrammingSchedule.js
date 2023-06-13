@@ -3,14 +3,9 @@ import HourglassTopIcon from "@mui/icons-material/HourglassTop";
 import AddIcon from "@mui/icons-material/Add";
 import fetchWithToken from "../fetchWithToken";
 import useGetDataOnMount from "../hooks/useGetData";
-import tw, { styled } from "twin.macro";
 import "styled-components/macro";
 import {
-  CancelButton,
-  ConfirmButton,
-  DialogBox,
   MenuSelector,
-  PopOut,
 } from "../components/styled";
 import UserContext from "../components/UserContext";
 import {
@@ -204,9 +199,9 @@ const ProgrammingSchedule = () => {
     <>
       <Box width={1}>
     <Typography variant="h5" >Activities</Typography>
-    {<Typography variant="h5" fontWeight="bold" >Week {currentWeek.display}</Typography>}
+    {currentWeek && <Typography variant="h5" fontWeight="bold" >Week {currentWeek.display}</Typography>}
     {<Typography variant="h6" >{dayDictionary[getSelectedDay()?.name]}</Typography>}
-        {createActivityData.showWindow && (
+        {activities && createActivityData.showWindow && (
           <CreateActivityBox
             open={createActivityData.showWindow}
             data={createActivityData}
@@ -216,7 +211,7 @@ const ProgrammingSchedule = () => {
             afterCreation={afterActivityCreation}
           />
         )}
-        {selectActivityData.showWindow && (
+        { activities && selectActivityData.showWindow && (
           <AddActivityBox
             open={selectActivityData.showWindow}
             activities={activities}

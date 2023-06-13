@@ -10,7 +10,7 @@ import Dashboard from "./pages/dashboard";
 import UserContext, { useUserData } from "./components/UserContext";
 import CabinListIndex from "./pages/CabinListIndex";
 import Scoreboard from "./pages/Scoreboard";
-import Score from "./components/Score"
+import Score from "./components/Score";
 import ProgrammingSchedule from "./pages/ProgrammingSchedule";
 import Slay from "./pages/Slay";
 import AdminAccess from "./components/ProtectedAdminAccess";
@@ -18,21 +18,20 @@ import UsersPage from "./pages/UsersPage";
 import StaffSchedule from "./pages/StaffSchedule";
 import ProfilePage from "./pages/ProfilePage";
 import CreateAward from "./pages/CreateAward";
-import '@fontsource/roboto/300.css';
-import '@fontsource/roboto/400.css';
-import '@fontsource/roboto/500.css';
-import '@fontsource/roboto/700.css';
+import "@fontsource/roboto/300.css";
+import "@fontsource/roboto/400.css";
+import "@fontsource/roboto/500.css";
+import "@fontsource/roboto/700.css";
 import RoleProtected from "./components/protectedRoutes";
 import SignUpIndex from "./pages/SignUpIndex";
 import CreateSchedulePage from "./pages/CreateSchedule";
 import AttendanceDisplay from "./pages/Attendance";
 import AttendanceIndex from "./pages/AttendanceIndex";
 
-
 function App() {
   const userState = useUserData();
   return (
-    <div className="App" >
+    <div className="App">
       <UserContext.Provider value={userState}>
         <BrowserRouter>
           <Routes>
@@ -53,8 +52,7 @@ function App() {
                     <ProfilePage />
                   </Protected>
                 }
-              >
-              </Route>
+              ></Route>
 
               <Route path="award" element={<CreateAward />} />
               <Route path="cabins/">
@@ -70,15 +68,18 @@ function App() {
                   ></Route>
                 </Route>
               </Route>
-              <Route path="users" element={
-                <RoleProtected role="admin">
-                  <UsersPage />
-                </RoleProtected>} />
+              <Route
+                path="users"
+                element={
+                  <RoleProtected role="admin">
+                    <UsersPage />
+                  </RoleProtected>
+                }
+              />
               <Route path="scoreboard" element={<Scoreboard />}>
                 <Route path=":weekNumber" element={<Score />} />
               </Route>
-              <Route path="schedule" >
-
+              <Route path="schedule">
                 <Route path="sign-up" element={<SignUpIndex />}>
                   <Route
                     path=":cabin/:weekNumber"
@@ -86,27 +87,35 @@ function App() {
                   />
                 </Route>
 
-                <Route path="activities" element={
-                  <RoleProtected role="programming">
-                    <ProgrammingSchedule />
-                  </RoleProtected>} />
+                <Route
+                  path="activities"
+                  element={
+                    <RoleProtected role="programming">
+                      <ProgrammingSchedule />
+                    </RoleProtected>
+                  }
+                />
 
-                <Route path="staff" element={
-                  <RoleProtected role="unit_head">
-                    <StaffSchedule />
-                  </RoleProtected>} />
+                <Route
+                  path="staff"
+                  element={
+                    <RoleProtected role="unit_head">
+                      <StaffSchedule />
+                    </RoleProtected>
+                  }
+                />
 
-                <Route path="attendance" element={<AttendanceIndex />}>
-                  <Route path=":periodId"
-                    element={<AttendanceDisplay />}
-                  />
-                </Route>
+                <Route
+                  path="attendance/:periodId"
+                  element={<AttendanceDisplay />}
+                />
               </Route>
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
-      </UserContext.Provider></div>
+      </UserContext.Provider>
+    </div>
   );
 }
 

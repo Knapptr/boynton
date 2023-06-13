@@ -14,10 +14,13 @@ import UserContext from "./UserContext";
 const drawerWidth = 240;
 
 const navItems = [
-  { name: 'Attendance', url: "/schedule/attendance" },
   { name: 'Give Award', url: "/award" },
   { name: 'Cabin Lists', url: "/cabins/list" },
   // { name: 'Scores', url: "/scoreboard" },
+]
+
+const navDialogs = [
+  {name: "Attendance", dialog: "attendance"},
 ]
 
 const adminNavItems = [
@@ -96,6 +99,20 @@ const MenuNav = ({ title, items, auth }) => {
   )
 }
 
+const DrawerDialog = ({items,handleDialogs})=>{
+  const handleDialog = (dialogName) =>{
+    handleDialogs(dialogName);
+  }
+
+  return (<List>
+    {items.map(item => {
+      return (<ListItem key={"drawer-" + item.name}>
+        <ListItemButton component={Button} onClick={()=>{handleDialog(item.dialog)}}><ListItemText primary={item.name} /></ListItemButton>
+      </ListItem>)
+    })}
+  </List>
+  )
+}
 const DrawerNav = ({ items, auth }) => {
   return (<List>
     {prepareRoleMenuItems(items, auth).map(item => {
@@ -128,6 +145,7 @@ function NavDrawer(props) {
   const auth = useContext(UserContext);
   const location = useLocation()
   console.log({ location });
+  const {handleDialogs} = props;
   const { window } = props;
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -141,6 +159,8 @@ function NavDrawer(props) {
         <DrawerNav items={navItems} />
       </List>
       <Divider />
+    <DrawerDialog items = {navDialogs} handleDialogs={handleDialogs}/>
+    <Divider />
       <DrawerNav items={regMenuItems} auth={auth} />
       <Divider />
       <DrawerNav items={adminNavItems} auth={auth} />

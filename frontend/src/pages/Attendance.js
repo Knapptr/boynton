@@ -12,7 +12,7 @@ import ActivitySelectors from "../components/ActivitySelectors";
 import ReassignmentSelectionDialog from "../components/AttendanceReassignDialog";
 import fetchWithToken from "../fetchWithToken";
 import AttendanceSearch from "../components/AttendanceSearch";
-import { Box, Button, Grid, Skeleton } from "@mui/material";
+import { Box, Button, Grid, Skeleton, Typography } from "@mui/material";
 import { Stack } from "@mui/system";
 
 // rate at which to update
@@ -22,7 +22,6 @@ const cancelIntervalTime = 1000 * 60 * 8;
 
   
 const AttendanceDisplay = () => {
-  const { setHeaderFields, hasHeaderFields } = useOutletContext();
   const abortControllerRef = useRef(null);
   const { periodId } = useParams();
   const auth = useContext(UserContext);
@@ -44,20 +43,20 @@ const AttendanceDisplay = () => {
     if(data.ok){
     const periodJson = await data.json();
     //set fields if not set. This updates the Index component
-    if (!hasHeaderFields) {
-      setHeaderFields({
-        weekNumber: periodJson.weekNumber,
-        dayName: periodJson.dayName,
-          periodNumber: periodJson.number,
-        weekTitle: periodJson.weekTitle,
-        weekDisplay: periodJson.weekDisplay
-      });
-    }
+    // if (!hasHeaderFields) {
+    //   setHeaderFields({
+    //     weekNumber: periodJson.weekNumber,
+    //     dayName: periodJson.dayName,
+    //       periodNumber: periodJson.number,
+    //     weekTitle: periodJson.weekTitle,
+    //     weekDisplay: periodJson.weekDisplay
+    //   });
+    // }
     setPeriod(periodJson);
     }else{
       console.log("Error avoided")
     }
-  }, [periodId, auth, setHeaderFields, hasHeaderFields]);
+  }, [periodId, auth]);
 
   // Set period to undefined any time id changes
   useEffect(() => {
@@ -210,6 +209,13 @@ const AttendanceDisplay = () => {
         )}
         {period && (
           <>
+          <Box mt={3}>
+          <Typography variant="subtitle2">Week {period.weekDisplay}</Typography>
+          <Typography variant="caption">{period.weekTitle}</Typography>
+          <Typography variant="h6">{period.dayName} Act {period.number}</Typography>
+
+          </Box>
+
             <AttendanceSearch
               closeSearchModal={closeSearchModal}
               shouldDisplay={showSearchModal}
@@ -239,6 +245,7 @@ const AttendanceDisplay = () => {
             </Box>
           </>
         )}
+    {period && period.activities.length === 0 && <Typography mt={4} fontWeight="bold">No Activities</Typography>}
         <Grid container spacing={2} justifyContent="center">
           {period && displayAll && renderAllActivities()}
           {period && !displayAll && renderSelectedActivity()}
