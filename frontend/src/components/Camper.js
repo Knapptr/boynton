@@ -3,16 +3,8 @@ import "styled-components/macro";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUserMinus } from "@fortawesome/free-solid-svg-icons";
 import { useState } from "react";
+import { Box, IconButton, Stack } from "@mui/material";
 
-const RemoveButton = tw.button`rounded bg-red-500 text-white p-1 m-0.5 hover:bg-red-700 mr-3`;
-const CamperItem = styled.li(({ full, removable, isSelected, dayCamp, fl }) => [
-    tw`p-1 bg-green-200 flex items-center`,
-    dayCamp && tw`bg-yellow-200`,
-    fl && tw`bg-orange-200`,
-    !removable && tw`pl-4`,
-    full && tw`w-full`,
-    isSelected && tw`bg-green-500`,
-]);
 
 const Camper = ({
     camper,
@@ -28,7 +20,7 @@ const Camper = ({
     const { firstName, lastName, age, id, dayCamp, camperID, fl } = camper;
     const [isSelected, setIsSelected] = useState(false);
     return (
-        <CamperItem
+        <Box
             onClick={(e) => {
                 e.stopPropagation();
                 if (selectable) {
@@ -49,21 +41,21 @@ const Camper = ({
             fl={fl}
         >
             {removable && (
-                <RemoveButton
+                <IconButton
                     onClick={(e) => {
                         e.stopPropagation();
                         unassignCamper(camper.id);
                     }}
                 >
                     <FontAwesomeIcon icon={faUserMinus} />
-                </RemoveButton>
+                </IconButton>
             )}
-            <p tw="text-lg">
-                <span tw="font-light"> {age}</span>  {firstName} {lastName}
-                {dayCamp && <span tw="font-light text-xs">{" "}day</span>}
-                {fl && <span tw="font-light text-xs">{" "}FL</span>}
-            </p>
-        </CamperItem>
+            <Stack >
+                <span > {age}</span>  {firstName} {lastName}
+                {dayCamp && <span >{" "}day</span>}
+                {fl && <span >{" "}FL</span>}
+            </Stack>
+        </Box>
     );
 };
 

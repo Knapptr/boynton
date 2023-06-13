@@ -5,10 +5,17 @@ import tw, { styled } from "twin.macro";
 import "styled-components/macro";
 import { AssignmentHeader } from "./styled";
 import { PropagateLoader } from "react-spinners";
+import {
+  Box,
+  FormControlLabel,
+  Checkbox,
+  FormGroup,
+  Grid,
+  Skeleton,
+  IconButton,
+  Typography,
+} from "@mui/material";
 
-const CabinsList = styled.div(() => [
-  tw`w-full bg-sky-300 py-4 flex flex-wrap gap-1`,
-]);
 
 const Button = styled.button(() => [tw`bg-green-600 rounded text-white p-2`]);
 const UnassignButton = styled.button(({ anyAssignments }) => [
@@ -20,74 +27,59 @@ const Cabins = ({
   assign,
   cabinSessions,
   toggleUnassignModal,
+  selectedCampers,
   cabinsOnly,
   unassign,
 }) => {
+  //const [hideFull, setHideFull] = useState(false);
 
-  const [hideFull, setHideFull] = useState(false);
-
-  const areEmpty = () => {
-    console.log({ cabinSessions });
-    if (cabinSessions.every(cabin => cabin.campers.length === 0) || cabinSessions.length === 0) {
-      return true;
-    }
-  };
   const displayCabins = () => {
     let list = [...cabinSessions];
-    if (hideFull) {
-      list = cabinSessions.filter(
-        (cabin) => cabin.capacity > cabin.campers.length
-      );
-    }
+    // if (hideFull) {
+    //   list = cabinSessions.filter(
+    //     (cabin) => cabin.capacity > cabin.campers.length
+    //   );
+    // }
     return list.map((cabinSession, index) => {
       return (
+        <Grid item xs={12} md={4}>
         <Cabin
           cabinsOnly={cabinsOnly}
           assign={assign}
+        selectedCampers = {selectedCampers}
           key={`cabin-${cabinSession.name}`}
-          unassignCamper={(camperSessionId) => unassign(camperSessionId, cabinSession.id)}
+          unassignCamper={(camperSessionId) =>
+            unassign(camperSessionId, cabinSession.id)
+          }
           allOpenState={showAllLists}
           session={cabinSession}
         />
+        </Grid>
       );
     });
   };
   return (
     <>
-      <AssignmentHeader tw="w-full">
-        <h2 tw="font-bold text-lg">Cabins</h2>
-        <div>
-          <UnassignButton
-            tw="mr-5"
-            anyAssignments={!areEmpty()}
-            onClick={() => {
-              if (!areEmpty()) {
-                toggleUnassignModal();
-              }
-            }}
-          >
-            Unassign All
-          </UnassignButton>
-          <label htmlFor="hideFullToggle">Hide Full</label>
-          <input
-            tw="m-1"
-            id="hideFullToggle"
-            type="checkbox"
-            value={hideFull}
-            onChange={() => {
-              setHideFull((f) => !f);
-            }}
-          />
-        </div>
-      </AssignmentHeader>
-      <CabinsList>
-        {cabinSessions.length === 0 &&
-          <div tw="my-2 py-8 text-center w-full ">
-            <PropagateLoader loading={true} />
-          </div>
-        }
+    {/*
+      <Box variant="header">
+      <Box>
+      <FormGroup>
+      <FormControlLabel
+      checked={hideFull}
+      onChange={() => {
+        setHideFull((f) => !f);
+      }}
+      label="Hide Full"
+      control={<Checkbox />}
+      />
+      </FormGroup>
+      </Box>
+      </Box>
+    */}
+      <Grid container gap={3} justifyContent="center">
+        {cabinSessions.length === 0 && <Skeleton variant="rectangular" />}
         {displayCabins()}
-      </CabinsList>
+      </Grid>
     </>
   );
 };

@@ -2,8 +2,6 @@ import { useCallback, useContext, useEffect, useState } from "react";
 import UserContext from "../components/UserContext";
 import { Link, Outlet } from "react-router-dom";
 import useGetDataOnMount from "../hooks/useGetData";
-import tw from "twin.macro";
-import "styled-components/macro";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { MenuSelector } from "../components/styled";
 import fetchWithToken from "../fetchWithToken";
@@ -15,18 +13,13 @@ import {
   AccordionSummary,
   Box,
   Card,
-  Chip,
-  Divider,
   Grid,
-  List,
-  ListItem,
-  ListItemText,
   Stack,
-  styled,
   ToggleButton,
   ToggleButtonGroup,
   Typography,
 } from "@mui/material";
+import CamperItem from "../components/CamperItem";
 
 /** A helper to deal with the cabin list */
 const cabinSelections = {
@@ -47,48 +40,6 @@ const cabinSelections = {
   none: () => ({ selectionName: "NONE", cabins: [] }),
 };
 
-// export const CamperItem = styled.li(({ dayCamp, fl }) => [
-//     tw`bg-green-100 flex justify-start `,
-//     dayCamp && tw`bg-yellow-200`,
-//     fl && tw`bg-orange-200`
-// ]);
-
-const CamperItem = ({ camper }) => {
-  const camperBadges = (camper) => {
-    const badges = [
-      { type: "dayCamp", label: "day" },
-      { type: "fl", label: "FL" },
-      { type: "pronouns", label: camper.pronouns },
-    ];
-
-    const activeBadges = badges.filter((badge) => camper[badge.type]);
-    console.log({ camper });
-    console.log({ activeBadges });
-    return activeBadges;
-  };
-  return (
-    <Box
-      sx={{
-        "&:nth-child(odd)": { backgroundColor: "background.main" },
-        "&:nth-child(even)": { backgroundColor: "background.alt" },
-      }}
-      py={0.75}
-      px={1}
-      textAlign="left"
-      key={`camper-${camper.id}`}
-    >
-      <Typography>
-        {camper.firstName} {camper.lastName} <em>{camper.age}</em>
-      </Typography>
-      <Stack direction="row" justifyContent="start">
-        {camperBadges(camper).map((badge) => (
-          <Chip size="small" label={badge.label} />
-        ))}
-      </Stack>
-      <Divider variant="inset" />
-    </Box>
-  );
-};
 const CabinListItem = ({ cabin }) => {
   return (
     <>
@@ -106,7 +57,7 @@ const CabinListItem = ({ cabin }) => {
       <Card elevation={2}>
         <Stack>
           {cabin &&
-            cabin.campers.map((camper) => <CamperItem camper={camper} />)}
+            cabin.campers.map((camper,index) => <CamperItem index={index} camper={camper} />)}
         </Stack>
       </Card>
     </>
@@ -294,8 +245,8 @@ const CabinListIndex = () => {
               item
               xs={12}
               sm={selected.cabins.length > 1 ? 6 : 12}
-              md={selected.cabins.length > 1 ? 4 : 12}
-              lg={selected.cabins.length > 1 ? 6 : 12}
+              md={selected.cabins.length > 1 ? 3 : 12}
+              lg={selected.cabins.length > 1 ? 2 : 12}
             >
               <CabinListItem key={`cabin-list-${cabin.name}`} cabin={cabin} />
             </Grid>
@@ -306,8 +257,8 @@ const CabinListIndex = () => {
             item
             xs={12}
             sm={selected.cabins.length > 1 ? 6 : 12}
-            md={selected.cabins.length > 1 ? 4 : 12}
-            lg={selected.cabins.length > 1 ? 6 : 12}
+            md={selected.cabins.length > 1 ? 3 : 12}
+            lg={selected.cabins.length > 1 ? 2 : 12}
           >
             <CabinListItem
               cabin={{ name: "Unassigned", campers: unassignedCampers }}
@@ -320,24 +271,3 @@ const CabinListIndex = () => {
 };
 
 export default CabinListIndex;
-// {unassignedCampers.map(camper => (
-//   < CamperItem dayCamp={camper.dayCamp} key={`camper-${camper.sessionId}`} fl={camper.fl} >
-//     <CamperCol>
-//       <span tw="text-sm">{camper.firstName} {camper.lastName} </span>
-//       <span > {camper.age}</span>
-//     </CamperCol>
-//     {camper.dayCamp &&
-//       <CamperCol>
-//         <span tw="text-sm">{" "}day</span>
-//       </CamperCol>}
-//     {camper.fl &&
-//       <CamperCol>
-//         <span tw="text-sm">{" "}fl</span>
-//       </CamperCol>
-//     }
-//     <CamperCol>
-//       {camper.pronouns && <PronounBadge tw="text-sm">{camper.pronouns.toLowerCase()}</PronounBadge>}
-//     </CamperCol>
-
-//   </CamperItem>
-// ))}

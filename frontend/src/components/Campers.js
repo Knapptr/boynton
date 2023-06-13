@@ -1,6 +1,7 @@
 import Camper from "./Camper";
 import tw, { styled } from "twin.macro";
 import { AssignmentHeader } from "./styled";
+import { Box, Typography ,Stack} from "@mui/material";
 
 const CamperList = styled.ul(() => [
   tw`flex w-full  py-2 px-4  flex-wrap justify-start gap-1 md:gap-2 `,
@@ -8,12 +9,7 @@ const CamperList = styled.ul(() => [
 const Campers = ({ select, deselect, list, allCampers }) => {
   return (
     <>
-      <AssignmentHeader tw="sticky">
-        <h1>{list.length} Unassigned Campers</h1>
-        <h1>{allCampers.length} Total Campers</h1>
-      </AssignmentHeader>
-
-      <CamperList >
+      <Stack >
         {list.map((camper, index) => (
           <Camper
             full
@@ -25,7 +21,7 @@ const Campers = ({ select, deselect, list, allCampers }) => {
             deselect={deselect}
           />
         ))}
-      </CamperList>
+      </Stack>
     </>
   )
 };
