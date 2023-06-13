@@ -68,7 +68,7 @@ const SignUpIndex = () => {
 				</>
 			) : (
 				<>
-					<Accordion tw="mb-6 shadow-none py-2 px-1 rounded bg-green-200"
+				{/*					<Accordion tw="mb-6 shadow-none py-2 px-1 rounded bg-green-200"
 						expanded={location.pathname === "/schedule/sign-up" || showAccordion}
 						onChange={handleAccordionChange}
 					>
@@ -111,6 +111,7 @@ const SignUpIndex = () => {
 							</ul>
 						</AccordionDetails>
 					</Accordion>
+					*/}
 				</>
 			)}
 			<Outlet />

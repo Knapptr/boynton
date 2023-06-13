@@ -1,201 +1,206 @@
-import { useLocation, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import useGetDataOnMount from "../hooks/useGetData";
 import tw, { styled } from "twin.macro";
 import "styled-components/macro";
 import { useState, useEffect } from "react";
 import SelectActivities from "../components/SelectActivities";
-import CabinNav from "../components/CabinNav";
-import { LabeledDivider, MenuSelector } from "../components/styled";
-import DayNav from "../components/DayNav";
-import PeriodNav from "../components/PeriodNav";
 import toTitleCase from "../toTitleCase";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faForwardStep, faBackwardStep } from '@fortawesome/free-solid-svg-icons'
-
-const Periods = tw.ul` gap-2 flex justify-center`;
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faForwardStep,
+  faBackwardStep,
+} from "@fortawesome/free-solid-svg-icons";
+import { Box, Button, IconButton, Stack, Typography } from "@mui/material";
+import ToggleSelector from "../components/Selector";
+import SelectDayPeriod from "../components/SelectDayPeriod";
 
 const dayAbbrev = {
-	MON: "Monday",
-	TUE: "Tuesday",
-	WED: "Wednesday",
-	THU: "Thursday",
-	FRI: "Friday",
+  MON: "Monday",
+  TUE: "Tuesday",
+  WED: "Wednesday",
+  THU: "Thursday",
+  FRI: "Friday",
 };
 
-const NextButton = styled.button(({ disabled }) => [
-	tw`self-end py-2 px-4 bg-green-100 rounded shadow transition-colors mx-2 text-black`,
-	disabled && tw`bg-gray-500 cursor-default text-gray-600`
-
-]);
-const Controls = styled.nav(({ showControls }) => [
-	tw`hidden`,
-	showControls && tw`block`,
-]);
 
 const CreateSchedulePage = () => {
-	const [selectedDay, setSelectedDay] = useState(0);
+  const [selectedDay, setSelectedDay] = useState(0);
 
-	const [selectedPeriod, setSelectedPeriod] = useState(0);
+  const [selectedPeriod, setSelectedPeriod] = useState(0);
 
-	const { weekNumber, cabin } = useParams();
+  const { weekNumber, cabin } = useParams();
 
-	const [showControls, setShowControls] = useState(false);
+  const [showControls, setShowControls] = useState(false);
 
-	const [selectedCampers, setSelectedCampers] = useState([]);
+  const [selectedCampers, setSelectedCampers] = useState([]);
 
-	// clear selection on change in week/cabin
-	useEffect(() => {
-		clearSelection();
-	}, [weekNumber, cabin, selectedDay])
+  const handleOpenControls = () => {
+    setShowControls(true);
+  };
+  const handleDialogSubmit = ({ day, period }) => {
+    setSelectedDay(day);
+    setSelectedPeriod(period);
+  };
+  // clear selection on change in week/cabin
+  useEffect(() => {
+    clearSelection();
+  }, [weekNumber, cabin, selectedDay]);
 
-	/** Add / remove selected camper and source id  to selected list. 
-	* @param {camperSession} camper The camper to add/remove from the selection list
-	* @param {any} sourceId the source of the camper (unassigned, or activitySessionId)
-	*/
-	const handleSelectCamper = (camper, sourceId) => {
-		// check if is currently Selected
-		if (selectedCampers.some(c => c.camper.camperSessionId === camper.camperSessionId)) {
-			setSelectedCampers(sc => sc.filter(slc => slc.camper.camperSessionId !== camper.camperSessionId))
-			return;
-		}
-		setSelectedCampers(s => [...s, { camper, sourceId }]);
-	}
+  /** Add / remove selected camper and source id  to selected list.
+   * @param {camperSession} camper The camper to add/remove from the selection list
+   * @param {any} sourceId the source of the camper (unassigned, or activitySessionId)
+   */
+  const handleSelectCamper = (camper, sourceId) => {
+    // check if is currently Selected
+    if (
+      selectedCampers.some(
+        (c) => c.camper.camperSessionId === camper.camperSessionId
+      )
+    ) {
+      setSelectedCampers((sc) =>
+        sc.filter(
+          (slc) => slc.camper.camperSessionId !== camper.camperSessionId
+        )
+      );
+      return;
+    }
+    setSelectedCampers((s) => [...s, { camper, sourceId }]);
+  };
 
-	/** Clear the list of selectedCampers */
-	const clearSelection = () => {
-		setSelectedCampers([]);
-	}
+  /** Clear the list of selectedCampers */
+  const clearSelection = () => {
+    setSelectedCampers([]);
+  };
 
-	const [week, setWeek] = useGetDataOnMount({
-		url: `/api/weeks/${weekNumber}`,
-		runOn: [weekNumber, cabin],
-		initialState: {},
-		useToken: true,
-	});
-	const [weekLoaded, setWeekLoaded] = useState(false);
-	useEffect(() => {
-		if (week.days) {
-			setWeekLoaded(true);
-		}
-	}, [week]);
-	const isTheLastPeriod = () => {
-		if (weekLoaded) {
-			return (
-				selectedDay === week.days.length - 1 &&
-				selectedPeriod === week.days[selectedDay].periods.length - 1
-			);
-		} else {
-			return false;
-		}
-	};
-	const selectNext = (numberToIncrement) => {
-		const currentDayIndex = selectedDay;
-		const currentPeriods = week.days[currentDayIndex].periods;
-		const currentPeriodIndex = selectedPeriod;
-		const nextPeriodIndex = currentPeriodIndex + numberToIncrement
-		const itIsTheLastPeriod = currentPeriods.length === nextPeriodIndex;
+  const [week, setWeek] = useGetDataOnMount({
+    url: `/api/weeks/${weekNumber}`,
+    runOn: [weekNumber, cabin],
+    initialState: {},
+    useToken: true,
+  });
+  const [weekLoaded, setWeekLoaded] = useState(false);
+  useEffect(() => {
+    if (week.days) {
+      setWeekLoaded(true);
+    }
+  }, [week]);
+  const isTheLastPeriod = () => {
+    if (weekLoaded) {
+      return (
+        selectedDay === week.days.length - 1 &&
+        selectedPeriod === week.days[selectedDay].periods.length - 1
+      );
+    } else {
+      return false;
+    }
+  };
+  const selectNext = (numberToIncrement) => {
+    const currentDayIndex = selectedDay;
+    const currentPeriods = week.days[currentDayIndex].periods;
+    const currentPeriodIndex = selectedPeriod;
+    const nextPeriodIndex = currentPeriodIndex + numberToIncrement;
+    const itIsTheLastPeriod = currentPeriods.length === nextPeriodIndex;
 
-		if (!itIsTheLastPeriod && nextPeriodIndex >= 0) {
-			setSelectedPeriod(nextPeriodIndex);
-			return;
+    if (!itIsTheLastPeriod && nextPeriodIndex >= 0) {
+      setSelectedPeriod(nextPeriodIndex);
+      return;
+    } else {
+      const nextIndex = currentDayIndex + numberToIncrement;
+      const thereIsANextDay = week.days[nextIndex] !== undefined;
+      const periodToChoose =
+        numberToIncrement > 0 ? 0 : week.days[nextIndex].periods.length - 1;
+      if (thereIsANextDay) {
+        setSelectedDay(nextIndex);
+        setSelectedPeriod(periodToChoose);
+      }
+    }
+  };
 
-		} else {
-			const nextIndex = currentDayIndex + numberToIncrement;
-			const thereIsANextDay = week.days[nextIndex] !== undefined
-			const periodToChoose = numberToIncrement > 0 ? 0 : week.days[nextIndex].periods.length - 1
-			if (thereIsANextDay) {
-				setSelectedDay(nextIndex);
-				setSelectedPeriod(periodToChoose);
-			}
-		}
-	};
+  const getPeriod = () => week.days[selectedDay].periods[selectedPeriod];
 
-	const getPeriod = () => week.days[selectedDay].periods[selectedPeriod]
-
-	return (
-		<div tw="flex flex-col justify-center min-h-screen w-full">
-			<header tw="mb-3 flex items-center justify-around">
-				<h1 tw="font-bold text-3xl">Cabin {`${toTitleCase(cabin)}`}</h1>
-				<h5 tw="text-xl font-bold text-gray-600">Week {weekNumber}</h5>
-			</header>
-			<div tw="mx-auto flex w-full md:w-2/3 justify-between bg-green-700 p-2 font-bold text-white">
-				<NextButton
-					disabled={selectedDay === 0 && selectedPeriod === 0}
-					previous
-					onClick={() => {
-						selectNext(-1);
-						clearSelection();
-					}}
-				>
-					<FontAwesomeIcon icon={faBackwardStep} />
-				</NextButton>
-				{week.days &&
-					<div tw="flex flex-col justify-center">
-						<h1 >{dayAbbrev[week.days[selectedDay].name]}</h1>
-						<h1>Activity Period {week.days[selectedDay].periods[selectedPeriod].number
-						}</h1>
-					</div>
-				}
-				<NextButton
-					disabled={isTheLastPeriod()}
-					onClick={() => {
-						selectNext(1);
-						clearSelection();
-					}}
-				>
-					<FontAwesomeIcon icon={faForwardStep} />
-				</NextButton>
-			</div>
-			{weekLoaded && (
-				<div tw="flex-grow ">
-					<SelectActivities
-						handleSelectCamper={handleSelectCamper}
-						selectedCampers={selectedCampers}
-						clearSelection={clearSelection}
-						cabinName={cabin}
-						periodId={getPeriod().id}
-					/>
-				</div>
-			)}
-			{weekLoaded && (
-				<div tw="p-3 bg-stone-100 sticky bottom-0">
-					<Controls showControls={showControls}>
-						<LabeledDivider text="Period" />
-						{weekLoaded && (
-							<PeriodNav
-								days={week.days}
-								selectedDay={selectedDay}
-								selectPeriod={setSelectedPeriod}
-								selectedPeriod={selectedPeriod}
-							/>
-						)}
-						<LabeledDivider text="Day" />
-						<DayNav
-							selectDay={setSelectedDay}
-							selectPeriod={setSelectedPeriod}
-							selectedPeriod={selectedPeriod}
-							days={week.days}
-							selectedDay={selectedDay}
-						/>
-						{/*			<LabeledDivider text="Cabin" />
-						<CabinNav
-							currentCabin={cabin}
-							weekNumber={weekNumber}
-							cabins={cabins}
-						/>   */ }
-					</Controls>
-					<button
-						onClick={() => {
-							setShowControls((s) => !s);
-						}}
-						tw=" font-thin border rounded py-2 px-4 mt-2"
-					>
-						{showControls ? "Hide" : "Select Day / Activity Period"}
-					</button>
-				</div>
-			)}
-		</div>
-	);
+  return (
+    <Box width={1}>
+    <Box component="nav"
+    bgcolor="background.primary.light"
+    py={0.75}
+    position="sticky"
+    top={72}
+    zIndex={100}
+    >
+      <Stack
+        direction="row"
+        justifyContent="center"
+        spacing={0.5}
+        alignItems="baseline"
+      >
+        <Typography color="secondary" variant="h6">
+          Cabin {`${toTitleCase(cabin)}`}
+        </Typography>
+        <Typography color="secondary" variant="subtitle1">
+          Week {weekNumber}
+        </Typography>
+      </Stack>
+      <Stack direction="row" justifyContent="center" spacing={2}>
+        <IconButton
+          disabled={selectedDay === 0 && selectedPeriod === 0}
+          onClick={() => {
+            selectNext(-1);
+            clearSelection();
+          }}
+        >
+          <FontAwesomeIcon icon={faBackwardStep} />
+        </IconButton>
+        {week.days && (
+          <Box>
+            <Button onClick={handleOpenControls}>
+              <Typography mr={0.5}>
+                {dayAbbrev[week.days[selectedDay].name]}
+              </Typography>
+              <Typography fontWeight="bold">
+                Act {week.days[selectedDay].periods[selectedPeriod].number}
+              </Typography>
+            </Button>
+          </Box>
+        )}
+        <IconButton
+          disabled={isTheLastPeriod()}
+          onClick={() => {
+            selectNext(1);
+            clearSelection();
+          }}
+        >
+          <FontAwesomeIcon icon={faForwardStep} />
+        </IconButton>
+      </Stack>
+    </Box>
+      {weekLoaded && (
+        <>
+          <Box width={1}>
+            <SelectActivities
+              width={1}
+              handleSelectCamper={handleSelectCamper}
+              selectedCampers={selectedCampers}
+              clearSelection={clearSelection}
+              cabinName={cabin}
+              periodId={getPeriod().id}
+            />
+          </Box>
+          <SelectDayPeriod
+            onSubmit={handleDialogSubmit}
+            open={showControls}
+            onClose={() => {
+              setShowControls(false);
+            }}
+            days={week.days}
+            currentDay={selectedDay}
+            currentPeriod={selectedPeriod}
+            week={week}
+            cabin={cabin}
+          />
+        </>
+      )}
+    </Box>
+  );
 };
 
 export default CreateSchedulePage;

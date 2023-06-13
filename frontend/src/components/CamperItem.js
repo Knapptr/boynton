@@ -1,6 +1,7 @@
 import { Box, Chip, Divider, Stack, Typography } from "@mui/material";
 
 export const CamperItem = ({ camper,divider,index, selectable, handleSelect,isSelected, children}) => {
+  console.log({camper})
   const camperBadges = (camper) => {
     const badges = [
       { type: "dayCamp", label: "day" },
@@ -15,7 +16,7 @@ export const CamperItem = ({ camper,divider,index, selectable, handleSelect,isSe
     <Box
     onClick={handleSelect}
       sx={{
-        backgroundColor: selectable && isSelected ? "primary.main":index % 2 === 0 ? "backround.main" : "background.alt",
+        backgroundColor: selectable && isSelected ? "primary.main":index % 2 === 0 ? "background.paper" : "background.alt",
         color: selectable && isSelected ? "white" : "black"
       }}
     width={1}

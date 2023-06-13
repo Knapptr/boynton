@@ -74,7 +74,6 @@ const CabinAssignment = ({ area, weekNumber }) => {
   const [cabinsOnly, setCabinsOnly] = useState(false);
   const [selectedCampers, setSelected] = useState([]);
 
-
   /** Toggle the visibility of campers / cabins */
   const toggleCabinsOnly = () => {
     setCabinsOnly((s) => !s);
@@ -123,20 +122,20 @@ const CabinAssignment = ({ area, weekNumber }) => {
    * @param {camperSession} camper The camper to add to the selection
    */
   const selectCamper = (camper) => {
-    setSelected((s) => [...s, {...camper}]);
+    setSelected((s) => [...s, { ...camper }]);
   };
 
-  const isSelected=(camper)=>{
-    return selectedCampers.some(c=>c.id ===camper.id);
-  }
+  const isSelected = (camper) => {
+    return selectedCampers.some((c) => c.id === camper.id);
+  };
 
-  const handleSelect = (camper)=>{
-    if(isSelected(camper)){
+  const handleSelect = (camper) => {
+    if (isSelected(camper)) {
       deselectCamper(camper);
-    }else{
-      selectCamper(camper)
+    } else {
+      selectCamper(camper);
     }
-  }
+  };
   /** Remove all selected campers from the unassigned list */
   const removeSelectedFromUnassigned = () => {
     // filter unassigned
@@ -230,25 +229,25 @@ const CabinAssignment = ({ area, weekNumber }) => {
     let camper = undefined;
     setCabinSessions((c) => {
       // remove from assigned
-      console.log({oldState:c})
+      console.log({ oldState: c });
       const newState = [...c];
       const newCabinIndex = newState.findIndex(
         (cab) => cab.id === cabinSessionId
       );
       const newCabin = { ...newState[newCabinIndex] };
       const newCampers = [...newCabin.campers];
-      console.log({oldCabin:newCabin});
-      console.log({oldCampers:newCampers});
+      console.log({ oldCabin: newCabin });
+      console.log({ oldCampers: newCampers });
       const camperIndex = newCampers.find(
         (camper) => camper.id === camperSessionId
       );
       camper = newCampers.splice(camperIndex, 1)[0];
       newCabin.campers = newCampers;
-      console.log({newCampers})
-      console.log({newCabin})
+      console.log({ newCampers });
+      console.log({ newCabin });
       newState[newCabinIndex] = newCabin;
-      console.log({newState})
-      return newState.map(n=>n);
+      console.log({ newState });
+      return newState.map((n) => n);
     });
     // add to unassigned
     setAllCampers((c) => {
@@ -297,12 +296,12 @@ const CabinAssignment = ({ area, weekNumber }) => {
         <Box>
           <Cabins
             toggleUnassignModal={() => {
-              selectedCampers={selectedCampers}
+              selectedCampers = { selectedCampers };
               setShowUnassignModal((d) => !d);
             }}
             unassign={unassignReq}
             showAllLists={cabinsOnly || allAssigned()}
-          selectedCampers = {selectedCampers}
+            selectedCampers={selectedCampers}
             cabinSessions={cabinSessions}
             cabinsOnly={true}
             weekNumber={weekNumber}
@@ -315,17 +314,35 @@ const CabinAssignment = ({ area, weekNumber }) => {
 
   return (
     <>
-    <Dialog open={showUnassignModal}>
-    <DialogTitle>Unassign All Campers?</DialogTitle>
-    <DialogContent>
-    <DialogContentText>This will unassign every {area.toUpperCase()} camper for Week {weekNumber}.</DialogContentText>
-    <DialogContentText>Are you sure?</DialogContentText>
-    <Stack direction="row">
-    <Button color="success" onClick={()=>{setShowUnassignModal(false)}}>Nevermind.</Button><Button onClick={async()=>{ await unassignAll();
-                    setShowUnassignModal(false);
-    }}color="error">Yer outta there!</Button></Stack>
-    </DialogContent>
-    </Dialog>
+      <Dialog open={showUnassignModal}>
+        <DialogTitle>Unassign All Campers?</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            This will unassign every {area.toUpperCase()} camper for Week{" "}
+            {weekNumber}.
+          </DialogContentText>
+          <DialogContentText>Are you sure?</DialogContentText>
+          <Stack direction="row">
+            <Button
+              color="success"
+              onClick={() => {
+                setShowUnassignModal(false);
+              }}
+            >
+              Nevermind.
+            </Button>
+            <Button
+              onClick={async () => {
+                await unassignAll();
+                setShowUnassignModal(false);
+              }}
+              color="error"
+            >
+              Yer outta there!
+            </Button>
+          </Stack>
+        </DialogContent>
+      </Dialog>
       {/*
       <>
         {showUnassignModal && (
@@ -383,18 +400,30 @@ const CabinAssignment = ({ area, weekNumber }) => {
         >
           <Box mb={12} />
           <Stack>
-            {allCampers.unassigned.map((camper, index) => 
-              {{console.log("mapping",camper)}
-              return <CamperItem 
-              key={`camper-item-${camper.id}`}
-              selectable
-                index={index}
-              handleSelect= {()=>{handleSelect(camper)}}
-              isSelected={isSelected(camper)}
-              onSelect={()=>{selectCamper(camper)}}
-              onDeselect={()=>{deselectCamper(camper)}}
-              camper={camper}
-              />}
+            {allCampers.unassigned.map(
+              (camper, index) => {
+                {
+                  console.log("mapping", camper);
+                }
+                return (
+                  <CamperItem
+                    key={`camper-item-${camper.id}`}
+                    selectable
+                    index={index}
+                    handleSelect={() => {
+                      handleSelect(camper);
+                    }}
+                    isSelected={isSelected(camper)}
+                    onSelect={() => {
+                      selectCamper(camper);
+                    }}
+                    onDeselect={() => {
+                      deselectCamper(camper);
+                    }}
+                    camper={camper}
+                  />
+                );
+              }
               /*<Camper
                 full
                 selectable
@@ -409,7 +438,14 @@ const CabinAssignment = ({ area, weekNumber }) => {
         </Drawer>
         {/* MAIN ZONE */}
         <Box sx={{ flexGrow: 1 }}>
-          <Box bgcolor="background.default" component="header" position="sticky" top={72} zIndex={3} sx={{ width: 1, mb: 3}}>
+          <Box
+            bgcolor="background.default"
+            component="header"
+            position="sticky"
+            top={72}
+            zIndex={3}
+            sx={{ width: 1, mb: 3 }}
+          >
             <Grid container alignItems="center">
               <Grid container item xs={12} alignItems="center">
                 <Grid item xs={6} md={3}>
@@ -420,23 +456,25 @@ const CabinAssignment = ({ area, weekNumber }) => {
                 </Grid>
                 <Grid item xs={3}>
                   <Stack color="primary.main">
-                    <Typography variant={{xs:"caption"}}>{allCampers.unassigned.length}</Typography>
+                    <Typography variant={{ xs: "caption" }}>
+                      {allCampers.unassigned.length}
+                    </Typography>
                     <Typography variant="caption">Unassigned</Typography>
                   </Stack>
                 </Grid>
 
                 <Grid item xs={3}>
                   <Stack color="primary.main">
-                    <Typography variant="caption">{allCampers.all.length}</Typography>
+                    <Typography variant="caption">
+                      {allCampers.all.length}
+                    </Typography>
                     <Typography variant="caption">Total</Typography>
                   </Stack>
                 </Grid>
-                <Grid 
-sx={{display: {xs:"none",md:"block"}}}
-    item xs={2}>
+                <Grid sx={{ display: { xs: "none", md: "block" } }} item xs={2}>
                   <Button
                     variant="outlined"
-    size="small"
+                    size="small"
                     color="error"
                     onClick={() => {
                       if (true) {
@@ -483,7 +521,7 @@ sx={{display: {xs:"none",md:"block"}}}
               toggleUnassignModal={() => {}}
               cabinsOnly={false}
               cabinSessions={cabinSessions}
-    selectedCampers={selectedCampers}
+              selectedCampers={selectedCampers}
               weekNumber={weekNumber}
               area={area}
             />

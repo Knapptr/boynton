@@ -60,9 +60,16 @@ const theme = createTheme({
       // default: '#e9f4ee',
       //default: "#E2EEE7",
       default: "#D3E8D7",
+      primary: {
+        light: "#aaba77"
+      },
       paper: '#ccd6ac',
       alt: "#D6D0AC",
-      alt2: "#9f9538"
+      alt2: "#9f9538",
+      secondary: "#a178a5",
+    blue: "#a3aabf",
+    teal: "#93cbc7"
+
       
     },
     warning: {

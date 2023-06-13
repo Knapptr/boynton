@@ -19,7 +19,6 @@ oldtests/
 tests/tryIfExists.js
 config-heroku.json
 frontend/src/hooks/useGetData.js
-frontend/src/pages/CabinAssignment.js
 .productionDB
 .productionDB
 dummyReport.csv

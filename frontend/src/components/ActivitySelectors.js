@@ -40,8 +40,8 @@ const ActivitySelectors = ({
   return (
     <>
     <Badge badgeContent={getTotalUnaccounted()||<CheckedIcon fontSize="inherit" />} color={getTotalUnaccounted()===0?"success":"error"} anchorOrigin={{vertical:"top",horizontal:"left"}} >
-    <ToggleButtonGroup exclusive >
-    <ActivityToggleButton value="all" onClick={selectAll} selected={displayAll}>
+    <ToggleButtonGroup exclusive size="small" >
+    <ActivityToggleButton  value="all" onClick={selectAll} selected={displayAll}>
     All
     </ActivityToggleButton>
       {period.activities.map((act, index) => (

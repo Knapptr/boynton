@@ -24,13 +24,6 @@ export const NavBarLink = styled.li(({ color }) => [
   color && NavBarLinkColors[color],
 ]);
 export const Divider = styled.hr(() => [tw`my-2 flex-grow border-stone-200`]);
-export const LabeledDivider = ({ text }) => (
-  <div tw="flex justify-center items-center my-1">
-    <Divider />
-    <h3 tw="mx-3 ">{text}</h3>
-    <Divider />
-  </div>
-);
 export const menuColors = {
   red: tw`bg-red-200`,
   blue: tw`bg-blue-200`,

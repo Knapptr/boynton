@@ -97,7 +97,6 @@ const AttendanceIndex = () => {
         </AccordionDetails>
       </Accordion>
     </Box>
-
       <Outlet context={{ setHeaderFields,hasHeaderFields: headerFields !== null }} />
     </>
   );
