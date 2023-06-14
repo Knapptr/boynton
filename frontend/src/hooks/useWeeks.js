@@ -29,6 +29,11 @@ const useWeeks = () => {
   const [selectedDayIndex, setSelectedDayIndex] = useState(null);
   const [selectedPeriodIndex, setSelectedPeriodIndex] = useState(null);
 
+  const getWeekByNumber = useCallback((weekNumber) =>{
+    const week = weeks.find(w=> w.number === weekNumber)
+    return week;
+  },[weeks])
+
   const allSelected = ()=>{
     return selectedWeek() && selectedDay() && selectedPeriod()
   }
@@ -159,9 +164,6 @@ const useWeeks = () => {
     setSelectedIndex(autoMagicSelectCurrent(weeks));
   }, [weeks]);
 
-  const WeekSelecttionFull = ({}) => {
-    <Stack></Stack>;
-  };
   const WeekSelection = ({ noLabel, labelElement }) => {
     return (
       <Stack
@@ -306,7 +308,8 @@ const useWeeks = () => {
     setWeeks,
     DaySelectDropdown,
     PeriodSelectDropdown,
-    allSelected
+    allSelected,
+    getWeekByNumber
   };
 };
 

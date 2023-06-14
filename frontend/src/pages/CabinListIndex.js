@@ -1,6 +1,6 @@
 import { useCallback, useContext, useEffect, useState } from "react";
 import UserContext from "../components/UserContext";
-import { Link, Outlet } from "react-router-dom";
+import { Link, Outlet, useParams } from "react-router-dom";
 import useGetDataOnMount from "../hooks/useGetData";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { MenuSelector } from "../components/styled";
@@ -20,6 +20,7 @@ import {
   Typography,
 } from "@mui/material";
 import CamperItem from "../components/CamperItem";
+import WeekContext from "../components/WeekContext";
 
 /** A helper to deal with the cabin list */
 const cabinSelections = {
@@ -63,8 +64,12 @@ const CabinListItem = ({ cabin }) => {
     </>
   );
 };
+
 const CabinListIndex = () => {
-  const { weeks, selectedWeek, WeekSelection, isSelected } = useWeeks();
+  const {getWeekByNumber} = useContext(WeekContext)
+  const {weekNumber} = useParams();
+
+  const currentWeek = getWeekByNumber(Number.parseInt(weekNumber));
 
   const [cabinSessions, setCabinSessions] = useState([]);
 
@@ -89,13 +94,13 @@ const CabinListIndex = () => {
     }
     return selected.cabins.length;
   };
-  /** Handle the selection of a week  */
+
+  /** get list on page load*/
   useEffect(() => {
-    if (selectedWeek() !== null) {
       /** Fetch cabin-sessions from api Defined here because of useEffect dependencies */
       const getCabinSessions = async () => {
         const csResponse = await fetchWithToken(
-          `/api/cabin-sessions?week=${selectedWeek().number}`,
+          `/api/cabin-sessions?week=${weekNumber}`,
           {},
           auth
         );
@@ -114,7 +119,7 @@ const CabinListIndex = () => {
         // unpopulatel list to avoid display conflicts
         setUnassignedCampers([]);
         const ucResponse = await fetchWithToken(
-          `/api/camper-weeks?week=${selectedWeek().number}&cabin=unassigned`,
+          `/api/camper-weeks?week=${weekNumber}&cabin=unassigned`,
           {},
           auth
         );
@@ -123,54 +128,13 @@ const CabinListIndex = () => {
       };
       getCabinSessions();
       getUnassignedCampers();
-    }
-  }, [selectedWeek, auth]);
+  }, [auth]);
 
-  const [showAccordion, setShowAccordion] = useState(selectedWeek() === null);
-  const handleAccordionChange = (e, state) => {
-    setShowAccordion(state);
-  };
-
-  useEffect(() => {
-    if (selectedWeek()) {
-      setShowAccordion(false);
-    }
-  }, [selectedWeek]);
   return (
     <>
-      <Accordion
-        sx={{ width: 1 }}
-        expanded={showAccordion}
-        onChange={handleAccordionChange}
-      >
-        <AccordionSummary
-          expandIcon={
-            selectedWeek() === null? (
-              <></>
-            ) : (
-              <ExpandMoreIcon />
-            )
-          }
-    >
-          {selectedWeek() ? (
-            <>
-              <Box width={1}>
-                <Typography variant="h6">{selectedWeek().title}</Typography>
-                <Typography variant="body2">
-                  Week {selectedWeek().number}
-                </Typography>
-              </Box>
-            </>
-          ) : (
-            <Box width={1}>
-              <Typography variant="h6">Select Week</Typography>
-            </Box>
-          )}
-        </AccordionSummary>
-        <AccordionDetails>
-          <WeekSelection />
-        </AccordionDetails>
-      </Accordion>
+    <Typography variant="subtitle1" component="h1">Cabin List</Typography>
+    <Typography variant="h6" component="h1">Week {currentWeek?.display}</Typography>
+    <Typography variant="subtitle1" component="h1"><em>{currentWeek?.title}</em></Typography>
 
       {cabinSessions.length > 0 && (
         <ToggleButtonGroup

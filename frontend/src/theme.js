@@ -55,6 +55,12 @@ const theme = createTheme({
     secondary: {
       main: '#714779',
     },
+    teal: {
+      light: "#93cbc7",
+      main: "#93cbc7",
+      dark:  "#93cbc7",
+      contrastText: "#000000"
+    },
     background: {
       // Other potential default bg colors
       // default: '#e9f4ee',
@@ -68,7 +74,12 @@ const theme = createTheme({
       alt2: "#9f9538",
       secondary: "#a178a5",
     blue: "#a3aabf",
-    teal: "#93cbc7"
+    teal: {
+      light: "#93cbc7",
+      main: "#93cbc7",
+      dark:  "#93cbc7",
+      contrastText: "#000000"
+    }
 
       
     },

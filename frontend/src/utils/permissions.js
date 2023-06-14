@@ -3,6 +3,7 @@ export function isAdmin(auth) {
 }
 
 export function isUnitHead(auth) {
+  console.log("Checking if unithead",{auth});
   return isAdmin(auth) || auth.userData.user.role === "unit_head"
 }
 

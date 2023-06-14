@@ -9,6 +9,24 @@ const { param } = require("express-validator");
 const Score = require("../../models/score");
 
 const weekHandler = {
+	getHeaders: [
+		param("weekNumber").exists().isInt().custom(async (weekNumber, { req }) => {
+			const getStaff = req.query.staff === "true";
+			const week = await Week.get(weekNumber, getStaff);
+			if (!week) {
+				throw new Error("Week does not exist");
+			}
+			req.week = week;
+
+		}),
+		handleValidation,
+		async (req,res,next)=>{
+			const week = req.week;
+			const {number,display,title,begins,ends} = week;
+			const data = { number,display,title,begins,ends }
+			res.json(data)
+		}],
+
 	async getAll(req, res, next) {
 		const getStaff = req.query.staff === "true";
 		const weeks = await Week.getAll(getStaff);

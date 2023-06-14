@@ -42,16 +42,6 @@ const AttendanceDisplay = () => {
     console.log({data});
     if(data.ok){
     const periodJson = await data.json();
-    //set fields if not set. This updates the Index component
-    // if (!hasHeaderFields) {
-    //   setHeaderFields({
-    //     weekNumber: periodJson.weekNumber,
-    //     dayName: periodJson.dayName,
-    //       periodNumber: periodJson.number,
-    //     weekTitle: periodJson.weekTitle,
-    //     weekDisplay: periodJson.weekDisplay
-    //   });
-    // }
     setPeriod(periodJson);
     }else{
       console.log("Error avoided")
@@ -83,6 +73,8 @@ const AttendanceDisplay = () => {
         clearInterval(intervalRef.current);
       }, cancelIntervalTime);
     } else {
+      // make initial request
+      getPeriod();
       intervalRef.current = setInterval(() => {
         getPeriod();
       }, refreshRate);
@@ -93,6 +85,8 @@ const AttendanceDisplay = () => {
     }
   }, [getPeriod]);
 
+
+  /** Handle user inputs and recurring requests */
   useEffect(() => {
     abortControllerRef.current?.abort();
     startTimer();
@@ -136,17 +130,15 @@ const AttendanceDisplay = () => {
       setSelectedCampers([]);
     },
   };
+
   const countUnaccounted = (campers) => {
     return campers.reduce((acc,cv)=>acc + (cv.isPresent?0:1),0)
   }
+
   const totalUnaccounted = () => {
     return period.activities.reduce((acc,cv)=>acc + countUnaccounted(cv.campers),0)
   }
-  const allActivitiesClear = () => {
-    return period.activities.every((activity) =>
-      activity.campers.every((camper) => camper.isPresent)
-    );
-  };
+
   const toggleHere = (sessionId, camperSessionId) => {
     setUserInput((i) => !i);
     const updatedActivities = [...period.activities];
@@ -195,7 +187,7 @@ const AttendanceDisplay = () => {
 
   return (
     <>
-      <Box pb={32} width={11 / 12}>
+  <Box pb={32} width={1}>
         {!period && (
           <Stack spacing={1} marginTop={8}>
             <Skeleton variant="rectangular" width="100%" height={40} />

@@ -4,9 +4,7 @@ import AddIcon from "@mui/icons-material/Add";
 import fetchWithToken from "../fetchWithToken";
 import useGetDataOnMount from "../hooks/useGetData";
 import "styled-components/macro";
-import {
-  MenuSelector,
-} from "../components/styled";
+import { MenuSelector } from "../components/styled";
 import UserContext from "../components/UserContext";
 import {
   Autocomplete,
@@ -26,9 +24,11 @@ import {
   ListItemText,
   ListItemButton,
   ListItemIcon,
+  ToggleButtonGroup,
+  ToggleButton,
 } from "@mui/material";
 import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
-import HourglassTop from "@mui/icons-material/HourglassTop";
+import { useParams } from "react-router-dom";
 
 const dayDictionary = {
   MON: "Monday",
@@ -40,6 +40,7 @@ const dayDictionary = {
 
 const ProgrammingSchedule = () => {
   const auth = useContext(UserContext);
+  const { weekNumber } = useParams();
 
   const [activities, _, updateActivities] = useGetDataOnMount({
     url: "/api/activities",
@@ -50,62 +51,33 @@ const ProgrammingSchedule = () => {
   // get the list of weeks
   const [weeks, setWeeks] = useState([]);
   // selectedWeekId is mainly concerned with the selection menu and UI logic
-  const [selectedWeekNumber, setSelectedWeekNumber] = useState(undefined);
   // current Week is data fetched from /api/weeks/:weekid
   const [currentWeek, setCurrentWeek] = useState(undefined);
 
-  const [selectedDayIndex, setSelectedDayIndex] = useState(undefined);
+  const [selectedDayIndex, setSelectedDayIndex] = useState(0);
 
-  const selectDay = (dayIndex) => {
-    setSelectedDayIndex(dayIndex);
+  const handleDaySelect = (e) => {
+    setSelectedDayIndex(Number.parseInt(e.target.value));
   };
 
   const getSelectedDay = () => {
-    if (!currentWeek) {
-      return undefined;
-    }
-    return currentWeek.days[selectedDayIndex];
+    return currentWeek?.days[selectedDayIndex];
   };
 
-  const getWeeks = useCallback(async () => {
-    const response = await fetchWithToken("/api/weeks", {}, auth);
+  const getWeek = useCallback(async () => {
+    const response = await fetchWithToken(`/api/weeks/${weekNumber}`, {}, auth);
     if (!response || response.status !== 200) {
-      console.log("Something went wrong!");
       return;
     }
     const data = await response.json();
-    setWeeks(data);
-  }, [auth]);
+    setCurrentWeek(data);
+  }, [auth, weekNumber]);
 
-  const getWeek = useCallback(
-    async (weekNumber) => {
-      const response = await fetchWithToken(
-        `/api/weeks/${weekNumber}`,
-        {},
-        auth
-      );
-      if (!response || response.status !== 200) {
-        console.log("Something went wrong!");
-        return;
-      }
-      const data = await response.json();
-      setCurrentWeek(data);
-    },
-    [auth]
-  );
-
+  // get week on page load
   useEffect(() => {
-    getWeeks();
-  }, [getWeeks]);
+    getWeek();
+  }, [getWeek]);
 
-  const selectWeek = (weekNumber) => {
-    // clear the selected day
-    setSelectedDayIndex(undefined);
-    // Select for menu
-    setSelectedWeekNumber(weekNumber);
-    // fetch weeks data
-    getWeek(weekNumber);
-  };
   const [createActivityData, setCreateActivityData] = useState({
     showWindow: false,
     name: "",
@@ -125,9 +97,6 @@ const ProgrammingSchedule = () => {
   const closeAddPopout = () => {
     setSelectActivityData((d) => ({ ...d, showWindow: false }));
   };
-  // const openAddPopout = () => {
-  //   setSelectActivityData(d => ({ ...d, showWindow: true }));
-  // }
 
   /** Begin the creation of an activity, display a popup with relevant fields.
    * @param periodId {periodId} the period for which to instantiate a session of the newly created activity */
@@ -155,7 +124,7 @@ const ProgrammingSchedule = () => {
   /** things to do after creating activity and activity session with activity creator
    */
   const afterActivityCreation = async () => {
-    await getWeek(selectedWeekNumber);
+    await getWeek();
     closeCreatePopOut();
     updateActivities();
   };
@@ -189,7 +158,7 @@ const ProgrammingSchedule = () => {
       return;
     }
     console.log("Deleted activity session");
-    await getWeek(selectedWeekNumber);
+    await getWeek();
     setWaitingForDeleteRequest((r) =>
       r.filter((aid) => aid.activitySessionId !== activitySessionId)
     );
@@ -198,9 +167,12 @@ const ProgrammingSchedule = () => {
   return (
     <>
       <Box width={1}>
-    <Typography variant="h5" >Activities</Typography>
-    {currentWeek && <Typography variant="h5" fontWeight="bold" >Week {currentWeek.display}</Typography>}
-    {<Typography variant="h6" >{dayDictionary[getSelectedDay()?.name]}</Typography>}
+        <Typography variant="h5">Activities</Typography>
+        {currentWeek && (
+          <Typography variant="h5" fontWeight="bold">
+            Week {currentWeek.display}
+          </Typography>
+        )}
         {activities && createActivityData.showWindow && (
           <CreateActivityBox
             open={createActivityData.showWindow}
@@ -211,7 +183,7 @@ const ProgrammingSchedule = () => {
             afterCreation={afterActivityCreation}
           />
         )}
-        { activities && selectActivityData.showWindow && (
+        {activities && selectActivityData.showWindow && (
           <AddActivityBox
             open={selectActivityData.showWindow}
             activities={activities}
@@ -221,66 +193,54 @@ const ProgrammingSchedule = () => {
             period={selectActivityData.period}
             close={closeAddPopout}
             createActivity={beginCreateActivity}
-            updateWeek={() => getWeek(selectedWeekNumber)}
+            updateWeek={() => getWeek()}
           />
         )}
-        <ul tw="flex justify-center sm:justify-evenly gap-2">
-          {weeks.map((week, weekIndex) => {
-            return (
-              <MenuSelector
-                key={`week-select-${week.number}`}
-                onClick={() => {
-                  selectWeek(week.number);
-                }}
-                isSelected={
-                  selectedWeekNumber && week.number === selectedWeekNumber
-                }
-              >
-                <h2>
-                  <span tw="hidden  sm:block">Week</span> {week.number}{" "}
-                </h2>
-                <span tw="hidden sm:block text-xs font-thin">{week.title}</span>
-              </MenuSelector>
-            );
-          })}
-        </ul>
-        <ul tw="flex justify-center sm:justify-evenly gap-2">
-          {" "}
-          {selectedWeekNumber !== undefined &&
-            currentWeek &&
+        <ToggleButtonGroup
+          exclusive
+          value={selectedDayIndex}
+          onChange={handleDaySelect}
+        >
+          {currentWeek &&
             currentWeek.days.map((day, dayIndex) => (
-              <MenuSelector
-                key={`day-select-${day.id}`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  selectDay(dayIndex);
-                }}
-                isSelected={getSelectedDay() && day.id === getSelectedDay().id}
-              >
+              <ToggleButton key={`day-select-${day.id}`} value={dayIndex}>
                 {" "}
-                <h3>{day.name}</h3>
-              </MenuSelector>
+                {day.name}
+              </ToggleButton>
             ))}
-        </ul>
+        </ToggleButtonGroup>
         {/* PERIODS */}
         <Grid container spacing={1} alignItems="start">
+          <Grid item xs={12}>
+            <Typography variant="h6">
+              {dayDictionary[getSelectedDay()?.name]}
+            </Typography>
+          </Grid>
           {getSelectedDay() !== undefined &&
             getSelectedDay().periods.map((period) => {
               return (
-                <Grid key={`period-select-${period.id}`}container item xs={12} sm={6} md={3} justifyContent="center" alignItems="start" spacing={0.5}>
-                    <Grid xs={12} component="header" bgcolor="secondary.main">
-                      <Typography variant="h6">
-                        Act {period.number}
-                      </Typography>
-                      <IconButton
-                        color="success"
-                        onClick={() => {
-                          beginAddActivity(period);
-                        }}
-                      >
-                        <AddIcon />
-                      </IconButton>
-                    </Grid>
+                <Grid
+                  key={`period-select-${period.id}`}
+                  container
+                  item
+                  xs={12}
+                  sm={6}
+                  md={3}
+                  justifyContent="center"
+                  alignItems="start"
+                  spacing={0.5}
+                >
+                  <Grid xs={12} component="header" bgcolor="secondary.main">
+                    <Typography variant="h6">Act {period.number}</Typography>
+                    <IconButton
+                      color="success"
+                      onClick={() => {
+                        beginAddActivity(period);
+                      }}
+                    >
+                      <AddIcon />
+                    </IconButton>
+                  </Grid>
                   <Grid item xs={11}>
                     <Box
                       bgcolor="primary.light"
@@ -297,7 +257,8 @@ const ProgrammingSchedule = () => {
                       )}
                       {period.activities.map((activity) => (
                         <ListItem key={`activity-list-${activity.id}`}>
-                          <ListItemButton
+                          <ListItemText>{activity.name}</ListItemText>
+                          <IconButton
                             disabled={waitingForDeleteRequest.includes(
                               activity.sessionId
                             )}
@@ -311,17 +272,14 @@ const ProgrammingSchedule = () => {
                               }
                             }}
                           >
-                            <ListItemText>{activity.name}</ListItemText>
-                            <ListItemIcon>
-                              {waitingForDeleteRequest.includes(
-                                activity.sessionId
-                              ) ? (
-                                <HourglassTopIcon />
-                              ) : (
-                                <RemoveCircleIcon />
-                              )}
-                            </ListItemIcon>
-                          </ListItemButton>
+                            {waitingForDeleteRequest.includes(
+                              activity.sessionId
+                            ) ? (
+                              <HourglassTopIcon />
+                            ) : (
+                              <RemoveCircleIcon />
+                            )}
+                          </IconButton>
                         </ListItem>
                       ))}
                     </List>
@@ -367,7 +325,6 @@ const AddActivityBox = ({
   const [selectedActivityId, setSelectedActivityId] = useState("");
 
   const makeSelection = (e, activity) => {
-    console.log({ e, activity });
     // setSelectedActivityId(e.target.value);
     setSelectedActivity(activity);
   };
@@ -394,7 +351,6 @@ const AddActivityBox = ({
         console.log(message);
         return;
       }
-      console.log({ actSessResponse });
       await updateWeek();
       closeAndClear();
     }
@@ -514,7 +470,6 @@ const CreateActivityBox = ({
     if (result.status === 400) {
       close();
       const message = await result.text();
-      console.log(message);
       return;
     }
     const { id } = await result.json();

@@ -30,4 +30,13 @@ export const useUserData = () => {
     return { logIn, logOut, userData }
 }
 
+export const UserContextProvider = ({children}) => {
+    const userState = useUserData()
+    return (
+        <UserContext.Provider value={userState} >
+        {children}
+        </UserContext.Provider>
+    )
+}
+
 export default UserContext;

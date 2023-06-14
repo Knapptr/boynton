@@ -10,13 +10,11 @@ import {
 import { useContext } from "react";
 import WeekContext from "./WeekContext";
 
-const AttendanceDialog = ({ open, onClose }) => {
+const WeekSelectDialog = ({ open, onClose,url,title }) => {
   const {
     weeks,
-    selectedPeriod,
+    selectedWeek,
     WeekSelection,
-    DaySelectDropdown,
-    PeriodSelectDropdown,
   } = useContext(WeekContext);
 
   const handleClose = () => {
@@ -27,7 +25,7 @@ const AttendanceDialog = ({ open, onClose }) => {
   };
 
   const getUrl = () => {
-    return `/schedule/attendance/${selectedPeriod()?.id}`;
+    return `${url}/${selectedWeek()?.number}`;
   };
 
   return (
@@ -39,8 +37,8 @@ const AttendanceDialog = ({ open, onClose }) => {
       maxWidth="md"
     >
       <DialogTitle>
-    <Typography variant="subtitle2">Attendance</Typography>
-    <Typography variant="h6" fontWeight="bold">Select Period</Typography></DialogTitle>
+    <Typography variant="subtitle2">{title}</Typography>
+    <Typography variant="h6" fontWeight="bold">Select Week</Typography></DialogTitle>
       <Box width={1} px={1} mb={1}>
         <Grid
           container
@@ -52,12 +50,6 @@ const AttendanceDialog = ({ open, onClose }) => {
           <Grid item xs={12}>
             <WeekSelection />
           </Grid>
-          <Grid item xs={7}>
-            <DaySelectDropdown />
-          </Grid>
-          <Grid item xs={7}>
-            <PeriodSelectDropdown />
-          </Grid>
         </Grid>
       </Box>
       <DialogActions>
@@ -66,7 +58,7 @@ const AttendanceDialog = ({ open, onClose }) => {
         </Button>
         <Button
           onClick={handleSubmit}
-          disabled={!selectedPeriod()}
+          disabled={!selectedWeek()}
           href={getUrl()}
         >
           Go
@@ -76,4 +68,4 @@ const AttendanceDialog = ({ open, onClose }) => {
   );
 };
 
-export default AttendanceDialog;
+export default WeekSelectDialog;

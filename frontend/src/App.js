@@ -2,11 +2,9 @@ import "./App.css";
 import { Route, Routes, BrowserRouter, Outlet } from "react-router-dom";
 import CabinAssignmentRoutes from "./pages/CabinAssignment";
 import NotFound from "./pages/NotFound";
-import ScheduleRoutes from "./pages/ScheduleRoutes";
 import LoginPage from "./pages/login";
 import NavWrapper from "./components/NavWrapper";
 import Protected from "./components/Protected";
-import Dashboard from "./pages/dashboard";
 import UserContext, { useUserData } from "./components/UserContext";
 import CabinListIndex from "./pages/CabinListIndex";
 import Scoreboard from "./pages/Scoreboard";
@@ -26,13 +24,13 @@ import RoleProtected from "./components/protectedRoutes";
 import SignUpIndex from "./pages/SignUpIndex";
 import CreateSchedulePage from "./pages/CreateSchedule";
 import AttendanceDisplay from "./pages/Attendance";
-import AttendanceIndex from "./pages/AttendanceIndex";
+import { UserContextProvider } from "./components/UserContext";
+import { WeekContextProvider } from "./components/WeekContext";
 
 function App() {
-  const userState = useUserData();
   return (
     <div className="App">
-      <UserContext.Provider value={userState}>
+    <UserContextProvider>
         <BrowserRouter>
           <Routes>
             <Route path="login" element={<LoginPage />} />
@@ -41,7 +39,9 @@ function App() {
               path=""
               element={
                 <Protected>
+                <WeekContextProvider>
                   <NavWrapper />
+                </WeekContextProvider>
                 </Protected>
               }
             >
@@ -54,10 +54,10 @@ function App() {
                 }
               ></Route>
 
-              <Route path="award" element={<CreateAward />} />
+              <Route path="award/:weekNumber" element={<CreateAward />} />
               <Route path="cabins/">
                 {CabinAssignmentRoutes()}{" "}
-                <Route path="list/">
+                <Route path="list/:weekNumber">
                   <Route
                     index
                     element={
@@ -80,15 +80,9 @@ function App() {
                 <Route path=":weekNumber" element={<Score />} />
               </Route>
               <Route path="schedule">
-                <Route path="sign-up" element={<SignUpIndex />}>
-                  <Route
-                    path=":cabin/:weekNumber"
-                    element={<CreateSchedulePage />}
-                  />
-                </Route>
 
                 <Route
-                  path="activities"
+                  path="programming/:weekNumber"
                   element={
                     <RoleProtected role="programming">
                       <ProgrammingSchedule />
@@ -96,8 +90,16 @@ function App() {
                   }
                 />
 
+                <Route path="sign-up" element={<SignUpIndex />}>
+                  <Route
+                    path=":cabin/:weekNumber"
+                    element={<CreateSchedulePage />}
+                  />
+                </Route>
+
+
                 <Route
-                  path="staff"
+                  path="staffing/:weekNumber"
                   element={
                     <RoleProtected role="unit_head">
                       <StaffSchedule />
@@ -114,7 +116,7 @@ function App() {
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
-      </UserContext.Provider>
+      </UserContextProvider>
     </div>
   );
 }

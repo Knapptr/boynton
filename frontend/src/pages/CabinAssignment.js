@@ -24,14 +24,14 @@ import {
   DialogTitle,
   DialogContent,
   DialogContentText,
+  Container,
 } from "@mui/material";
-import Camper from "../components/Camper";
 import CamperItem from "../components/CamperItem";
+import WeekContext from "../components/WeekContext";
 
 // CONSTANTS
 const areas = ["ba", "ga"];
 const weeks = ["1", "2", "3", "4", "5", "6"];
-
 const drawerWidth = 1 / 3;
 
 const CabinAssignmentRoutes = () => {
@@ -69,10 +69,14 @@ const CabinAssignmentRoutes = () => {
 
 const CabinAssignment = ({ area, weekNumber }) => {
   const auth = useContext(UserContext);
-  const token = auth.userData.token;
+  const {getWeekByNumber} = useContext(WeekContext);
+
+  const currentWeek = getWeekByNumber(Number.parseInt(weekNumber));
+
   const [showUnassignModal, setShowUnassignModal] = useState(false);
   const [cabinsOnly, setCabinsOnly] = useState(false);
   const [selectedCampers, setSelected] = useState([]);
+
 
   /** Toggle the visibility of campers / cabins */
   const toggleCabinsOnly = () => {
@@ -81,10 +85,7 @@ const CabinAssignment = ({ area, weekNumber }) => {
   const {
     cabinSessions,
     refreshCabins,
-    cabinList,
-    updateCabinList,
     setCabinSessions,
-    setCabinList,
   } = useCabinSessions(weekNumber, area);
 
   const [allCampers, setAllCampers] = useState({ unassigned: [], all: [] });
@@ -312,14 +313,14 @@ const CabinAssignment = ({ area, weekNumber }) => {
     );
   };
 
-  return (
+  return currentWeek && (
     <>
       <Dialog open={showUnassignModal}>
         <DialogTitle>Unassign All Campers?</DialogTitle>
         <DialogContent>
           <DialogContentText>
             This will unassign every {area.toUpperCase()} camper for Week{" "}
-            {weekNumber}.
+            {currentWeek.display}.
           </DialogContentText>
           <DialogContentText>Are you sure?</DialogContentText>
           <Stack direction="row">
@@ -343,45 +344,6 @@ const CabinAssignment = ({ area, weekNumber }) => {
           </Stack>
         </DialogContent>
       </Dialog>
-      {/*
-      <>
-        {showUnassignModal && (
-          <PopOut
-            onClick={() => {
-              setShowUnassignModal(false);
-            }}
-            shouldDisplay={true}
-          >
-            <div
-              tw="bg-coolGray-200 p-4 rounded shadow"
-              onClick={(e) => {
-                e.stopPropagation();
-              }}
-            >
-              <header>
-                <h4 tw="font-bold text-lg">Unassign All Campers</h4>
-                <p>Are you sure?</p>
-                <button
-                  onClick={() => setShowUnassignModal(false)}
-                  tw="rounded bg-green-400 p-2 m-2"
-                >
-                  Nevermind
-                </button>{" "}
-                <button
-                  tw=" rounded bg-red-400 m-2 p-2"
-                  onClick={async () => {
-                    await unassignAll();
-                    setShowUnassignModal(false);
-                  }}
-                >
-                  Get rid of 'em
-                </button>
-              </header>
-            </div>{" "}
-          </PopOut>
-        )}
-
-      */}
       <Box display="flex" width={1}>
         {/* keeps things nice*/}
         {/* Camper Drawer */}
@@ -395,11 +357,12 @@ const CabinAssignment = ({ area, weekNumber }) => {
             [`& .MuiDrawer-paper`]: {
               width: drawerWidth,
               boxSizing: "border-box",
+              backgroundColor: "background.primary.light"
             },
           }}
         >
           <Box mb={12} />
-          <Stack>
+          <Stack spacing={0.5} pb={4}>
             {allCampers.unassigned.map(
               (camper, index) => {
                 {
@@ -424,15 +387,6 @@ const CabinAssignment = ({ area, weekNumber }) => {
                   />
                 );
               }
-              /*<Camper
-                full
-                selectable
-                key={`camper-${camper.id}`}
-                index={index}
-                select={selectCamper}
-                deselect={deselectCamper}
-                camper={camper}
-              />*/
             )}
           </Stack>
         </Drawer>
@@ -446,17 +400,18 @@ const CabinAssignment = ({ area, weekNumber }) => {
             zIndex={3}
             sx={{ width: 1, mb: 3 }}
           >
-            <Grid container alignItems="center">
+            <Grid containeralignItems="center">
               <Grid container item xs={12} alignItems="center">
                 <Grid item xs={6} md={3}>
+                  <Typography variant="subtitle2">Cabin assignment</Typography>
                   <Typography variant="h6">
-                    {area.toUpperCase()} Week {weekNumber}
+                    {area.toUpperCase()} Week {currentWeek.display}
                   </Typography>
-                  <Typography variant="subtitle1">Cabin assignment</Typography>
+    <Typography fontSize="0.5rem" variant="subtitle1">{currentWeek.title}</Typography>
                 </Grid>
                 <Grid item xs={3}>
                   <Stack color="primary.main">
-                    <Typography variant={{ xs: "caption" }}>
+                    <Typography variant={"caption" }>
                       {allCampers.unassigned.length}
                     </Typography>
                     <Typography variant="caption">Unassigned</Typography>
@@ -514,7 +469,7 @@ const CabinAssignment = ({ area, weekNumber }) => {
               </Button>
             )*/}
 
-          <Grid item xs={12}>
+          <Grid px={0.4} item xs={12}>
             <Cabins
               unassign={unassignReq}
               assign={assignCabin}
