@@ -21,10 +21,10 @@ const RoleProtected = ({ role, children }) => {
     return token ? true : false;
   };
   if (!hasToken()) {
-    return <Navigate to="/login" state={{ cameFrom: location.pathname }} />;
+    return <Navigate to="/login" state={{ cameFrom: "/" }} />;
   } else {
     if (!roleAuth(role)(auth)) {
-      return <Navigate to="/login" state={{ cameFrom: location.pathname }} />;
+      return <Navigate to="/login" state={{ cameFrom: "/" }} />;
     }
     return children;
   }

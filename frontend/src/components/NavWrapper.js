@@ -5,6 +5,7 @@ import NavDrawer from "./NavDrawer";
 import CabinAssignmentDialog from "./CabinAssignmentDialog";
 import { Box, Container } from "@mui/material";
 import WeekSelectDialog from "./WeekSelectDialog";
+import ActivitySignUpDialog from "./ActivitySignUpDialog";
 
 const NavWrapper = () => {
 	const [openDialog,setOpenDialog] = useState(null);
@@ -44,6 +45,8 @@ const NavWrapper = () => {
 	  <WeekSelectDialog title="Staffirg"
 	  open={openDialog==="staffing"} onClose={handleClose} url="schedule/staffing" />
 
+	  {/* Activity Sign Up */}
+	  <ActivitySignUpDialog open={openDialog==="signup"} onClose={handleClose}/>
 	  {/* App Content */}
           <Outlet />
 

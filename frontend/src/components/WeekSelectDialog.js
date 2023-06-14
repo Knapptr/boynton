@@ -5,6 +5,7 @@ import {
   DialogActions,
   DialogTitle,
   Grid,
+  Stack,
   Typography,
 } from "@mui/material";
 import { useContext } from "react";
@@ -34,7 +35,7 @@ const WeekSelectDialog = ({ open, onClose,url,title }) => {
       open={weeks && open}
       onClose={onClose}
       fullWidth
-      maxWidth="md"
+      maxWidth="sm"
     >
       <DialogTitle>
     <Typography variant="subtitle2">{title}</Typography>
@@ -53,6 +54,7 @@ const WeekSelectDialog = ({ open, onClose,url,title }) => {
         </Grid>
       </Box>
       <DialogActions>
+    <Stack direction="row" spacing={2}>
         <Button color="warning" variant="outlined" onClick={handleClose}>
           Nevermind
         </Button>
@@ -60,9 +62,12 @@ const WeekSelectDialog = ({ open, onClose,url,title }) => {
           onClick={handleSubmit}
           disabled={!selectedWeek()}
           href={getUrl()}
+    color="primary"
+    variant="contained"
         >
           Go
         </Button>
+    </Stack>
       </DialogActions>
     </Dialog>
   );

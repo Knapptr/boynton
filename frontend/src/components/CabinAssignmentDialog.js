@@ -1,4 +1,4 @@
-import { Box,Select, Button, Dialog, DialogActions, DialogTitle, Grid, MenuItem, FormControl, FormControlLabel, InputLabel } from "@mui/material";
+import { Box,Select, Button, Dialog, DialogActions, DialogTitle, Grid, MenuItem, FormControl, FormControlLabel, InputLabel, Stack } from "@mui/material";
 import { useContext, useState } from "react";
 import WeekContext from "./WeekContext";
 
@@ -21,7 +21,7 @@ const CabinAssignmentDialog = ({open,onClose}) =>{
 
   return (<>
     {weeks.length > 0 &&
-    <Dialog PaperProps={{elevation:8}} open={weeks && open} onClose={handleClose} fullWidth maxWidth="md" >
+    <Dialog PaperProps={{elevation:8}} open={weeks && open} onClose={handleClose} fullWidth maxWidth="sm" >
           <DialogTitle >Cabin Assignment Selection</DialogTitle>
     <Box  width={1} px={1} mb={1}>
       <Grid container width={1} alignItems="center" justifyContent="center" spacing={2}>
@@ -40,8 +40,20 @@ const CabinAssignmentDialog = ({open,onClose}) =>{
       </Grid>
     </Box>
     <DialogActions>
-    <Button onClick={handleClose}>Nevermind</Button>
-    <Button onClick={handleSubmit} disabled={!selectedWeek() && !selectedArea} href={getUrl()}>Go</Button>
+    <Stack direction="row" spacing={2}>
+        <Button color="warning" variant="outlined" onClick={handleClose}>
+          Nevermind
+        </Button>
+        <Button
+          onClick={handleSubmit}
+          disabled={!selectedWeek() || selectedArea === ""}
+          href={getUrl()}
+    color="primary"
+    variant="contained"
+        >
+          Go
+        </Button>
+    </Stack>
     </DialogActions>
     </Dialog>
     }

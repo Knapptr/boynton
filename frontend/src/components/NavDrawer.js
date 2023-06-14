@@ -10,27 +10,46 @@ import IconButton from '@mui/material/IconButton';
 import { isAdmin, isProgramming, isUnitHead } from "../utils/permissions";
 import UserContext from "./UserContext";
 
+// Consts
 const drawerWidth = 240;
 
 const navItems = [
-  { name: 'Give Award', url: "/award" },
+  { label: 'Give Award', url: "/award" },
   // { name: 'Scores', url: "/scoreboard" },
 ]
 
+// Nav menu items that spawn a dialog box
 const navDialogs = [
-  {name: "Attendance", dialog: "attendance", reqRole: "counselor"},
-  {name: "Cabin Assignment", dialog: "cabinassignment", reqRole: "unit_head"},
-  {name: "Cabin Lists", dialog: "cabinlist", reqRole: "counselor"},
-  {name: "Give Award", dialog:"giveaward", reqRole:"counselor"},
-  {name: "Activity Schedule", dialog:"programming", reqRole:"programming"},
-  { name: "Staff Scheduling", dialog: "staffing", reqRole: "admin" },
-  { name: "Activity Sign-Up", dialog: "signup", reqRole:"counselor" },
+  {label: "Attendance", dialog: "attendance", reqRole: "counselor"},
+  {label: "Activity Sign-Up", dialog: "signup", reqRole:"counselor" },
+  {label: "Cabin Lists", dialog: "cabinlist", reqRole: "counselor"},
+  {label: "Give Award", dialog:"giveaward", reqRole:"counselor"},
+  {label: "Activity Schedule", dialog:"programming", reqRole:"programming"},
+  {label: "Cabin Assignment", dialog: "cabinassignment", reqRole: "unit_head"},
+  {label: "Staff Scheduling", dialog: "staffing", reqRole: "admin" },
 ]
 
+/** App bar items that spawn dialogs*/
+const appBarDialogOptions = [
+  {label: "Attendance", dialog: "attendance", reqRole: "counselor"},
+  {label: "Activity Sign-Up", dialog: "signup", reqRole:"counselor" },
+  {label: "Cabin Lists", dialog: "cabinlist", reqRole: "counselor"},
+  {label: "Give Award", dialog:"giveaward", reqRole:"counselor"},
+]
+
+/** Schedule Menu that each open dialogs **/
+const scheduleMenuOptions =[
+  {label: "Cabin Assignment", dialog: "cabinassignment", reqRole: "unit_head"},
+  {label: "Activity Schedule", dialog:"programming", reqRole:"programming"},
+  {label: "Staff Scheduling", dialog: "staffing", reqRole: "admin" },
+]
+
+// Nav items for admin only
 const adminNavItems = [
-  { name: "Users", url: "/users" }
+  {label: "Users", url: "/users" }
 ]
 
+/** Filter role based links on reqRole property*/
 const prepareRoleMenuItems = (items, auth) => {
   return items.filter(item => {
     switch (item.reqRole) {
@@ -50,50 +69,40 @@ const prepareRoleMenuItems = (items, auth) => {
   )
 }
 
+ 
+/** Nav menu button that is not a link*/
 const NavMenuButton = ({ children, onClick }) => {
   return (<Button sx={{ color: "white" }} onClick={onClick}  >
     {children}
   </Button >)
 }
 
+/** Turn items into nav bar dialog options*/
 const MenuDialogs = ({items,handleDialogs,auth})=>{
   const handleDialog = (dialogName)=>{
     handleDialogs(dialogName);
   }
-  return prepareRoleMenuItems(items,auth).map(item=> <NavMenuButton onClick={()=>{handleDialog(item.dialog)}}>{item.name}</NavMenuButton>)
+  return prepareRoleMenuItems(items,auth).map(item=> <NavMenuButton onClick={()=>{handleDialog(item.dialog)}}>{item.label}</NavMenuButton>)
 }
 
-const DrawerDialog = ({items,handleDialogs})=>{
+/** Turn items into drawer dialog options */
+const DrawerDialogs = ({items,handleDialogs,auth})=>{
 
   const handleDialog = (dialogName) =>{
     handleDialogs(dialogName);
   }
 
   return (<List>
-    {items.map(item =>  (<ListItem key={"drawer-" + item.name}>
-        <ListItemButton component={Button} onClick={()=>{handleDialog(item.dialog)}}><ListItemText primary={item.name} /></ListItemButton>
+    {prepareRoleMenuItems(items,auth).map(item =>  (<ListItem key={"drawer-" + item.label}>
+        <ListItemButton component={Button} onClick={()=>{handleDialog(item.dialog)}}><ListItemText primary={item.label} /></ListItemButton>
       </ListItem>)
     )}
   </List>)
 }
 
-const NavDialogButton = ({ active, handleDialogs, item }) => {
-  return (
-    <Button onClick={handleDialogs} sx={{ color: "white" }} disabled={active} key={item.name} >
-      {item.name}
-    </Button>
-  )
-}
 
-const NavContextLinkButton = ({ active, to, item }) => {
-  return (
-    <Button href={to} sx={{ color: "white" }} disabled={active} key={item.name} >
-      {item.name}
-    </Button>
-  )
-}
-
-const MenuNav = ({ title }) => {
+/** A Menu that opens on click*/
+const MenuNav = ({ title,items,onClick }) => {
   const [anchorEl, setAnchorEl] = useState(null);
 
   const handleMenu = (event) => {
@@ -103,7 +112,12 @@ const MenuNav = ({ title }) => {
   const handleClose = () => {
     setAnchorEl(null);
   };
+  const handleItemClick = (item) =>{
 
+    onClick && onClick(item)
+    handleClose();
+    
+  }
   return (
 
     <>
@@ -125,16 +139,22 @@ const MenuNav = ({ title }) => {
         open={Boolean(anchorEl)}
         onClose={handleClose}
       >
+    {items.map(item=><MenuItem >
+
+    <Button onClick={()=>{handleItemClick(item)}}href={item.url}>{item.label}</Button>
+
+      </MenuItem>)}
       </Menu>
     </>
   )
 }
 
+/** The navigation options on the Drawer */
 const DrawerNav = ({ items, auth }) => {
   return (<List>
     {prepareRoleMenuItems(items, auth).map(item => {
       return (<ListItem key={item.name}>
-        <ListItemButton component={Button} href={item.url} ><ListItemText primary={item.name} /></ListItemButton>
+        <ListItemButton component={Button} href={item.url} ><ListItemText primary={item.label} /></ListItemButton>
       </ListItem>)
     })}
   </List>
@@ -142,6 +162,8 @@ const DrawerNav = ({ items, auth }) => {
 }
 
 
+
+/** The main App Bar and Drawer*/
 function NavDrawer(props) {
   const auth = useContext(UserContext);
   const location = useLocation()
@@ -150,21 +172,20 @@ function NavDrawer(props) {
   const [mobileOpen, setMobileOpen] = useState(false);
   
 
-
-
-const DialogLinks = () =>{
-  return <DrawerDialog handleDialogs={handleDialogs}items={prepareRoleMenuItems(navDialogs,auth)}/>}
-
   const handleDrawerToggle = () => {
     setMobileOpen((prevState) => !prevState);
   };
 
+  /** The Drawer itself*/
   const drawer = (
     <Box onClick={handleDrawerToggle}  >
-   <DialogLinks /> 
+
+   <DrawerDialogs handleDialogs = {handleDialogs} auth={auth} items={navDialogs}/> 
   
       <Divider />
-      <DrawerNav items={adminNavItems} auth={auth} />
+
+    {/* Admin items at bottom */}
+    {isAdmin(auth)&&<DrawerNav items={adminNavItems} auth={auth} />}
       <Box
         sx={{ display: 'flex', width: "100%", justifyContent: "center", marginTop: "4rem" }}
       >
@@ -209,8 +230,17 @@ const DialogLinks = () =>{
             <Box
               sx={{ display: { xs: 'none', md: 'block' } }}
             >
-    <MenuDialogs auth={auth} items={navDialogs} handleDialogs={handleDialogs}/>
-              <MenuNav auth={auth} title="Admin" items={adminNavItems} />
+            <MenuDialogs auth={auth} items={appBarDialogOptions} handleDialogs={handleDialogs}/>
+            
+    {isProgramming(auth) &&<MenuNav 
+                auth={auth}
+                title="Schedule"
+                items={prepareRoleMenuItems(scheduleMenuOptions,auth)}
+                onClick={(item)=>{handleDialogs(item.dialog)}}/>}
+            
+    {isAdmin(auth) &&
+            <MenuNav auth={auth} title="Admin" items={adminNavItems} />
+    }
               <Button
                 sx={{ marginLeft: "2rem" }}
                 onClick={auth.logOut}

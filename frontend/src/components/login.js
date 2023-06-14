@@ -1,3 +1,4 @@
+import ParkTwoToneIcon from '@mui/icons-material/ParkTwoTone';
 import { useState, useContext } from "react";
 import UserContext from "./UserContext";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -6,9 +7,8 @@ import "styled-components/macro";
 import logo from "../cl.png";
 import usePops from "../hooks/usePops";
 import catchErrors from "../utils/fetchErrorHandling";
+import { Box, Button, Card, Stack, TextField, Typography } from "@mui/material";
 
-const LoginField = tw.input`rounded my-4 border-gray-200 border-2 p-4`;
-const SubmitButton = tw.button`bg-green-600 p-4 rounded-lg`;
 
 const Login = () => {
 	const auth = useContext(UserContext);
@@ -53,33 +53,38 @@ const Login = () => {
 		}
 	}
 	return (
-		<><form onSubmit={handleSubmit} tw="w-4/5 sm:w-1/2 md:w-2/5 max-w-sm">
-			<div tw="flex flex-col">
-				<img src={logo} alt="" />
-				<LoginField
-					type="text"
+		<Box maxWidth={400}>
+		<form onSubmit={handleSubmit} >
+		<Stack justifyContent="center" mb={8}>
+		<Typography lineHeight={0.8} variant="h1" textAlign="center" fontWeight="bold" color="primary">Boynton</Typography>
+		<Typography variant="h3" textAlign="center" color="secondary">Camp Leslie</Typography>
+		</Stack>
+			<Box display="flex" flexDirection="column">
+		<Stack spacing={2}>
+				<TextField
+		label="username"
 					name="username"
 					id="usernameInput"
-					placeholder="username"
 					onChange={handleUpdate}
 					value={formInputs.username}
 					required
 				/>
-				<LoginField
+				<TextField
 					type="password"
 					onChange={handleUpdate}
 					required
 					name="password"
 					id="passwordInput"
-					placeholder="password"
+		label="password"
 					value={formInputs.password}
 				/>
-				<SubmitButton>Login</SubmitButton>
-			</div>
+				<Button type="submit" variant="contained" color="primary" ><ParkTwoToneIcon/>Login </Button>
+		</Stack>
+			</Box>
 		</form>
 
 			<PopsBar />
-		</>
+		</Box>
 	);
 };
 

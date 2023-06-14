@@ -5,6 +5,7 @@ import {
   DialogActions,
   DialogTitle,
   Grid,
+  Stack,
   Typography,
 } from "@mui/material";
 import { useContext } from "react";
@@ -61,6 +62,7 @@ const AttendanceDialog = ({ open, onClose }) => {
         </Grid>
       </Box>
       <DialogActions>
+    <Stack direction="row" spacing={2}>
         <Button color="warning" variant="outlined" onClick={handleClose}>
           Nevermind
         </Button>
@@ -68,9 +70,12 @@ const AttendanceDialog = ({ open, onClose }) => {
           onClick={handleSubmit}
           disabled={!selectedPeriod()}
           href={getUrl()}
+    color="primary"
+    variant="contained"
         >
           Go
         </Button>
+    </Stack>
       </DialogActions>
     </Dialog>
   );
