@@ -12,7 +12,6 @@ class CamperActivity {
         const query = "SELECT * from camper_activities WHERE id = $1";
         const values = [id];
         const result = await fetchOne(query, values);
-        console.log({ modelResult: result });
         if (!result) {
             throw new Error("not found");
         }
@@ -29,12 +28,30 @@ class CamperActivity {
             "UPDATE camper_activities SET is_present = $1 WHERE id = $2 RETURNING *";
         const values = [trueOrFalse, this.id];
         const result = await fetchOne(query, values);
-        console.log({ modelResult: result });
         if (!result) {
             throw new Error("Could not update present value");
         }
         this.isPresent = trueOrFalse;
         return this;
+    }
+
+    async update(activitySessionId, isPresent) {
+        const query = `
+        UPDATE camper_activities
+        SET activity_id = $2,
+        is_present = $3
+        WHERE id = $1
+        RETURNING *
+        ` ;
+        const values = [this.id, activitySessionId, isPresent];
+
+        const result = await fetchOne(query, values);
+        if (!result) { throw new Error("Could not update camper activity session") };
+        this.activityId = activitySessionId;
+        this.isPresent = isPresent;
+        return this;
+
+
     }
 }
 

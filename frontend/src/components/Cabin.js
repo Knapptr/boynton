@@ -1,83 +1,165 @@
-import { Droppable } from "@react-forked/dnd";
-import Camper from "./Camper";
+import PersonRemoveIcon from "@mui/icons-material/PersonRemove";
 import { useState, useEffect } from "react";
-import tw, { styled } from "twin.macro";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import "styled-components/macro";
-const CabinComponentFrame = styled.div(({ cabinsOnly }) => [
-  tw`w-1/3 flex-grow`,
-  cabinsOnly && tw`w-1/2 lg:w-1/5`,
-]);
-const CabinWrapper = styled.div(({ isOpen, disabled, isOver }) => [
-  tw`select-none p-2 flex flex-col bg-sky-600 border border-sky-700  `,
-  disabled && tw`bg-red-300`,
-  isOver && tw`bg-sky-800 border-sky-900`,
-]);
-const CamperList = styled.ul(({ isOpen, hasCampers }) => [
-  tw`p-1 rounded flex-grow flex flex-col gap-1`,
-  hasCampers && isOpen && tw`bg-sky-800`,
-]);
-const Cabin = ({ session, list, allOpenState, unassignCamper, cabinsOnly }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const toggleOpen = () => {
-    setIsOpen((o) => !o);
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Box,
+  Card,
+  IconButton,
+  Stack,
+  Typography,
+} from "@mui/material";
+import CamperItem from "./CamperItem";
+
+const Cabin = ({
+  assign,
+  session,
+  // allOpenState,
+  unassignCamper,
+  // selectedCampers,
+  // cabinsOnly,
+}) => {
+
+  const [openList,setOpenList] = useState(false);
+
+  useEffect(()=>{
+    if(openList && session.campers.length === 0){setOpenList(false)}
+  },[session.campers,openList])
+
+  /** Get min and max ages in cabin, ignoring FLs */
+  const getMinMaxAge = () => {
+    if (session.campers.every((c) => c.fl)) {
+      return { min: "FL", max: "ONLY" };
+    }
+    // Cabins are sorted by age in the response, so iterate through until a non FL is found on each end
+    let i = 0;
+    let j = session.campers.length - 1;
+
+    while (i < session.campers.length && session.campers[i].fl) {
+      i++;
+    }
+    while (j > 0 && session.campers[j].fl) {
+      j--;
+    }
+    if (j < 0) {
+      return { min: session.campers[0].age, max: session.campers[0].age };
+    }
+    return { min: session.campers[i].age, max: session.campers[j].age };
   };
-  useEffect(() => {
-    setIsOpen(allOpenState);
-  }, [allOpenState]);
 
   return (
-    <CabinComponentFrame cabinsOnly={cabinsOnly}>
-      <Droppable
-        isDropDisabled={list.length === session.capacity}
-        droppableId={`${session.cabinName}`}
+    <Card width={1}>
+      <Box
+        disabled={session.campers.length === session.capacity}
+        onClick={(e) => {
+          e.stopPropagation();
+          // if (list.length === session.capacity) {
+          //   console.log("Cabin is full.");
+          // } else {
+          assign(session, session.campers.length);
+          //}
+        }}
       >
-        {(provided, snapshot) => (
-          <CabinWrapper
-            isOver={snapshot.isDraggingOver}
-            {...isOpen}
-            {...provided.droppableProps}
-            ref={provided.innerRef}
-            disabled={list.length === session.capacity}
+        <Stack
+          direction="row"
+          component="header"
+    justifyContent="space-between"
+    align-items="center"
+          sx={{
+            py: 1,
+            px: { xs: 4, md: 2 },
+            backgroundColor: "secondary.main",
+            color: "white",
+          }}
+        >
+    <Box>
+          <Typography variant="h5">{session.name}</Typography>
+    </Box>
+    <Box>
+    {session.campers.length === session.capacity && <Typography ml={1} variant="subtitle1" fontWeight="bold">full</Typography>}
+    </Box>
+    <Box ml="auto">
+            <Typography color="white" fontWeight="bold">
+              {session.campers.length}
+            </Typography>
+          <Typography color="lightgrey" >
+            /{session.capacity}
+          </Typography>
+    </Box>
+        </Stack>
+
+        <Accordion
+          expanded={openList}
+          disabled={session.campers.length === 0}
+          onChange={(e) => {
+            setOpenList(t=>!t);
+            e.stopPropagation();
+          }}
+        >
+          <AccordionSummary
+            expandIcon={session.campers.length > 0 && <ExpandMoreIcon />}
           >
-            <header tw="flex justify-between">
-              <h4 tw="font-bold text-xl">{session.cabinName}</h4>
-              <h4 tw="font-bold text-2xl">
-                {list.length}/{session.capacity}
-              </h4>
-            </header>
-            <div tw="flex justify-end">
-              {list.length > 0 && !allOpenState && (
-                <button onClick={toggleOpen}>
-                  {isOpen ? "Hide List" : "View List"}
-                </button>
-              )}
-              <h4 tw="ml-auto">
-                {list.length <= 0
-                  ? "Empty"
-                  : `Ages: ${list[0].age} - ${list[list.length - 1].age}`}
-              </h4>
-            </div>
-            <CamperList isOpen={isOpen} hasCampers={list.length > 0}>
-              {isOpen &&
-                list.map((camper, index) => {
-                  console.log({camprmap:camper})
-                  return (
-                    <Camper
-                      cabinName={session.cabinName}
-                      full
-                      removable
-                      unassignCamper={unassignCamper}
-                      key={`camper-${camper.id}`}
-                      camper={camper}
-                      index={index}
-                    />
-                  );
-                })}
-            </CamperList>
-          </CabinWrapper>
-        )}
-      </Droppable>
-    </CabinComponentFrame>
+            <Typography>
+              {session.campers.length <= 0
+                ? "Empty"
+                : `Ages: ${getMinMaxAge().min} - ${getMinMaxAge().max}`}
+            </Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            <Stack>
+              {session.campers.map((camper, index) => {
+                return (
+                  <Stack
+                  key={`camper-cabin-${camper.id}`}
+                    direction="row"
+                    alignItems="center"
+                    sx={{
+                      "&:nth-child(odd)": {
+                        backgroundColor: "background.main",
+                      },
+                      "&:nth-child(even)": {
+                        backgroundColor: "background.alt",
+                      },
+                    }}
+                  >
+                    <CamperItem camper={camper}>
+                      <IconButton
+                        onClick={() => {
+                          unassignCamper(camper.id);
+                        }}
+                        size="small"
+                        sx={{ ml: "auto" }}
+                      >
+                        <PersonRemoveIcon />
+                      </IconButton>
+                    </CamperItem>
+                  </Stack>
+                  /*<Grid container>
+                    <Grid item xs={9}>
+                      <Stack direction="row">
+                        <Typography>
+                          {camper.firstName} {camper.lastName}
+                        </Typography>
+                        <Typography>{camper.age}</Typography>
+                      </Stack>
+                    </Grid>
+                    <Grid item xs={3}>
+                      <PersonRemoveIcon />
+                    </Grid>
+                  <Grid item xs={12}>
+
+                  </Grid>
+                  </Grid>*/
+                );
+              })}
+            </Stack>
+          </AccordionDetails>
+        </Accordion>
+      </Box>
+    </Card>
   );
 };
 

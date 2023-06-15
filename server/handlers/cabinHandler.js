@@ -16,7 +16,6 @@ const cabinHandler = {
 	},
 	async getOneCabin(req, res, next) {
 		let cabin = await Cabin.getOne({ name: req.params.cabinName });
-		console.log({ cabin });
 		if (cabin) {
 			await cabin.init();
 		}

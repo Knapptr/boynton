@@ -1,104 +1,107 @@
-import { useState,useContext } from "react";
+import ParkTwoToneIcon from "@mui/icons-material/ParkTwoTone";
+import { useState, useContext } from "react";
 import UserContext from "./UserContext";
 import { useLocation, useNavigate } from "react-router-dom";
-import tw from "twin.macro";
-import "styled-components/macro";
-import logo from "../cl.png";
-const storeToken = (token) => {
-	localStorage.setItem("bearerToken", token);
-};
-
-const LoginField = tw.input`rounded my-4 border-gray-200 border-2 p-4`;
-const SubmitButton = tw.button`bg-green-400 p-4 rounded-lg`;
+// import logo from "../cl.png";
+import usePops from "../hooks/usePops";
+import catchErrors from "../utils/fetchErrorHandling";
+import { Box, Button, Stack, TextField, Typography } from "@mui/material";
 
 const Login = () => {
-    const auth = useContext(UserContext);
-  const [errors,setErrors] = useState([]);
-	const [formInputs, setFormInputs] = useState({
-		username: "",
-		password: "",
-	});
-  const clearPassword = ()=>{
-    setFormInputs(f=>( {...f,password:""} ))
-  }
-  const clearErrors = ()=>{
-    setErrors([]);
-  }
-	const location = useLocation();
-	const { cameFrom } = location.state || { cameFrom: null };
-	const navigate = useNavigate();
-	const handleUpdate = (e) => {
-    clearErrors();
-		const field = e.target.name;
-		const value = e.target.value;
-		setFormInputs((f) => {
-			return {
-				...f,
-				[field]: value,
-			};
-		});
-	};
-	const handleSubmit = async (e) => {
-		e.preventDefault();
-		const reqOptions = {
-			method: "POST",
-			headers: { "content-type": "application/json" },
-			body: JSON.stringify({
-				username: formInputs.username,
-				password: formInputs.password,
-			}),
-		};
-		const response = await fetch("/auth/login", reqOptions);
-		const data = await response.json();
-		if (response.status === 500) {
-      const error = {text: "Server Error. Tell an admin"}
-      clearPassword();
-      setErrors(e=>[...e, error])
-		}
-		if (response.status === 400) {
-		}
-		if (response.status === 401) {
-      clearPassword();
-      const error = {text:"Incorrect Username or Password"}
-      setErrors(e=>[...e,error])
-		}
-		if (response.status === 200) {
-      auth.logIn(data.token,data.user)
-			// storeToken(data.token);
-			navigate(cameFrom || "/");
-		}
-	};
-	return (
-    <><form onSubmit={handleSubmit} tw="w-4/5 sm:w-1/2 md:w-2/5 max-w-sm">
-      <div tw="flex flex-col">
-        <img src={logo} alt="" />
-        <LoginField
-          type="text"
-          name="username"
-          id="usernameInput"
-          placeholder="username"
-          onChange={handleUpdate}
-          value={formInputs.username}
-        />
-        <LoginField
-          type="password"
-          onChange={handleUpdate}
-          name="password"
-          id="passwordInput"
-          placeholder="password"
-          value={formInputs.password}
-        />
-        <SubmitButton type="submit">Login</SubmitButton>
-      </div>
-    </form>
+  const auth = useContext(UserContext);
+  const [formInputs, setFormInputs] = useState({
+    username: "",
+    password: "",
+  });
+  const { PopsBar, shamefulFailure,clearPops } = usePops();
 
-      {errors.length > 0 &&
-      <div>
-        <ul>{errors.map(( e,eIndex )=><li tw="bg-red-400 p-3 rounded m-2 font-bold" key={`error-${eIndex}`}>{e.text}</li>)}</ul>
-          </div>
-      }
-    </>
-	);
+  const location = useLocation();
+  const { cameFrom } = location.state || { cameFrom: null };
+  const navigate = useNavigate();
+  const handleUpdate = (e) => {
+    clearPops();
+    const field = e.target.name;
+    const value = e.target.value;
+    setFormInputs((f) => {
+      return {
+        ...f,
+        [field]: value,
+      };
+    });
+  };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const reqOptions = {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        username: formInputs.username,
+        password: formInputs.password,
+      }),
+    };
+    const result = await fetch("/auth/login", reqOptions);
+    const data = await catchErrors(result, (e) => {
+      setFormInputs((f) => ({ ...f, password: "" }));
+      shamefulFailure("SHAME!", e.message);
+    });
+    if (data) {
+      const userData = await data.json();
+      auth.logIn(userData.token, userData.user);
+      navigate(cameFrom || "/");
+    }
+  };
+  return (
+    <Box maxWidth={400}>
+      <form onSubmit={handleSubmit}>
+        <Stack justifyContent="center" mb={8}>
+          <Typography
+            lineHeight={0.8}
+            variant="h1"
+            textAlign="center"
+            fontWeight="bold"
+            color="primary"
+          >
+            Boynton
+          </Typography>
+          <Typography variant="h3" textAlign="center" color="secondary">
+            Camp Leslie
+          </Typography>
+        </Stack>
+        <Box display="flex" flexDirection="column">
+          <Stack spacing={2}>
+            <TextField
+              inputProps={{
+                autoCapitalize: "none",
+                autoComplete: "off",
+              }}
+              label="username"
+              name="username"
+              id="usernameInput"
+              onChange={handleUpdate}
+              value={formInputs.username}
+              autoFocus
+              required
+            />
+            <TextField
+              type="password"
+              onChange={handleUpdate}
+              required
+              name="password"
+              id="passwordInput"
+              label="password"
+              value={formInputs.password}
+            />
+            <Button type="submit" variant="contained" color="primary">
+              <ParkTwoToneIcon />
+              Login{" "}
+            </Button>
+          </Stack>
+        </Box>
+      </form>
+
+      <PopsBar />
+    </Box>
+  );
 };
 
 export default Login;

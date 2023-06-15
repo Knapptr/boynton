@@ -33,7 +33,7 @@ const submitAwardView = async ({ ack, view, client }) => {
 	const programArea =
 		view.state.values.programArea.select.selected_option.value;
 	awards.add(programArea, mapAwards(names, awardFor));
-	await awards.save();
+	// await awards.save();
 	client.chat.postMessage({
 		channel: channelToPostCongratulations,
 		text: `${namesPrint(names)} just received ${awardOrAwards(

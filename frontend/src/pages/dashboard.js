@@ -30,11 +30,22 @@ const Dashboard = () => {
           <Link to="cabins/list"><NavBarLink color="red">
             Cabin Lists
           </NavBarLink></Link>
-          {(user.role === "admin" || user.role === "unitHead") && (
+          {(user.role === "admin" || user.role === "unit_head") && (
             <Link to="cabins/assignment"><NavBarLink color="purple">
               Cabin Assignment
             </NavBarLink></Link>
           )}
+          {user.role === "admin" && (
+            <Link to="users"><NavBarLink color="brown">Users</NavBarLink></Link>
+          )}
+          {(user.role === "admin" || user.role === "unit_head" || user.role === "programming") && (
+            <Link to="programming-schedule/activities"><NavBarLink color="yellow">
+              Programming
+            </NavBarLink></Link>
+          )}
+          {user.role === "admin" && <Link to="programming-schedule/staff"><NavBarLink color="blue">
+            Staff Scheduling
+          </NavBarLink></Link>}
           <NavBarLink
             tw="mt-8"
             onClick={() => {

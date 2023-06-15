@@ -1,43 +1,44 @@
-import tw, { styled } from "twin.macro";
-import "styled-components/macro";
-
-const Dialog = styled.div(({ shouldDisplay }) => [
-  tw`invisible opacity-0 transition-opacity`,
-  shouldDisplay && tw`visible opacity-100`,
-]);
+import CloseIcon from '@mui/icons-material/Close';
+import { Fab, Fade } from "@mui/material";
 
 const ReassignmentSelectionDialog = ({
   selectedCampers,
   camperSelection,
   setDisplayModal,
+  displayModal
 }) => {
   return (
-    <Dialog
-      shouldDisplay={selectedCampers.length > 0}
-      tw="fixed bottom-0 w-full left-0 "
+    <>
+
+      <Fade in={selectedCampers.length > 0 && !displayModal}>
+      <Fab
+    size="small"
+    color="warning"
+    onClick={camperSelection.clear}
+      sx={{
+        position:"fixed",
+        bottom: 36,
+        left: 32
+      }}
     >
-      <div tw="bg-coolGray-400 shadow-lg rounded w-full md:w-1/2 mx-auto">
-        <h3 tw="bg-coolGray-100 flex px-2 justify-evenly">
-          Reassignment
-          <span tw=""> {selectedCampers.length} selected</span>
-        </h3>
-        <div tw="flex justify-around p-4">
-          <button tw="bg-red-500 rounded shadow w-1/2 py-2" onClick={camperSelection.clear}>
-            Clear
-          </button>
-          <button
-            tw="w-1/2 bg-green-500 rounded shadow py-2"
-            onClick={() => {
-              if (selectedCampers.length > 0) {
-                setDisplayModal(true);
-              }
-            }}
-          >
-            Reassign
-          </button>
-        </div>
-      </div>
-    </Dialog>
+    <CloseIcon/>
+    </Fab>
+      </Fade>
+      <Fade in={selectedCampers.length > 0 && !displayModal}>
+      <Fab
+    onClick={()=>{setDisplayModal(true)}}
+    color="success"
+      variant="extended"
+      sx={{
+        position:"fixed",
+        bottom: 32,
+        left: 92
+      }}
+      >
+      Reassign {selectedCampers.length > 0 && selectedCampers.length}
+      </Fab>
+      </Fade>
+    </>
   );
 };
 

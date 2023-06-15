@@ -1,12 +1,40 @@
+const { param } = require("express-validator");
 const Activity = require("../../models/activity");
 const CamperActivity = require("../../models/CamperActivity");
+const ApiError = require("../../utils/apiError");
+const DbError = require("../../utils/DbError");
 const jsonError = require("../../utils/jsonError");
+const activityValidation = require("../../validation/activity");
+const handleValidation = require("../../validation/validationMiddleware");
 module.exports = {
-    async getOne(req, res, next) {
-        const id = req.params.activityID;
-        let activity = await Activity.get(id);
-        res.json(activity);
-    },
+    create: [
+        activityValidation.name(),
+        activityValidation.description(),
+        handleValidation,
+        async (req, res, next) => {
+            const { name, description } = req.body;
+            try {
+                const activity = await Activity.create({ name, description })
+                res.json(activity)
+                return;
+            } catch (e) {
+                if (e.code = 23505) { next(DbError.alreadyExists("The activity already exists")); return; }
+                next(e);
+            }
+        }],
+    getOne: [
+        param("activityID").exists().custom(async (activityId, { req }) => {
+            const activity = await Activity.get(activityId);
+            if (!activity) {
+                throw new Error("Activity does not exist");
+            }
+            req.activity = activity;
+        }),
+        handleValidation,
+        async (req, res, next) => {
+            let activity = req.activity
+            res.json(activity);
+        }],
     async getAll(req, res, next) {
         let activities = await Activity.getAll();
         const { period } = req.query;
@@ -17,28 +45,34 @@ module.exports = {
         }
         res.json(activities);
     },
-    async addCamper(req, res, next) {
-      console.log({body:req.body});
-        const { camperWeekId, periodId } = req.body;
-        const activityId = req.params.activityID;
-      console.log({
-        camperWeekId,periodId,activityId
-      })
-        const activity = await Activity.get(activityId);
-      console.log({activity});
-        const camperActivityID = await activity.addCamper(
-            camperWeekId,
-            periodId
-        );
-        res.json({ camperActivityID });
-    },
-    async attendance(req, res) {
-        // const activityId = req.params.activityID;
-        const isPresent = req.body.isPresent;
-        const camperActivityID = req.params.camperActivityID;
-        const camperActivity = await CamperActivity.get(camperActivityID);
-        console.log({ camperActivity });
-        const updated = await camperActivity.setPresent(isPresent);
-        res.json(updated);
-    },
+    addCamper: [
+        activityValidation.periodId(),
+        activityValidation.camperWeekId(),
+        handleValidation,
+        async (req, res, next) => {
+            console.log({ body: req.body });
+            const { camperWeekId, periodId } = req.body;
+            const activityId = req.params.activityID;
+            console.log({
+                camperWeekId, periodId, activityId
+            })
+            const activity = await Activity.get(activityId);
+            console.log({ activity });
+            const camperActivityID = await activity.addCamper(
+                camperWeekId,
+                periodId
+            );
+            res.json({ camperActivityID });
+        }],
+    attendance: [
+        activityValidation.attendance(),
+        handleValidation,
+        async (req, res) => {
+            const isPresent = req.body.isPresent;
+            const camperActivityID = req.params.camperActivityID;
+            const camperActivity = await CamperActivity.get(camperActivityID);
+            console.log({ camperActivity });
+            const updated = await camperActivity.setPresent(isPresent);
+            res.json(updated);
+        }],
 };

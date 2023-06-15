@@ -5,27 +5,21 @@ const {
     fetchMany,
 } = require("../utils/pgWrapper");
 const Camper = require("./camper");
+const pool = require("../db");
+const DbError = require("../utils/DbError");
 
 class Activity {
-    constructor({ name, description, campers, id, periodID }) {
+    constructor({ name, description, id, sessions }) {
         this.name = name;
         this.id = id;
         this.description = description || "none";
-        this.periodID = periodID;
-        this.campers = campers;
+        this.sessions = sessions || []
     }
     static _parseResults(dbr) {
         return {
-            sessionID: dbr.camper_session_id,
-            camperID: dbr.camper_id,
-            firstName: dbr.first_name,
-            camperActivityId: dbr.camper_activity_id,
-            isPresent: dbr.is_present,
-            lastName: dbr.last_name,
-            name: dbr.name,
             id: dbr.id,
-            periodID: dbr.period_id,
-            description: dbr.description,
+            name: dbr.name,
+            description: dbr.description
         };
     }
     static async getAll() {
@@ -33,92 +27,55 @@ class Activity {
 SELECT
 act.name AS name,
 act.id,
-act.period_id,
-act.description,
-cw.id AS camper_session_id,
-cw.camper_id AS camper_id,
-ca.id AS camper_activity_id,
-ca.is_present,
-c.first_name,
-c.last_name
+act.description
 FROM activities act
-LEFT JOIN camper_activities ca ON ca.activity_id = act.id
-LEFT JOIN camper_weeks cw ON cw.id = ca.camper_week_id
-LEFT JOIN campers c ON cw.camper_id = c.id
-
+ORDER BY act.name
 		`;
         const results = await fetchMany(query);
         if (results) {
             const parsedResults = results.map((result) =>
                 Activity._parseResults(result)
             );
-            const mappedResults = mapManyToOne({
-                array: parsedResults,
-                identifier: "id",
-                newField: "campers",
-                fieldsToMap: ["sessionID","isPresent", "camperID", "firstName", "lastName"],
-                fieldsToRemain: ["name", "id", "periodID", "description"],
-            });
-            const activities = mappedResults.map((act) => new Activity(act));
+            const activities = parsedResults.map((act) => new Activity(act));
             return activities;
         }
         return [];
     }
     static async get(id) {
-        const query = `
-SELECT
-act.name AS name,
-act.id,
-act.period_id,
-act.description,
-cw.id AS camper_session_id,
-cw.camper_id AS camper_id,
-c.first_name,
-ca.id AS camper_activity_id,
-ca.is_present,
-c.last_name
-FROM activities act
-LEFT JOIN camper_activities ca ON ca.activity_id = act.id
-LEFT JOIN camper_weeks cw ON cw.id = ca.camper_week_id
-LEFT JOIN campers c ON cw.camper_id = c.id
-WHERE act.id = $1 `;
-        const values = [id];
-        const results = await fetchMany(query, values);
-        if (results) {
-            const parsedResults = results.map((result) =>
-                Activity._parseResults(result)
-            );
-            const mappedResults = mapManyToOne({
-                array: parsedResults,
-                identifier: "id",
-                newField: "campers",
-                fieldsToMap: [
-                    "sessionID",
-                    "camperID",
-                    "firstName",
-                    "lastName",
-                    "isPresent",
-                    "camperActivityId",
-                ],
-                fieldsToRemain: ["name", "id", "periodID", "description"],
-            });
-            const activities = mappedResults.map((act) => new Activity(act));
+        const client = await pool.connect();
+        try {
+            // get activity data
+            const activityResult = await client.query("SELECT * from activities act WHERE act.id = $1 ", [id]);
+            const activity = activityResult.rows.map(r => ({
+                id: r.id,
+                name: r.name,
+                description: r.description
+            }))[0];
 
-          console.log(activities[0].campers);
-            return activities[0];
+            const sessionsResult = await client.query("SELECT * from activity_sessions acts WHERE acts.activity_id = $1", [activity.id]);
+            const sessions = sessionsResult.rows.map(s => ({
+                id: s.id,
+                periodId: s.period_id
+            }))
+            const createdActivity = new Activity({ name: activity.name, id: activity.id, description: activity.description, sessions: sessions })
+            await client.query("COMMIT");
+            return createdActivity;
+
+        } catch (e) {
+            client.query("ROLLBACK");
+            console.error("Error with activity transaction")
+            return false
+        } finally {
+            client.release()
         }
-        return [];
     }
-    static async create({ name, description, periodID }) {
+    static async create({ name, description }) {
         const query =
-            "INSERT INTO activities (name,description,period_id) VALUES ($1,$2,$3) RETURNING id, name, description period_id";
-        const values = [name, description, periodID];
-        const activity = await fetchOneAndCreate({
-            query,
-            values,
-            Model: Activity,
-        });
-        return activity;
+            "INSERT INTO activities (name,description) VALUES ($1,$2) RETURNING *";
+        const values = [name, description];
+        const result = await fetchOne(query, values);
+        if (!result) { return false }
+        return new Activity({ name: result.name, description: result.description, id: result.id })
     }
     async addCamper(camperID, periodID) {
         const query =

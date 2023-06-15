@@ -11,15 +11,15 @@ const CabinNav = ({ cabins, currentCabin, weekNumber }) => {
 			{cabins.map((cabinLink, index) => {
 				return (
 					<Link
-						to={`../sign-up/${cabinLink.cabinName}/${weekNumber}`}
+						to={`../sign-up/${cabinLink.name}/${weekNumber}`}
 						key={`cabin-link-${index}`}
 						tw="w-1/4 md:w-[10%]"
 					>
 						<MenuSelector
 							color="blue"
-							isSelected={cabinLink.cabinName === currentCabin}
+							isSelected={cabinLink.name === currentCabin}
 						>
-							{toTitleCase(cabinLink.cabinName)}
+							{toTitleCase(cabinLink.name)}
 						</MenuSelector>
 					</Link>
 				);

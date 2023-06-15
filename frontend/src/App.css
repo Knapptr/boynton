@@ -1,3 +1,6 @@
+body{
+  background-color: #ced9d2
+}
 .App {
   text-align: center;
 }
@@ -35,4 +38,10 @@
   to {
     transform: rotate(360deg);
   }
+}
+@keyframes spinny{
+  from{
+    transform: rotate(0deg);
+  }
+  to{transform: rotate(360deg)};
 }

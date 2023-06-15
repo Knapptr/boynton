@@ -1,53 +1,35 @@
-import useGetDataOnMount from "../hooks/useGetData";
 import { useNavigate } from "react-router-dom";
-import { useState,useEffect } from "react";
-import {MenuSelector} from "../components/styled";
-import tw,{styled} from 'twin.macro';
-import 'styled-components/macro'
+import { useState, useEffect } from "react";
+import useWeeks from "../hooks/useWeeks";
+import { ToggleButton, ToggleButtonGroup } from "@mui/material";
+
+
+const AREAS = ["BA", "GA"];
 
 const CabinAssignmentIndex = () => {
   const navigate = useNavigate();
-  const [weeks, setWeeks] = useGetDataOnMount({
-    url: "/api/weeks",
-    initialState: [],
-    useToken: true,
-  });
-  const [selected, setSelected] = useState({ area: null, week: null });
-  const selectArea = (area) => {
-    setSelected((s) => ({ ...s, area }));
-  };
-  const selectWeek = (index) => {
-    setSelected((s) => ({ ...s, week: index }));
-  };
-  useEffect(()=>{
-    if(selected.week !== null && selected.area!== null){
-      navigate(`/cabins/assignment/${selected.area}/${weeks[selected.week].number}`)
+  const { selectedWeek, WeekSelection } = useWeeks();
+  const [selectedArea, setSelectedArea] = useState(null);
+
+  const handleAreaSelect = (e, value) => {
+    setSelectedArea(value);
+  }
+
+  useEffect(() => {
+    if (selectedWeek() !== null && selectedArea !== null) {
+      navigate(`/cabins/assignment/${selectedArea}/${selectedWeek().number}`)
     }
-  },[weeks,navigate, selected.week,selected.area])
-    
+  }, [navigate, selectedArea, selectedWeek])
+
   return (
     <>
       <div tw="mx-auto w-1/2">
-        <header><h1>Select Week</h1></header>
-        <ul tw="my-6 flex flex-col justify-center gap-2 ">
-    {weeks.map((week, index) => (
-          <MenuSelector onClick={() => selectWeek(index)} isSelected={index===selected.week} key={`week-${index}`}>
-            <button >
-            Week {week.number}
-            </button>
-      </MenuSelector>
-        ))}
-        </ul>
+        <WeekSelection />
         <header><h1>Select Area</h1></header>
-        <ul tw="my-6 flex gap-2 justify-center">
-          <MenuSelector onClick={() => selectArea("GA")} isSelected={selected.area==="GA"}>
-          <button >GA</button>
-          </MenuSelector>
-          <MenuSelector onClick={() => selectArea("BA")} isSelected={selected.area==="BA"}>
-          <button >BA</button>
-          </MenuSelector>
-        </ul>
-    </div>
+        <ToggleButtonGroup onChange={handleAreaSelect} value={selectedArea}>
+          {AREAS.map(area => <ToggleButton value={area} key={`select-${area}`}>{area}</ToggleButton>)}
+        </ToggleButtonGroup>
+      </div>
     </>
   );
 };
