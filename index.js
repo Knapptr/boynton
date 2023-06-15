@@ -11,7 +11,7 @@ const app = new App({
 	receiver: receiver,
 	// signingSecret: process.env.SIGNING_SECRET,
 	appToken: process.env.APP_TOKEN,
-	port: port;
+	port: port
 });
 
 // Slack integration
