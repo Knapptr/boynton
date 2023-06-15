@@ -3,7 +3,7 @@ const apiRouter = require("./routers/api");
 const express = require("express");
 const path = require("path");
 const authRouter = require("./routers/auth");
-const actionRouter = require('./routers/action');
+// const actionRouter = require('./routers/action');
 const passport = require("passport");
 require("./auth")(passport);
 
