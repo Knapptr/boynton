@@ -6,11 +6,11 @@ const registerShortcuts = require("./shortcuts/index");
 
 
 const registerListeners = (app) => {
-	registerActions(app);
-	registerViews(app);
-	registerEvents(app);
-	registerMessages(app);
-	registerShortcuts(app);
+	// registerActions(app);
+	// registerViews(app);
+	// registerEvents(app);
+	// registerMessages(app);
+	// registerShortcuts(app);
 };
 
 module.exports = registerListeners;
