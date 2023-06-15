@@ -7,32 +7,30 @@ import { assignCabins } from "../requests/assignCabins";
 import useCabinSessions from "../hooks/useCabinSessions";
 import CabinAssignmentIndex from "./cabinAssignmentIndex";
 import UnitHeadAccess from "../components/ProtectedUnitHead";
-import { PropagateLoader } from "react-spinners";
-import { PopOut } from "../components/styled";
 import NotFound from "./NotFound";
 import fetchWithToken from "../fetchWithToken";
 import { Box } from "@mui/system";
 import {
   Typography,
   Button,
-  Skeleton,
   Grid,
   Stack,
   Drawer,
-  CssBaseline,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogContentText,
-  Container,
 } from "@mui/material";
 import CamperItem from "../components/CamperItem";
 import WeekContext from "../components/WeekContext";
+import { Helmet } from "react-helmet";
+import usePops from "../hooks/usePops";
 
 // CONSTANTS
 const areas = ["ba", "ga"];
 const weeks = ["1", "2", "3", "4", "5", "6"];
 const drawerWidth = 1 / 3;
+const marginSize = 56;
 
 const CabinAssignmentRoutes = () => {
   const routes = [];
@@ -131,6 +129,7 @@ const CabinAssignment = ({ area, weekNumber }) => {
   };
 
   const handleSelect = (camper) => {
+    clearPops();
     if (isSelected(camper)) {
       deselectCamper(camper);
     } else {
@@ -183,14 +182,13 @@ const CabinAssignment = ({ area, weekNumber }) => {
    * @param {string} cabinNumber (a unique cabin identifier)
    */
   const assignCabin = async (cabinSession) => {
+    clearPops();
     const camperSessions = [...selectedCampers];
     if (
       camperSessions.length >
       cabinSession.capacity - cabinSession.campers.length
     ) {
-      console.log(
-        "Handle this case: Not enough space for all selected campers"
-      );
+      shamefulFailure("SHAME!",`that cabin can't fit ${camperSessions.length} more campers`)
       return;
     }
     removeSelectedFromUnassigned();
@@ -230,24 +228,18 @@ const CabinAssignment = ({ area, weekNumber }) => {
     let camper = undefined;
     setCabinSessions((c) => {
       // remove from assigned
-      console.log({ oldState: c });
       const newState = [...c];
       const newCabinIndex = newState.findIndex(
         (cab) => cab.id === cabinSessionId
       );
       const newCabin = { ...newState[newCabinIndex] };
       const newCampers = [...newCabin.campers];
-      console.log({ oldCabin: newCabin });
-      console.log({ oldCampers: newCampers });
       const camperIndex = newCampers.find(
         (camper) => camper.id === camperSessionId
       );
       camper = newCampers.splice(camperIndex, 1)[0];
       newCabin.campers = newCampers;
-      console.log({ newCampers });
-      console.log({ newCabin });
       newState[newCabinIndex] = newCabin;
-      console.log({ newState });
       return newState.map((n) => n);
     });
     // add to unassigned
@@ -291,30 +283,33 @@ const CabinAssignment = ({ area, weekNumber }) => {
   };
 
   /** Display Cabins Only */
-  const showOnlyCabins = () => {
-    return (
-      <div>
-        <Box>
-          <Cabins
-            toggleUnassignModal={() => {
-              selectedCampers = { selectedCampers };
-              setShowUnassignModal((d) => !d);
-            }}
-            unassign={unassignReq}
-            showAllLists={cabinsOnly || allAssigned()}
-            selectedCampers={selectedCampers}
-            cabinSessions={cabinSessions}
-            cabinsOnly={true}
-            weekNumber={weekNumber}
-            area={area}
-          />
-        </Box>
-      </div>
-    );
-  };
-
+  // const showOnlyCabins = () => {
+  //   return (
+  //     <div>
+  //       <Box>
+  //         <Cabins
+  //           toggleUnassignModal={() => {
+  //             selectedCampers = { selectedCampers };
+  //             setShowUnassignModal((d) => !d);
+  //           }}
+  //           unassign={unassignReq}
+  //           showAllLists={cabinsOnly || allAssigned()}
+  //           selectedCampers={selectedCampers}
+  //           cabinSessions={cabinSessions}
+  //           cabinsOnly={true}
+  //           weekNumber={weekNumber}
+  //           area={area}
+  //         />
+  //       </Box>
+  //     </div>
+  //   );
+  // };
+const {PopsBar,shamefulFailure,clearPops} = usePops()
   return currentWeek && (
     <>
+    <Helmet><title>Cabin Assignment</title></Helmet>
+    
+  <PopsBar />
       <Dialog open={showUnassignModal}>
         <DialogTitle>Unassign All Campers?</DialogTitle>
         <DialogContent>
@@ -361,13 +356,10 @@ const CabinAssignment = ({ area, weekNumber }) => {
             },
           }}
         >
-          <Box mb={12} />
+          <Box mb={10} />
           <Stack spacing={0.5} pb={4}>
             {allCampers.unassigned.map(
               (camper, index) => {
-                {
-                  console.log("mapping", camper);
-                }
                 return (
                   <CamperItem
                     key={`camper-item-${camper.id}`}
@@ -396,7 +388,7 @@ const CabinAssignment = ({ area, weekNumber }) => {
             bgcolor="background.default"
             component="header"
             position="sticky"
-            top={72}
+            top={marginSize}
             zIndex={3}
             sx={{ width: 1, mb: 3 }}
           >

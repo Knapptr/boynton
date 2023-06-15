@@ -26,6 +26,7 @@ import CreateSchedulePage from "./pages/CreateSchedule";
 import AttendanceDisplay from "./pages/Attendance";
 import { UserContextProvider } from "./components/UserContext";
 import { WeekContextProvider } from "./components/WeekContext";
+import { Helmet } from "react-helmet";
 
 function App() {
   return (

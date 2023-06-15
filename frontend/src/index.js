@@ -5,7 +5,8 @@ import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import CssBaseline from "@mui/material/CssBaseline";
 import { ThemeProvider } from "@mui/material/styles";
-import theme from "./theme"
+import theme from "./theme";
+import {Helmet} from "react-helmet";
 
 
 
@@ -14,7 +15,10 @@ const root = ReactDOM.createRoot(document.getElementById("root"));
 
 root.render(
 	<>
-
+<Helmet>
+	<title>Camp Leslie: Boynton</title>
+	<meta name="description" content="A place for camp" />	
+	</Helmet>
 		<ThemeProvider theme={theme}>
 			<CssBaseline />
 			<App />

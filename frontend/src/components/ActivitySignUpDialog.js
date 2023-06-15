@@ -58,7 +58,6 @@ const ActivitySignUpDialog = ({ open, onClose }) => {
       PaperProps={{ elevation: 8 }}
       open={weeks && open}
       onClose={onClose}
-      maxWidth="sm"
     >
       <DialogTitle>
         <Typography variant="subtitle2">Activity Sign Up</Typography>
@@ -77,7 +76,7 @@ const ActivitySignUpDialog = ({ open, onClose }) => {
           <Grid item xs={12}>
             <WeekSelection />
           </Grid>
-          <Grid item xs={12}>
+          <Grid item xs={4}>
             <FormControl fullWidth>
               <InputLabel>Cabin</InputLabel>
               <Select

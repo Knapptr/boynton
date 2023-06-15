@@ -36,6 +36,7 @@ import {
 } from "@mui/material";
 import { StaffBadge } from "../components/styled";
 import useWeeks from "../hooks/useWeeks";
+import { Helmet } from "react-helmet";
 
 const AddScoreDialog = ({ onClose, show, week }) => {
   const TEAMS = ["Naumkeag", "Tahattawan"];
@@ -341,6 +342,10 @@ const ProfilePage = () => {
     handleGetUser();
   }, [handleGetUser]);
   return (
+    <>
+    <Helmet>
+      <title>{auth.userData.user.username}-Boynton</title>
+    </Helmet>
     <Box id="profilePage" width={1} py={2} px={1}>
       {userData && (
         <>
@@ -399,6 +404,7 @@ const ProfilePage = () => {
         </>
       )}
     </Box>
+    </>
   );
 };
 

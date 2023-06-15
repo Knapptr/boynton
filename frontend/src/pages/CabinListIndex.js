@@ -21,6 +21,7 @@ import {
 } from "@mui/material";
 import CamperItem from "../components/CamperItem";
 import WeekContext from "../components/WeekContext";
+import { Helmet } from "react-helmet";
 
 /** A helper to deal with the cabin list */
 const cabinSelections = {
@@ -132,6 +133,9 @@ const CabinListIndex = () => {
 
   return (
     <>
+    <Helmet>
+    <title>Cabin List</title>
+    </Helmet>
     <Typography variant="subtitle1" component="h1">Cabin List</Typography>
     <Typography variant="h6" component="h1">Week {currentWeek?.display}</Typography>
     <Typography variant="subtitle1" component="h1"><em>{currentWeek?.title}</em></Typography>

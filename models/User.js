@@ -52,6 +52,7 @@ module.exports = class User {
     LEFT JOIN cabin_sessions cs ON cs.id = ss.cabin_assignment
     LEFT JOIN cabins cab ON cab.name = cs.cabin_name
     WHERE u.username = $1
+    ORDER BY ss.week_number
     `;
     const values = [username];
     const userResponse = await fetchMany(query, values);

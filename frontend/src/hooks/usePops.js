@@ -38,8 +38,8 @@ const usePops = () => {
 	}
 	const PopsBar = () => {
 		return (<>
-			<Box tw="w-full fixed bottom-10">
-				<Stack spacing={2} tw="w-9/12 mx-auto" >
+			<Box position="fixed" bottom={10} width={1} zIndex={100}>
+				<Stack spacing={2} width={1} justifyContent="center" alignItems="center"  >
 					{mapPops(success, "success")}
 					{mapPops(errors, "error")}
 				</Stack>

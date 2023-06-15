@@ -36,15 +36,14 @@ const AttendanceDialog = ({ open, onClose }) => {
       PaperProps={{ elevation: 8 }}
       open={weeks && open}
       onClose={onClose}
-      maxWidth="sm"
+    sx={{maxWidth: 400, mx:"auto"}}
     >
       <DialogTitle>
     <Typography variant="subtitle2">Attendance</Typography>
     <Typography variant="h6" fontWeight="bold">Select Period</Typography></DialogTitle>
-      <Box width={1} px={1} mb={1}>
+      <Box width={1}  px={1} mb={1}>
         <Grid
           container
-          width={1}
           alignItems="center"
           justifyContent="center"
           spacing={2}
@@ -52,10 +51,10 @@ const AttendanceDialog = ({ open, onClose }) => {
           <Grid item xs={12}>
             <WeekSelection />
           </Grid>
-          <Grid item xs={7}>
+          <Grid item xs={6}>
             <DaySelectDropdown />
           </Grid>
-          <Grid item xs={7}>
+          <Grid item xs={6}>
             <PeriodSelectDropdown />
           </Grid>
         </Grid>

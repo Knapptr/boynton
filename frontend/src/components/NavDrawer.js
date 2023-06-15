@@ -1,6 +1,6 @@
 import tw, { styled } from "twin.macro";
 import "styled-components/macro";
-import { AppBar, Divider, Drawer, List, ListItem, ListItemButton, ListItemText, Toolbar, Typography, Button, Menu,  MenuItem } from "@mui/material";
+import { AppBar, Divider, Drawer, List, ListItem, ListItemButton, ListItemText, Toolbar, Typography, Button, Menu,  MenuItem, Stack } from "@mui/material";
 import { useLocation } from "react-router-dom";
 import ParkTwoToneIcon from '@mui/icons-material/ParkTwoTone';
 import { Box } from "@mui/system";
@@ -206,24 +206,28 @@ function NavDrawer(props) {
       <AppBar position="sticky" component="nav">
         <Box width="100%">
           <Toolbar>
+    <Stack direction="row" alignItems="center" mr="auto">
+
+              <IconButton href="/"><ParkTwoToneIcon sx={{fontSize:40}} /></IconButton>
             <Button
               href="/"
               size="large"
               sx={{
-                marginRight: "auto",
                 color: "black",
                 fontSize: "2rem",
-              }}
-              startIcon={<ParkTwoToneIcon />} >
+                  padding:0
+              }}>
               Boynton
             </Button>
 
+    </Stack>
             <IconButton
               color="inherit"
               aria-label="open drawer"
               edge="start"
               onClick={handleDrawerToggle}
-              sx={{ display: { md: 'none' } }}
+    
+              sx={{ml:"auto", display: { md: 'none' } }}
             >
               <MenuIcon />
             </IconButton>
@@ -245,6 +249,7 @@ function NavDrawer(props) {
                 sx={{ marginLeft: "2rem" }}
                 onClick={auth.logOut}
                 variant="outlined"
+    size="small"
                 color="warning" >Log Out </Button>
             </Box>
           </Toolbar>

@@ -14,6 +14,7 @@ import fetchWithToken from "../fetchWithToken";
 import AttendanceSearch from "../components/AttendanceSearch";
 import { Box, Button, Grid, Skeleton, Typography } from "@mui/material";
 import { Stack } from "@mui/system";
+import { Helmet } from "react-helmet";
 
 // rate at which to update
 const refreshRate = 1000 * 2;
@@ -187,6 +188,9 @@ const AttendanceDisplay = () => {
 
   return (
     <>
+    <Helmet>
+    <title> {period?`Act ${period.number}`:""} Attendance</title>
+    </Helmet>
   <Box pb={32} width={1}>
         {!period && (
           <Stack spacing={1} marginTop={8}>

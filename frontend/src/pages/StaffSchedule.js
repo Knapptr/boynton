@@ -17,11 +17,12 @@ import {
   ToggleButtonGroup,
   Typography,
 } from "@mui/material";
-import { Box, Container, Stack } from "@mui/system";
+import { Box,Stack } from "@mui/system";
 import StaffItem from "../components/StaffItem";
-import { IcecreamOutlined } from "@mui/icons-material";
 
 const drawerWidth = 1 / 3;
+const topMargin = 8;
+
 const StaffSelectionSources = {
   UNASSIGNED: () => "UNASSIGNED",
   ACTIVITY: (activity) => activity.sessionId,
@@ -259,7 +260,7 @@ const StaffSchedule = () => {
           },
         }}
       >
-        <Box mb={16} />
+        <Box mb={topMargin} />
      <Card sx={{mb:1}}><Typography variant="h6">{viableStaff.length===0 ? "No Available Staff" :"Available Staff"}</Typography></Card>
         <ViableStaffList
           isSelected={isSelected}
