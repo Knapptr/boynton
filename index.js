@@ -1,6 +1,7 @@
 require("dotenv").config();
 // slack integration
 // const registerListeners = require("./slack/listeners/index");
+console.log({dbname: process.env.RDS_DB_NAME, hostName: process.env.RDS_HOSTNAME})
 const { App, ExpressReceiver } = require("@slack/bolt");
 const receiver = require("./server/index");
 const dbInit = require('./db.init');
