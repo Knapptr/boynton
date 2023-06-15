@@ -36,8 +36,7 @@ const AttendanceDialog = ({ open, onClose }) => {
       PaperProps={{ elevation: 8 }}
       open={weeks && open}
       onClose={onClose}
-      fullWidth
-      maxWidth="md"
+      maxWidth="sm"
     >
       <DialogTitle>
     <Typography variant="subtitle2">Attendance</Typography>
