@@ -1,9 +1,6 @@
-import { DialogBox, PopOut } from "./styled";
 import { useEffect, useRef, useState } from "react";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCircleXmark } from '@fortawesome/free-regular-svg-icons'
 import getDayName from "../utils/getDayname";
-import { Box, Dialog, Button, List, ListItem, ListItemText, TextField, Typography, Stack } from "@mui/material";
+import { Box, Dialog, Button, ListItemText, TextField, Typography, Stack } from "@mui/material";
 
 const AttendanceSearch = ({
   shouldDisplay,

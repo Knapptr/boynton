@@ -1,5 +1,3 @@
-import Camper from "./Camper";
-import DoNotDisturbAltOutlinedIcon from '@mui/icons-material/DoNotDisturbAltOutlined';
 import PersonRemoveIcon from "@mui/icons-material/PersonRemove";
 import { useState, useEffect } from "react";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -8,39 +6,28 @@ import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
-  Badge,
+  Box,
   Card,
-  Divider,
-  Grid,
   IconButton,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
   Stack,
   Typography,
 } from "@mui/material";
-import { Box } from "@mui/system";
-import { Button } from "@mui/base";
 import CamperItem from "./CamperItem";
-import DoNotDisturbAltOutlined from "@mui/icons-material/DoNotDisturbAltOutlined";
 
 const Cabin = ({
   assign,
   session,
-  allOpenState,
+  // allOpenState,
   unassignCamper,
-  selectedCampers,
-  cabinsOnly,
+  // selectedCampers,
+  // cabinsOnly,
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const toggleOpen = () => {
-    setIsOpen((o) => !o);
-  };
 
-  useEffect(() => {
-    setIsOpen(allOpenState);
-  }, [allOpenState]);
+  const [openList,setOpenList] = useState(false);
+
+  useEffect(()=>{
+    if(openList && session.campers.length === 0){setOpenList(false)}
+  },[session.campers,openList])
 
   /** Get min and max ages in cabin, ignoring FLs */
   const getMinMaxAge = () => {
@@ -63,11 +50,6 @@ const Cabin = ({
     return { min: session.campers[i].age, max: session.campers[j].age };
   };
 
-  const [openList,setOpenList] = useState(false);
-
-  useEffect(()=>{
-    if(openList && session.campers.length === 0){setOpenList(false)}
-  },[session.campers])
   return (
     <Card width={1}>
       <Box
@@ -100,10 +82,10 @@ const Cabin = ({
     {session.campers.length === session.capacity && <Typography ml={1} variant="subtitle1" fontWeight="bold">full</Typography>}
     </Box>
     <Box ml="auto">
-          <Typography color="lightgrey" >
             <Typography color="white" fontWeight="bold">
               {session.campers.length}
             </Typography>
+          <Typography color="lightgrey" >
             /{session.capacity}
           </Typography>
     </Box>
@@ -131,6 +113,7 @@ const Cabin = ({
               {session.campers.map((camper, index) => {
                 return (
                   <Stack
+                  key={`camper-cabin-${camper.id}`}
                     direction="row"
                     alignItems="center"
                     sx={{
@@ -180,16 +163,4 @@ const Cabin = ({
   );
 };
 
-{
-  /*<Camper
-                    cabinName={session.name}
-                    selectable={false}
-                    full
-                    removable
-                    unassignCamper={unassignCamper}
-                    key={`camper-${camper.id}`}
-                    camper={camper}
-                    index={index}
-                  /> */
-}
 export default Cabin;

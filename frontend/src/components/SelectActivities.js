@@ -1,5 +1,5 @@
 import useActivityAttendance from "../hooks/useActivityAttendance";
-import { useContext, useEffect } from "react";
+import { useContext } from "react";
 import lodash from "lodash";
 import { postCampersToActivity } from "../requests/activity";
 import toTitleCase from "../toTitleCase";
@@ -18,7 +18,6 @@ import {
 } from "@mui/material";
 
 const drawerWidth = 175;
-const topMargin = 0;
 
 const ActivityList = styled(Box)(({ bg, theme }) => ({
   backgroundColor: bg
@@ -50,7 +49,7 @@ const SelectActivities = ({
     ) {
       const campersToAdd = [...selectedCampers];
       try {
-        const response = await postCampersToActivity(
+        await postCampersToActivity(
           campersToAdd.map((c) => c.camper),
           activitySessionId,
           auth
@@ -76,18 +75,18 @@ const SelectActivities = ({
       setLists(newState);
     }
   };
-  const dropZoneSize=(activityId)=>{
-     switch (activityLists[activityId].campers.length){
+  const dropZoneSize = (activityId) => {
+    switch (activityLists[activityId].campers.length) {
       case 0:
-         return 4;
-      case 1: 
-         return 2;
+        return 4;
+      case 1:
+        return 2;
       case 2:
-         return 1;
+        return 1;
       default:
-       return 0;
+        return 0;
     }
-  }
+  };
 
   return (
     <>
@@ -105,34 +104,45 @@ const SelectActivities = ({
             },
           }}
         >
-                <Box mb={20}/>
-    {activityLists.unassigned && activityLists.unassigned.campers.length === 0 &&
-      <Box px={0.75}>
-      <Alert severity="success" variant="filled">All Campers Assigned!</Alert>
-      </Box>
-    }
-    {activityLists.unassigned &&
-              activityLists.unassigned.campers.length > 0 && (
-                <Box px={0.75}>
-                    <Box position="sticky" top={0} component="header">
-                      <Typography variant="subtitle1" fontWeight="bold">Unassigned</Typography>
-                    </Box>
+          <Box mb={20} />
+          {activityLists.unassigned &&
+            activityLists.unassigned.campers.length === 0 && (
+              <Box px={0.75}>
+                <Alert severity="success" variant="filled">
+                  All Campers Assigned!
+                </Alert>
+              </Box>
+            )}
+          {activityLists.unassigned &&
+            activityLists.unassigned.campers.length > 0 && (
+              <Box px={0.75}>
+                <Box position="sticky" top={0} component="header">
+                  <Typography variant="subtitle1" fontWeight="bold">
+                    Unassigned
+                  </Typography>
+                </Box>
                 <Stack direction="column" spacing={1}>
-                    {activityLists.unassigned &&
-                      [...activityLists.unassigned.campers]
-                        .sort((a, b) => a.lastName.localeCompare(b.lastName))
-                        .map((camper, index) => (
-                                <Chip
-                            onClick={(e)=>{
-                              e.stopPropagation()
-                              handleSelectCamper(camper,"unassigned")
-                            }
-
-                            }
-                            color={selectedCampers.some(sc=>sc.camper.camperSessionId === camper.camperSessionId)?"primary":"default"}
-
-                                  label={`${camper.firstName} ${camper.lastName} ${camper.age}`}
-                                />
+                  {activityLists.unassigned &&
+                    [...activityLists.unassigned.campers]
+                      .sort((a, b) => a.lastName.localeCompare(b.lastName))
+                      .map((camper, index) => (
+                        <Chip
+                          key={`camper-unassigned-${camper.camperSessionId}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSelectCamper(camper, "unassigned");
+                          }}
+                          color={
+                            selectedCampers.some(
+                              (sc) =>
+                                sc.camper.camperSessionId ===
+                                camper.camperSessionId
+                            )
+                              ? "primary"
+                              : "default"
+                          }
+                          label={`${camper.firstName} ${camper.lastName} ${camper.age}`}
+                        />
                         /*<CamperItem
                             selectable
                             camper={camper}
@@ -146,11 +156,11 @@ const SelectActivities = ({
                               handleSelectCamper(camper, "unassigned")
                             }
                           ></CamperItem>*/
-                        ))}
-                          </Stack>
-                </Box>
-              )}
-    </Drawer>
+                      ))}
+                </Stack>
+              </Box>
+            )}
+        </Drawer>
         <Grid container justifyContent="center">
           {activitiesLoading ? (
             <Box>
@@ -170,14 +180,21 @@ const SelectActivities = ({
           ) : (
             <>
               {/* ACTIVITIES */}
-            
-              <Stack width={1} maxWidth={666} spacing={2} pl={0.33} alignItems="stretch" py={1} >
+
+              <Stack
+                width={1}
+                maxWidth={666}
+                spacing={2}
+                pl={0.33}
+                alignItems="stretch"
+                py={1}
+              >
                 {activityLists.activityIds &&
                   activityLists.activityIds.map((aid, index) => (
                     <ActivityList
+                      key={`activity-list-${aid}`}
                       px={1}
                       width={1}
-                      key={`activity-list-${aid}`}
                       onClick={() => {
                         handleSubmit(aid);
                       }}
@@ -188,43 +205,34 @@ const SelectActivities = ({
                         </Typography>
                       </Box>
                       {/* Alphabetize here, so that ui updates are consistant*/}
-                    <Container maxWidth="sm" >
-                      <Stack spacing={1} >
-                        {[...activityLists[aid].campers]
-                          .sort((a, b) => a.lastName.localeCompare(b.lastName))
-                          .map((camper, index) => (
-                            <>
-                                <Chip
-                            onClick={(e)=>{
-                              e.stopPropagation()
-                              handleSelectCamper(camper,aid)
-                            }
-
-                            }
-                            color={selectedCampers.some(sc=>sc.camper.camperSessionId === camper.camperSessionId)?"primary":"default"}
-
-                                  label={`${camper.firstName} ${camper.lastName}`}
-                                />
-                              {/*<CamperItem
-                            selectable
-                            index={index}
-                            camper={camper}
-                            isSelected={selectedCampers.some(
-                              (sc) =>
-                                sc.camper.camperSessionId ===
-                                camper.camperSessionId
-                            )}
-                            key={`camper-assingment-${camper.camperSessionId}`}
-                            handleSelect={(e) => {
-                              e.stopPropagation();
-                              handleSelectCamper(camper, aid);
-                            }}
-                          ></CamperItem>*/}
-                            </>
-                          ))}
-                      </Stack>
-                    </Container>
-                    <Box id={`${aid}-dropzone`} py={dropZoneSize(aid)} ></Box>
+                      <Container maxWidth="sm">
+                        <Stack spacing={1}>
+                          {[...activityLists[aid].campers]
+                            .sort((a, b) =>
+                              a.lastName.localeCompare(b.lastName)
+                            )
+                            .map((camper) => (
+                              <Chip
+                                key={`activity-${aid}-${camper.camperSessionId}`}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleSelectCamper(camper, aid);
+                                }}
+                                color={
+                                  selectedCampers.some(
+                                    (sc) =>
+                                      sc.camper.camperSessionId ===
+                                      camper.camperSessionId
+                                  )
+                                    ? "primary"
+                                    : "default"
+                                }
+                                label={`${camper.firstName} ${camper.lastName}`}
+                              />
+                            ))}
+                        </Stack>
+                      </Container>
+                      <Box id={`${aid}-dropzone`} py={dropZoneSize(aid)}></Box>
                     </ActivityList>
                   ))}
               </Stack>

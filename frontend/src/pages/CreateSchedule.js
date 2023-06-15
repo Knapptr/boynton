@@ -1,7 +1,5 @@
 import { useParams } from "react-router-dom";
 import useGetDataOnMount from "../hooks/useGetData";
-import tw, { styled } from "twin.macro";
-import "styled-components/macro";
 import { useState, useEffect } from "react";
 import SelectActivities from "../components/SelectActivities";
 import toTitleCase from "../toTitleCase";
@@ -11,7 +9,6 @@ import {
   faBackwardStep,
 } from "@fortawesome/free-solid-svg-icons";
 import { Box, Button, IconButton, Stack, Typography } from "@mui/material";
-import ToggleSelector from "../components/Selector";
 import SelectDayPeriod from "../components/SelectDayPeriod";
 
 const dayAbbrev = {
@@ -22,7 +19,7 @@ const dayAbbrev = {
   FRI: "Friday",
 };
 
-const drawerSize = 0;
+// const drawerSize = 0;
 const topMargin = 12;
 
 const CreateSchedulePage = () => {
@@ -74,7 +71,7 @@ const CreateSchedulePage = () => {
     setSelectedCampers([]);
   };
 
-  const [week, setWeek] = useGetDataOnMount({
+  const [week] = useGetDataOnMount({
     url: `/api/weeks/${weekNumber}`,
     runOn: [weekNumber, cabin],
     initialState: {},

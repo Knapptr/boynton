@@ -1,5 +1,3 @@
-import { useContext } from "react";
-import UserContext from "../components/UserContext";
 import fetchWithToken from "../fetchWithToken";
 
 export const assignCabins = async (cabinSession, camperSessions, auth) => {

@@ -1,10 +1,3 @@
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faCircleDot,
-  faCircle,
-  faSquare,
-  faSquareCheck,
-} from "@fortawesome/free-regular-svg-icons";
 import CheckedIcon from "@mui/icons-material/TaskAltOutlined";
 import UncheckedIcon from "@mui/icons-material/RadioButtonUncheckedOutlined";
 import {
@@ -14,10 +7,8 @@ import {
   Grid,
   Stack,
   Chip,
-  Divider,
   Container,
   IconButton,
-  AlertTitle,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import RemoveCircleFilledIcon from "@mui/icons-material/RemoveCircleOutlined";
@@ -37,7 +28,7 @@ const AttendantWrapper = styled(Box)(
 );
 
 export const AttendanceSummary = ({
-  title,
+  // title,
   icon,
   allHere,
   clearText,

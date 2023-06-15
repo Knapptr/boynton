@@ -1,7 +1,6 @@
 import { Box, Chip, Divider, Stack, Typography } from "@mui/material";
 
 export const CamperItem = ({ camper,divider,index, selectable, handleSelect,isSelected, children}) => {
-  console.log({camper})
   const camperBadges = (camper) => {
     const badges = [
       { type: "dayCamp", label: "day" },
@@ -32,7 +31,7 @@ export const CamperItem = ({ camper,divider,index, selectable, handleSelect,isSe
       </Typography>
       <Stack direction="row" justifyContent="start">
         {camperBadges(camper).map((badge) => (
-          <Chip size="small" label={badge.label} />
+          <Chip key={`${camper.id}-badge-${badge.type}`}size="small" label={badge.label} />
         ))}
     </Stack>
       </Stack>

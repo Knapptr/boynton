@@ -37,7 +37,7 @@ const WeekSelectDialog = ({ open, onClose,url,title }) => {
       fullWidth
       maxWidth="sm"
     >
-      <DialogTitle>
+      <DialogTitle component="div">
     <Typography variant="subtitle2">{title}</Typography>
     <Typography variant="h6" fontWeight="bold">Select Week</Typography></DialogTitle>
       <Box width={1} px={1} mb={1}>

@@ -1,4 +1,3 @@
-import tw, { styled } from "twin.macro";
 import "styled-components/macro";
 import { AppBar, Divider, Drawer, List, ListItem, ListItemButton, ListItemText, Toolbar, Typography, Button, Menu,  MenuItem, Stack } from "@mui/material";
 import { useLocation } from "react-router-dom";
@@ -13,10 +12,6 @@ import UserContext from "./UserContext";
 // Consts
 const drawerWidth = 240;
 
-const navItems = [
-  { label: 'Give Award', url: "/award" },
-  // { name: 'Scores', url: "/scoreboard" },
-]
 
 // Nav menu items that spawn a dialog box
 const navDialogs = [
@@ -82,7 +77,7 @@ const MenuDialogs = ({items,handleDialogs,auth})=>{
   const handleDialog = (dialogName)=>{
     handleDialogs(dialogName);
   }
-  return prepareRoleMenuItems(items,auth).map(item=> <NavMenuButton onClick={()=>{handleDialog(item.dialog)}}>{item.label}</NavMenuButton>)
+  return prepareRoleMenuItems(items,auth).map(item=> <NavMenuButton key={`nav-${item.label}`}onClick={()=>{handleDialog(item.dialog)}}>{item.label}</NavMenuButton>)
 }
 
 /** Turn items into drawer dialog options */
@@ -139,7 +134,7 @@ const MenuNav = ({ title,items,onClick }) => {
         open={Boolean(anchorEl)}
         onClose={handleClose}
       >
-    {items.map(item=><MenuItem >
+    {items.map(item=><MenuItem key={`menuItem-${item.label}`}>
 
     <Button onClick={()=>{handleItemClick(item)}}href={item.url}>{item.label}</Button>
 
@@ -153,7 +148,7 @@ const MenuNav = ({ title,items,onClick }) => {
 const DrawerNav = ({ items, auth }) => {
   return (<List>
     {prepareRoleMenuItems(items, auth).map(item => {
-      return (<ListItem key={item.name}>
+      return (<ListItem key={`drawer-nav-${item.name}`}>
         <ListItemButton component={Button} href={item.url} ><ListItemText primary={item.label} /></ListItemButton>
       </ListItem>)
     })}
@@ -166,7 +161,6 @@ const DrawerNav = ({ items, auth }) => {
 /** The main App Bar and Drawer*/
 function NavDrawer(props) {
   const auth = useContext(UserContext);
-  const location = useLocation()
   const {handleDialogs} = props;
   const { window } = props;
   const [mobileOpen, setMobileOpen] = useState(false);

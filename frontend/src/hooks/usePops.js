@@ -1,5 +1,3 @@
-import tw from "twin.macro";
-import "styled-components/macro";
 import { Alert, AlertTitle, Box, IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { Stack } from "@mui/system";
@@ -46,7 +44,7 @@ const usePops = () => {
 			</Box>
 		</>)
 	}
-	return { PopsBar, shamefulFailure, greatSuccess, clearPops }
+	return { PopsBar, shamefulFailure, greatSuccess, clearPops, thereAreErrors,thereAreSuccess }
 
 }
 

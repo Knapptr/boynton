@@ -39,7 +39,7 @@ const useActivityAttendance = (period, cabin) => {
 		[auth])
 	const getData = useCallback(async () => {
 		getCampers(period, cabin, true)
-	}, [period, cabin])
+	}, [period, cabin,getCampers])
 
 	const refresh = () => {
 		getCampers(period, cabin, false);

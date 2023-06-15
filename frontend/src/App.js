@@ -1,17 +1,13 @@
 import "./App.css";
-import { Route, Routes, BrowserRouter, Outlet } from "react-router-dom";
+import { Route, Routes, BrowserRouter} from "react-router-dom";
 import CabinAssignmentRoutes from "./pages/CabinAssignment";
 import NotFound from "./pages/NotFound";
 import LoginPage from "./pages/login";
 import NavWrapper from "./components/NavWrapper";
 import Protected from "./components/Protected";
-import UserContext, { useUserData } from "./components/UserContext";
 import CabinListIndex from "./pages/CabinListIndex";
-import Scoreboard from "./pages/Scoreboard";
-import Score from "./components/Score";
 import ProgrammingSchedule from "./pages/ProgrammingSchedule";
 import Slay from "./pages/Slay";
-import AdminAccess from "./components/ProtectedAdminAccess";
 import UsersPage from "./pages/UsersPage";
 import StaffSchedule from "./pages/StaffSchedule";
 import ProfilePage from "./pages/ProfilePage";
@@ -26,7 +22,6 @@ import CreateSchedulePage from "./pages/CreateSchedule";
 import AttendanceDisplay from "./pages/Attendance";
 import { UserContextProvider } from "./components/UserContext";
 import { WeekContextProvider } from "./components/WeekContext";
-import { Helmet } from "react-helmet";
 
 function App() {
   return (
@@ -77,9 +72,6 @@ function App() {
                   </RoleProtected>
                 }
               />
-              <Route path="scoreboard" element={<Scoreboard />}>
-                <Route path=":weekNumber" element={<Score />} />
-              </Route>
               <Route path="schedule">
 
                 <Route

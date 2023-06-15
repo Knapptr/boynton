@@ -2,12 +2,10 @@ import ParkTwoToneIcon from "@mui/icons-material/ParkTwoTone";
 import { useState, useContext } from "react";
 import UserContext from "./UserContext";
 import { useLocation, useNavigate } from "react-router-dom";
-import tw from "twin.macro";
-import "styled-components/macro";
-import logo from "../cl.png";
+// import logo from "../cl.png";
 import usePops from "../hooks/usePops";
 import catchErrors from "../utils/fetchErrorHandling";
-import { Box, Button, Card, Stack, TextField, Typography } from "@mui/material";
+import { Box, Button, Stack, TextField, Typography } from "@mui/material";
 
 const Login = () => {
   const auth = useContext(UserContext);
@@ -15,10 +13,8 @@ const Login = () => {
     username: "",
     password: "",
   });
-  const { PopsBar, shamefulFailure, greatSuccess, clearPops } = usePops();
-  const clearPassword = () => {
-    setFormInputs((f) => ({ ...f, password: "" }));
-  };
+  const { PopsBar, shamefulFailure,clearPops } = usePops();
+
   const location = useLocation();
   const { cameFrom } = location.state || { cameFrom: null };
   const navigate = useNavigate();
@@ -80,12 +76,10 @@ const Login = () => {
               }}
               label="username"
               name="username"
-              autoFocus="on"
-              autoComplete="off"
-              autoCapitalize="off"
               id="usernameInput"
               onChange={handleUpdate}
               value={formInputs.username}
+              autoFocus
               required
             />
             <TextField

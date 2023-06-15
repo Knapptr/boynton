@@ -1,18 +1,5 @@
-import tw, { styled } from "twin.macro";
-import "styled-components/macro";
 import CloseIcon from '@mui/icons-material/Close';
-import { Fab,Box,Badge, Typography, Fade } from "@mui/material";
-
-const Dialog = styled.div(({ shouldDisplay }) => [
-  tw`invisible opacity-0 transition-opacity`,
-  shouldDisplay && tw`visible opacity-100`,
-]);
-
-          // <span tw=""> {selectedCampers.length} selected</span>
-          // <button tw="bg-red-500 rounded shadow w-1/2 py-2" onClick={camperSelection.clear}>
-          //   onClick={() => {
-          //     if (selectedCampers.length > 0) {
-          //       setDisplayModal(true);
+import { Fab, Fade } from "@mui/material";
 
 const ReassignmentSelectionDialog = ({
   selectedCampers,

@@ -1,15 +1,12 @@
 import { useContext, useState, useEffect, useCallback } from "react";
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
-import { MenuSelector, StaffListing } from "../components/styled";
 import UserContext from "../components/UserContext";
 import fetchWithToken from "../fetchWithToken";
-import tw from "twin.macro";
-import "styled-components/macro";
-import styled from "styled-components";
 import WeekContext from "../components/WeekContext";
 import { useParams } from "react-router-dom";
 import {
     Card,
+  Box, Stack,
   Drawer,
   Grid,
   IconButton,
@@ -17,7 +14,6 @@ import {
   ToggleButtonGroup,
   Typography,
 } from "@mui/material";
-import { Box,Stack } from "@mui/system";
 import StaffItem from "../components/StaffItem";
 
 const drawerWidth = 1 / 3;
@@ -30,7 +26,7 @@ const StaffSelectionSources = {
 const StaffSchedule = () => {
   const auth = useContext(UserContext);
   const { weekNumber } = useParams();
-  const { getWeekByNumber, weeks } = useContext(WeekContext);
+  const { getWeekByNumber} = useContext(WeekContext);
   const currentWeek = getWeekByNumber(Number.parseInt(weekNumber));
 
   const [selectedDayIndex, setSelectedDayIndex] = useState(0);
@@ -165,7 +161,6 @@ const StaffSchedule = () => {
     // Removal
     const newActivities = [...activities];
     let newStaffList = [...newActivities[sourceIndex].staff];
-    console.log({ before: newStaffList });
     newStaffList = newStaffList.filter(
       (s) => s.staffSessionId !== staffer.staffSessionId
     );
@@ -365,12 +360,14 @@ const ActivityStaffList = ({
   handleActivityAssignment,
   remove,
 }) => {
-  const auth = useContext(UserContext);
+  // const auth = useContext(UserContext);
 
   return (
     <Grid container spacing={{xs:1,sm:2}} >
       {activities.map((activity, activityIndex) => (
-        <Grid item xs={12} sm={6}>
+        <Grid 
+            key={`activity-${activity.sessionId}`}
+        item xs={12} sm={6}>
           <Box
             bgcolor="background.secondary"
         padding={1}
@@ -378,7 +375,6 @@ const ActivityStaffList = ({
               e.stopPropagation();
               handleActivityAssignment(activity, activityIndex);
             }}
-            key={`activity-${activity.sessionId}`}
           >
             <Stack direction="row" width={1} justifyContent="space-around">
               <Typography variant="h6">{activity.name}</Typography>
@@ -411,7 +407,6 @@ const ActivityStaffList = ({
                   >
                 <IconButton onClick={(e)=>{
                   e.stopPropagation();
-                  console.log({activity})
                   remove(activityIndex,staffer)
                 }}size="small"><HighlightOffIcon/></IconButton>
                 </StaffItem>

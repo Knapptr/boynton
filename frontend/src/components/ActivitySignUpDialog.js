@@ -12,7 +12,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { useCallback, useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import fetchWithToken from "../fetchWithToken";
 import UserContext from "./UserContext";
 import WeekContext from "./WeekContext";
@@ -59,7 +59,7 @@ const ActivitySignUpDialog = ({ open, onClose }) => {
       open={weeks && open}
       onClose={onClose}
     >
-      <DialogTitle>
+      <DialogTitle component="div">
         <Typography variant="subtitle2">Activity Sign Up</Typography>
         <Typography variant="h6" fontWeight="bold">
           Select Week & Cabin
@@ -85,7 +85,7 @@ const ActivitySignUpDialog = ({ open, onClose }) => {
                 onChange={handleCabinSelectChange}
               >
                 {cabins.map((cabin) => (
-                  <MenuItem value={cabin.name}>{cabin.name}</MenuItem>
+                  <MenuItem key={`cabin-menu-${cabin.name}`}value={cabin.name}>{cabin.name}</MenuItem>
                 ))}
               </Select>
             </FormControl>

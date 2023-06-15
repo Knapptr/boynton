@@ -58,7 +58,7 @@ const EditUserBox = ({
     <Dialog onClose={closePopOut} open={open}>
       {user !== null && (
         <Box px={2}>
-          <DialogTitle>
+          <DialogTitle component="div">
             <Typography variant="h6" fontWeight="bold" color="primary">
               Editing {user?.username}
             </Typography>
@@ -100,7 +100,7 @@ const EditUserBox = ({
                 <InputLabel>Role</InputLabel>
                 <Select label="Role" value={edits.role}>
                   {ROLES.map((role) => (
-                    <MenuItem value={role}>{role}</MenuItem>
+                    <MenuItem key={`role-${role}`}value={role}>{role}</MenuItem>
                   ))}
                 </Select>
               </FormControl>
@@ -375,7 +375,7 @@ const UsersPage = () => {
             open={edit.type === editTypes.DELETE}
             onClose={closePopOut}
           >
-            <DialogTitle>
+            <DialogTitle component="div">
               <Typography color="primary" fontWeight="bold" variant="h5">
                 Delete {edit.user?.username}?
               </Typography>

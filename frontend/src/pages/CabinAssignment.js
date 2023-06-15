@@ -1,4 +1,3 @@
-import Campers from "../components/Campers";
 import Cabins from "../components/Cabins";
 import { Route } from "react-router-dom";
 import { useState, useContext, useEffect, useCallback } from "react";
@@ -9,9 +8,9 @@ import CabinAssignmentIndex from "./cabinAssignmentIndex";
 import UnitHeadAccess from "../components/ProtectedUnitHead";
 import NotFound from "./NotFound";
 import fetchWithToken from "../fetchWithToken";
-import { Box } from "@mui/system";
 import {
   Typography,
+  Box,
   Button,
   Grid,
   Stack,
@@ -72,14 +71,15 @@ const CabinAssignment = ({ area, weekNumber }) => {
   const currentWeek = getWeekByNumber(Number.parseInt(weekNumber));
 
   const [showUnassignModal, setShowUnassignModal] = useState(false);
-  const [cabinsOnly, setCabinsOnly] = useState(false);
+  // const [cabinsOnly, setCabinsOnly] = useState(false);
   const [selectedCampers, setSelected] = useState([]);
 
 
-  /** Toggle the visibility of campers / cabins */
-  const toggleCabinsOnly = () => {
-    setCabinsOnly((s) => !s);
-  };
+  // /** Toggle the visibility of campers / cabins */
+  // const toggleCabinsOnly = () => {
+  //   setCabinsOnly((s) => !s);
+  // };
+
   const {
     cabinSessions,
     refreshCabins,
@@ -248,7 +248,7 @@ const CabinAssignment = ({ area, weekNumber }) => {
       sortByAge(updatedList);
       return { unassigned: updatedList, all: c.all };
     });
-    const result = await fetchWithToken(url, options, auth);
+  await fetchWithToken(url, options, auth);
     // update from db
     refreshCabins();
     getCampers();
@@ -271,16 +271,16 @@ const CabinAssignment = ({ area, weekNumber }) => {
       return cs.map((c) => ({ ...c, campers: [] }));
     });
     // API Request
-    const results = await fetchWithToken(url, options, auth);
+    await fetchWithToken(url, options, auth);
     // Refresh page from DB
     refreshCabins();
     getCampers();
   };
 
   /** Show Both Cabins and Campers **/
-  const showAll = () => {
-    return <></>;
-  };
+  // const showAll = () => {
+  //   return <></>;
+  // };
 
   /** Display Cabins Only */
   // const showOnlyCabins = () => {
@@ -392,7 +392,7 @@ const {PopsBar,shamefulFailure,clearPops} = usePops()
             zIndex={3}
             sx={{ width: 1, mb: 3 }}
           >
-            <Grid containeralignItems="center">
+            <Grid container alignItems="center">
               <Grid container item xs={12} alignItems="center">
                 <Grid item xs={6} md={3}>
                   <Typography variant="subtitle2">Cabin assignment</Typography>

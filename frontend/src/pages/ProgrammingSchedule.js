@@ -4,7 +4,6 @@ import AddIcon from "@mui/icons-material/Add";
 import fetchWithToken from "../fetchWithToken";
 import useGetDataOnMount from "../hooks/useGetData";
 import "styled-components/macro";
-import { MenuSelector } from "../components/styled";
 import UserContext from "../components/UserContext";
 import {
   Autocomplete,
@@ -22,8 +21,6 @@ import {
   List,
   ListItem,
   ListItemText,
-  ListItemButton,
-  ListItemIcon,
   ToggleButtonGroup,
   ToggleButton,
 } from "@mui/material";
@@ -42,14 +39,14 @@ const ProgrammingSchedule = () => {
   const auth = useContext(UserContext);
   const { weekNumber } = useParams();
 
-  const [activities, _, updateActivities] = useGetDataOnMount({
+  const data =useGetDataOnMount({
     url: "/api/activities",
     initialState: [],
     useToken: true,
   });
-
-  // get the list of weeks
-  const [weeks, setWeeks] = useState([]);
+  // To avoid destructuring from get data, but also avoid unused linter errors :/
+  const [activities, updateActivities] = [data[0],data[2]];
+  //
   // selectedWeekId is mainly concerned with the selection menu and UI logic
   // current Week is data fetched from /api/weeks/:weekid
   const [currentWeek, setCurrentWeek] = useState(undefined);
@@ -230,7 +227,7 @@ const ProgrammingSchedule = () => {
                   alignItems="start"
                   spacing={0.5}
                 >
-                  <Grid xs={12} component="header" bgcolor="secondary.main">
+                  <Grid item xs={12} component="header" bgcolor="secondary.main">
                     <Typography variant="h6">Act {period.number}</Typography>
                     <IconButton
                       color="success"
@@ -319,10 +316,9 @@ const AddActivityBox = ({
 }) => {
   // get list of activities
 
-  const [activityField, setActivityField] = useState("");
 
   const [selectedActivity, setSelectedActivity] = useState(null);
-  const [selectedActivityId, setSelectedActivityId] = useState("");
+  // const [selectedActivityId, setSelectedActivityId] = useState("");
 
   const makeSelection = (e, activity) => {
     // setSelectedActivityId(e.target.value);
@@ -331,12 +327,11 @@ const AddActivityBox = ({
 
   const closeAndClear = () => {
     makeSelection({ target: { value: "" } });
-    setActivityField("");
     close();
   };
 
+  // I don't know why this component is working without the input change handler.
   const handleChange = (e) => {
-    setActivityField(e.target.value);
   };
 
   const handleSubmit = async () => {
@@ -358,7 +353,7 @@ const AddActivityBox = ({
   return (
     <Dialog open={open} onClose={closeAndClear} fullWidth maxWidth="md">
       <Box width={1} px={3}>
-        <DialogTitle>
+        <DialogTitle component="div">
           <Typography variant="subtitle2">
             Week {week.number} <span>{week.title}</span>
           </Typography>
@@ -420,7 +415,7 @@ const AddActivityBox = ({
           <Button
             variant="contained"
             color="success"
-            enabled={selectedActivity !== undefined}
+            enabled={`${selectedActivity !== undefined}`}
             onClick={handleSubmit}
           >
             Add
@@ -469,7 +464,7 @@ const CreateActivityBox = ({
     const result = await fetchWithToken(url, options, auth);
     if (result.status === 400) {
       close();
-      const message = await result.text();
+      await result.text();
       return;
     }
     const { id } = await result.json();
@@ -486,9 +481,9 @@ const CreateActivityBox = ({
   };
 
   return (
-    <Dialog open={open} fullWidth maxWidth="md">
+    <Dialog onClose={close} open={open} fullWidth maxWidth="md">
       <Box width={1} px={3}>
-        <DialogTitle>
+        <DialogTitle component="div">
           <Typography variant="h6">Create New Activity</Typography>
         </DialogTitle>
         <Stack spacing={1}>

@@ -38,8 +38,8 @@ const AttendanceDialog = ({ open, onClose }) => {
       onClose={onClose}
     sx={{maxWidth: 400, mx:"auto"}}
     >
-      <DialogTitle>
-    <Typography variant="subtitle2">Attendance</Typography>
+      <DialogTitle component="div">
+    <Typography variant="subtitle2" component="h5">Attendance</Typography>
     <Typography variant="h6" fontWeight="bold">Select Period</Typography></DialogTitle>
       <Box width={1}  px={1} mb={1}>
         <Grid

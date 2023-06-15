@@ -1,7 +1,5 @@
 import Login from "../components/login";
 import {Container} from "@mui/material"
-import "styled-components/macro";
-import { BoyntonHeader } from "../components/styled";
 import { Box } from "@mui/system";
 import { Helmet } from "react-helmet";
 const LoginPage = () => {

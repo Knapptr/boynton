@@ -3,7 +3,7 @@ import AttendanceDialog from "./AttendanceDialog";
 import { useState } from "react";
 import NavDrawer from "./NavDrawer"; 
 import CabinAssignmentDialog from "./CabinAssignmentDialog";
-import { Box, Container } from "@mui/material";
+import {Container } from "@mui/material";
 import WeekSelectDialog from "./WeekSelectDialog";
 import ActivitySignUpDialog from "./ActivitySignUpDialog";
 

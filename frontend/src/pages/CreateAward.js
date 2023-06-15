@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import catchErrors from "../utils/fetchErrorHandling";
 import {
   Container,
@@ -10,8 +10,6 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
-  ToggleButtonGroup,
-  ToggleButton,
   Button,
 } from "@mui/material";
 import { useState, useContext, useCallback, useEffect } from "react";
@@ -19,14 +17,13 @@ import { Box, Stack } from "@mui/system";
 import UserContext from "../components/UserContext";
 import fetchWithToken from "../fetchWithToken";
 import usePops from "../hooks/usePops";
-import useWeeks from "../hooks/useWeeks";
 import WeekContext from "../components/WeekContext";
 
 const CreateAward = () => {
   const { weekNumber } = useParams();
   const { getWeekByNumber } = useContext(WeekContext);
 
-  const currentWeek = getWeekByNumber(Number.parseInt(weekNumber)) 
+  const currentWeek = useCallback(()=>getWeekByNumber(Number.parseInt(weekNumber)),[getWeekByNumber]);
 
   const auth = useContext(UserContext);
   const { PopsBar, shamefulFailure, greatSuccess, clearPops } = usePops();
@@ -72,11 +69,11 @@ const CreateAward = () => {
       const camperData = await response.json();
       setCampers(camperData);
     },
-    [auth]
+    [auth,weekNumber]
   );
 
   useEffect(() => {
-      getCampers(currentWeek);
+      getCampers();
   }, [getCampers]);
 
   const handleFormChange = (event) => {
@@ -114,11 +111,11 @@ const CreateAward = () => {
   return (
     <>
       <Container maxWidth="md">
-        {currentWeek && campers && (
+        {currentWeek() && campers && (
           <Paper elevation={4} sx={{ paddingY: 4, paddingX: 2, mt:2 }}>
             <Box component="header">
-          <Typography variant="h6" component="h1">Week {currentWeek.display} </Typography>
-          <Typography variant="h5" component="h1"><em>{currentWeek.title}</em> </Typography>
+          <Typography variant="h6" component="h1">Week {currentWeek().display} </Typography>
+          <Typography variant="h5" component="h1"><em>{currentWeek().title}</em> </Typography>
               <Typography variant="body1" component="h2">
                 A Camper really excelled. Celebrate their achievement!
               </Typography>

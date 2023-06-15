@@ -1,14 +1,9 @@
 import { useContext, useState } from "react";
-import { PopOut } from "./styled";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCircleXmark } from "@fortawesome/free-regular-svg-icons";
 import { postCampersToActivity } from "../requests/activity";
 import UserContext from "./UserContext";
 import {
-  Box,
   Button,
     Container,
-  Card,
   Dialog,
   DialogTitle,
   Divider,
@@ -20,7 +15,6 @@ import {
   MenuItem,
   Select,
   Stack,
-  Typography,
 } from "@mui/material";
 
 const ReassignModal = ({

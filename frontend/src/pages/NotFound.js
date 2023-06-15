@@ -1,7 +1,4 @@
-import { Container, Box, Card, Paper, Typography, Divider, Button } from '@mui/material';
-import tw from "twin.macro";
-import "styled-components/macro";
-import { Link } from 'react-router-dom';
+import { Container, Box, Card, Typography, Divider, Button } from '@mui/material';
 
 const NotFound = () => {
 	return <>

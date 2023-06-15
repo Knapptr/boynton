@@ -1,7 +1,5 @@
 import { useState } from "react";
-import tw from "twin.macro";
-import "styled-components/macro";
-import { Slider } from "@mui/material"
+import { Box, Slider, Typography } from "@mui/material"
 
 const TIME = 100;
 
@@ -15,10 +13,10 @@ const Slay = () => {
     setSliderValue(value);
   }
   return (
-    <div tw="h-screen bg-black w-full flex flex-col lg:flex-row items-center justify-center select-none">
-      <h1 tw="text-8xl md:text-9xl xl:text-[16rem] text-pink-600 font-bold" css={{ animation: `spinny infinite ${speed}ms linear` }}>S L A Y</h1>
+    <Box height="100vh" bgcolor="black" width={1} display="flex" flexDirectior={{xs:"column",lg:"row"}} justifyContent="center" alignItems="center" >
+      <Typography color="pink" >S L A Y</Typography>
 
-      <div tw=" w-8/12 fixed bottom-1">
+      <Box width={8/12} position="fixob" bottom={1}>
         <Slider
           aria-label="Temperature"
           orientation="horizontal"
@@ -28,10 +26,10 @@ const Slay = () => {
           min={400}
           max={4000}
           onChange={handleChange}
-          tw="text-pink-600"
+          color="pink"
         />
-      </div>
-    </div>
+      </Box>
+    </Box>
   )
 }
 

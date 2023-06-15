@@ -1,4 +1,4 @@
-import { Box, Chip, Divider, Stack, Typography } from "@mui/material";
+import { Box, Chip, Stack, Typography } from "@mui/material";
 
 const stafferBadges = (staffer) => {
   const badges = [
@@ -62,7 +62,7 @@ export const StaffItem = ({
             }}
           >
             {stafferBadges(staffer).map((badge) => (
-              <Chip color="teal" size="small" label={badge.label} />
+              <Chip key={`staff-${staffer.id}-badge-${badge.type}`}color="teal" size="small" label={badge.label} />
             ))}
           </Stack>
         </Stack>

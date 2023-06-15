@@ -1,16 +1,10 @@
 import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
   Box,
   Fade,
   FormControl,
   InputLabel,
   MenuItem,
   Select,
-  Skeleton,
-  Slide,
-  styled,
   ToggleButton,
   ToggleButtonGroup,
   Typography,
@@ -25,9 +19,9 @@ import fetchWithToken from "../fetchWithToken";
 const useWeeks = () => {
   const auth = useContext(UserContext);
   const [weeks, setWeeks] = useState([]);
-  const [selectedWeekIndex, setSelectedIndex] = useState(null);
-  const [selectedDayIndex, setSelectedDayIndex] = useState(null);
-  const [selectedPeriodIndex, setSelectedPeriodIndex] = useState(null);
+  const [selectedWeekIndex, setSelectedIndex] = useState(0);
+  const [selectedDayIndex, setSelectedDayIndex] = useState(0);
+  const [selectedPeriodIndex, setSelectedPeriodIndex] = useState(0);
 
   const getWeekByNumber = useCallback((weekNumber) =>{
     const week = weeks.find(w=> w.number === weekNumber)
@@ -49,7 +43,7 @@ const useWeeks = () => {
     if (selectedWeekIndex === null || selectedDayIndex === null) {
       return null;
     }
-    return selectedWeek().days[selectedDayIndex];
+    return selectedWeek()?.days[selectedDayIndex];
   }, [selectedDayIndex, selectedWeekIndex, selectedWeek]);
 
   const selectedPeriod = useCallback(() => {
@@ -60,7 +54,7 @@ const useWeeks = () => {
     ) {
       return null;
     }
-    return selectedDay().periods[selectedPeriodIndex];
+    return selectedDay()?.periods[selectedPeriodIndex];
   }, [selectedDay, selectedDayIndex, selectedPeriodIndex, selectedWeekIndex]);
 
   const clearSelection = () => {
@@ -104,7 +98,7 @@ const useWeeks = () => {
           onChange={handlePeriodSelect}
         >
           {selectedDay() &&
-            selectedDay().periods.map((period, index) => (
+            selectedDay()?.periods.map((period, index) => (
               <MenuItem key={`select-act-${period.number}`} value={index}>
                 Act {period.number}
               </MenuItem>
@@ -124,7 +118,7 @@ const useWeeks = () => {
           onChange={handleDaySelect}
         >
           {selectedWeek() &&
-            selectedWeek().days.map((day, index) => (
+            selectedWeek()?.days.map((day, index) => (
               <MenuItem key={`select-${day.name}`} value={index}>
                 {day.name}
               </MenuItem>
@@ -208,7 +202,7 @@ const useWeeks = () => {
       } else {
         setOpen(false);
       }
-    });
+    },[]);
     return (
       <Box>
         <Fade in={open}>
@@ -231,7 +225,7 @@ const useWeeks = () => {
               exclusive
             >
               {selectedWeek() &&
-                selectedWeek().days.map((d, dIndex) => (
+                selectedWeek()?.days.map((d, dIndex) => (
                   <ToggleButton
                     key={`week-select-${d.id}`}
                     tw="bg-green-600 hover:bg-green-400"
@@ -279,7 +273,7 @@ const useWeeks = () => {
               exclusive
             >
               {selectedDay() &&
-                selectedDay().periods.map((p, pIndex) => (
+                selectedDay()?.periods.map((p, pIndex) => (
                   <ToggleButton
                     key={`period-select-${p.id}`}
                     tw="bg-green-600 hover:bg-green-400"

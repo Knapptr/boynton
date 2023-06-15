@@ -9,8 +9,7 @@ import AccordionDetails from "@mui/material/AccordionDetails";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import getDayName from "../utils/getDayname";
 import useWeeks from "../hooks/useWeeks";
-import { Box, Typography } from "@mui/material";
-import { Stack } from "@mui/system";
+import { Box, Stack, Typography } from "@mui/material";
 
 const SelectionHeader = ({ fields }) => {
   return (

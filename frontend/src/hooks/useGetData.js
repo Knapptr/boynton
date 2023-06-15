@@ -9,7 +9,7 @@ const useGetDataOnMount = ({
   beforeSet,
   afterSet,
   optionalSortFunction,
-  runOn = [],
+  // runOn = [],
   useToken = false,
 }) => {
   const [data, setData] = useState(initialState);
@@ -55,7 +55,7 @@ const useGetDataOnMount = ({
       optionalSortFunction,
       useToken,
     });
-  }, [beforeSet, optionalSortFunction, useToken, afterSet, url, fetchAndSet]);
+  }, [optionalSortFunction, useToken, afterSet, url, fetchAndSet]);
 
   useEffect(() => {
     fetchAndSet({
@@ -66,7 +66,7 @@ const useGetDataOnMount = ({
       optionalSortFunction,
       useToken,
     });
-  }, []);
+  }, [afterSet,beforeSet,fetchAndSet,optionalSortFunction,url,useToken]);
 
   return [data, setData, update, loaded];
 };

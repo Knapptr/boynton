@@ -1,19 +1,14 @@
-// MOST RECENT
-import { useOutletContext, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
-import tw, { styled } from "twin.macro";
-import "styled-components/macro";
 import UserContext from "../components/UserContext";
 import ReassignModal from "../components/ReassignModal";
 import ActivityAttendance, {
-  AttendanceSummary,
 } from "../components/ActivityAttendance";
 import ActivitySelectors from "../components/ActivitySelectors";
 import ReassignmentSelectionDialog from "../components/AttendanceReassignDialog";
 import fetchWithToken from "../fetchWithToken";
 import AttendanceSearch from "../components/AttendanceSearch";
-import { Box, Button, Grid, Skeleton, Typography } from "@mui/material";
-import { Stack } from "@mui/system";
+import { Box, Button, Grid, Skeleton, Typography, Stack } from "@mui/material";
 import { Helmet } from "react-helmet";
 
 // rate at which to update

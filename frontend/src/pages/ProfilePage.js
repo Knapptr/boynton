@@ -51,7 +51,7 @@ const AddScoreDialog = ({ onClose, show, week }) => {
       body: JSON.stringify(reqBody),
     };
     const response = await fetchWithToken(url, options, auth);
-    const data = await response.json();
+    await response.json();
   };
 
   const handleSubmit = async () => {
@@ -153,7 +153,7 @@ const AddScoreDialog = ({ onClose, show, week }) => {
 const ScorePane = () => {
   const auth = useContext(UserContext);
   const [scores, setScores] = useState(null);
-  const { weeks, DaySelection, selectedWeek, WeekSelection, PeriodSelection } =
+  const { selectedWeek, WeekSelection} =
     useWeeks();
 
   const getScore = useCallback(
@@ -378,6 +378,7 @@ const ProfilePage = () => {
                   >
                     {userBadges().map((badge) => (
                       <StaffBadge
+                      key={`badge-${userData.username}-${badge.type}`}
                         size="small"
                         variant="outlined"
                         type={badge.type}
