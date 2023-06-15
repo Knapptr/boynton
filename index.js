@@ -1,5 +1,6 @@
 require("dotenv").config();
-const registerListeners = require("./slack/listeners/index");
+// slack integration
+// const registerListeners = require("./slack/listeners/index");
 const { App, ExpressReceiver } = require("@slack/bolt");
 const receiver = require("./server/index");
 const dbInit = require('./db.init');
@@ -13,7 +14,8 @@ const app = new App({
 	port: 3000,
 });
 
-registerListeners(app);
+// Slack integration
+// registerListeners(app);
 
 console.log("Starting Boynton . . .");
 (async () => {
