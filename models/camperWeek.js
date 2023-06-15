@@ -11,24 +11,28 @@ class CamperWeek {
         id,
         firstName,
         lastName,
-      dayCamp,
+        dayCamp,
+        pronouns,
+        fl,
         age,
         gender,
         weekNumber,
         weekTitle,
-        camperID,
+        camperId,
         cabinSessionID,
         cabinName,
         activities,
     }) {
         this.weekNumber = weekNumber;
         this.gender = gender;
+        this.pronouns = pronouns
         this.dayCamp = dayCamp;
+        this.fl = fl;
         this.age = age;
         this.firstName = firstName;
         this.lastName = lastName;
         this.weekTitle = weekTitle;
-        this.camperID = camperID;
+        this.camperId = camperId;
         this.id = id;
         this.cabinSessionID = cabinSessionID;
         this.cabinName = cabinName || "unassigned";
@@ -38,6 +42,7 @@ class CamperWeek {
         id,
         camper_id,
         day_camp,
+        fl,
         first_name,
         last_name,
         age,
@@ -50,12 +55,15 @@ class CamperWeek {
         activity_id,
         period_id,
         activity_name,
+        pronouns,
         activity_description,
     }) {
         return {
             id: id,
-            camperID: camper_id,
-          dayCamp: day_camp,
+            camperId: camper_id,
+            dayCamp: day_camp,
+            pronouns: pronouns,
+            fl: fl,
             firstName: first_name,
             lastName: last_name,
             age: age,
@@ -76,7 +84,7 @@ class CamperWeek {
 			SELECT 
 			cw.id,
       cw.day_camp,
-			cw.camper_id,c.first_name,c.last_name,c.age,c.gender,
+			cw.camper_id,c.first_name,c.last_name,c.pronouns, c.age,c.gender,cw.fl,
 			w.number as week_number,w.title as week_title,
 			cw.cabin_session_id,cab.name as cabin_name,
 			ca.id as camper_activity_id,ca.activity_id as activity_id,ca.period_id,
@@ -90,10 +98,11 @@ class CamperWeek {
 			LEFT JOIN camper_activities ca ON ca.camper_week_id = cw.id
 			LEFT JOIN activities a ON a.id = ca.activity_id
 
+                        ORDER BY c.age, c.last_name
+
 		`;
         const dbResult = await fetchMany(query);
-      console.log({dbResult});
-      if(!dbResult){return []}
+        if (!dbResult) { return [] }
         const parsedResult = dbResult.map((oneResult) =>
             CamperWeek._parseResults(oneResult)
         );
@@ -110,8 +119,10 @@ class CamperWeek {
             ],
             fieldsToRemain: [
                 "id",
-                "camperID",
-              "dayCamp",
+                "camperId",
+                "dayCamp",
+                "fl",
+                "pronouns",
                 "firstName",
                 "lastName",
                 "age",
@@ -129,7 +140,7 @@ class CamperWeek {
         const query = `
 			SELECT 
 			cw.id,
-			cw.camper_id,c.first_name,c.last_name,c.age,c.gender,
+			cw.camper_id,c.first_name,c.last_name, cw.fl, c.age,c.gender, c.pronouns,
 			w.number as week_number,w.title as week_title,
 			cw.cabin_session_id,cab.name as cabin_name,
 			ca.id as activity_id,ca.period_id,
@@ -147,6 +158,7 @@ class CamperWeek {
 		`;
         const values = [id];
         const dbResult = await fetchMany(query, values);
+        if (!dbResult) { return false };
         const parsedResult = dbResult.map((oneResult) =>
             CamperWeek._parseResults(oneResult)
         );
@@ -163,8 +175,11 @@ class CamperWeek {
             ],
             fieldsToRemain: [
                 "id",
-                "camperID",
+                "camperId",
+                "dayCamp",
+                "fl",
                 "firstName",
+                "pronouns",
                 "lastName",
                 "age",
                 "gender",

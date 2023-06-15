@@ -1,27 +1,21 @@
-import tw, { styled } from "twin.macro";
-import "styled-components/macro";
 import { MenuSelector } from "./styled";
+import { ToggleButton, ToggleButtonGroup } from "@mui/material";
 
 const PeriodNav = ({ days, selectPeriod, selectedDay, selectedPeriod }) => {
 	return (
-		<ul tw="gap-2 flex justify-center">
+		<ToggleButtonGroup exclusive value={selectedPeriod} onChange={(e,value)=>{selectPeriod(value)}}>
 			{days[selectedDay].periods.map((period, index) => (
-				<MenuSelector
-					color="blue"
-					tw="flex-grow"
-					isSelected={
-						days[selectedDay].periods[selectedPeriod].id ===
-						period.id
-					}
+				<ToggleButton
+					key={`period-${index}`}
 					onClick={() => {
 						selectPeriod(index);
 					}}
-					key={`period-${index}`}
+				value={index}
 				>
-					Activity Period {period.number}
-				</MenuSelector>
+					Act {period.number}
+				</ToggleButton>
 			))}
-		</ul>
+		</ToggleButtonGroup>
 	);
 };
 export default PeriodNav;

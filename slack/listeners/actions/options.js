@@ -1,4 +1,5 @@
 const pool = require("../../../db/index");
+
 const sendCampers = async ({ ack, payload }) => {
 	const value = payload.value;
 	const values = [`^${value}`];
@@ -6,7 +7,6 @@ const sendCampers = async ({ ack, payload }) => {
 		"SELECT * from campers where first_name ~* $1 OR last_name ~* $1",
 		values
 	);
-	const campers = camperResults.rows;
 	const results = camperResults.rows;
 	const options = results.map((camper) => {
 		return {
@@ -22,5 +22,6 @@ const sendCampers = async ({ ack, payload }) => {
 	});
 	await ack({ options });
 };
+
 
 module.exports = { sendCampers };

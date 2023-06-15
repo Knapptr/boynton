@@ -1,5 +1,7 @@
 const router = require("express").Router();
+const { param } = require("express-validator");
 const Camper = require("../../models/camper");
+const handleValidation = require("../../validation/validationMiddleware");
 
 const areaToGender = {
 	BA: "Male",
@@ -28,18 +30,25 @@ const handler = {
 				camper.weeks.some((session) => {
 					return week
 						? session.cabinName === cabin &&
-								session.number === week
+						session.number === week
 						: session.cabinName === cabin;
 				})
 			);
 		}
 		res.json(campers);
 	},
-	async getOneCamper(req, res, next) {
-		const id = req.params.camperID;
-		let camper = await Camper.getById(id);
-		res.json(camper);
-	},
+	getOneCamper: [
+		param("camperID").exists().isInt().custom(async (value, { req }) => {
+			let camper = await Camper.getById(value);
+			if (!camper) {
+				throw new Error("Camper does not exist");
+			}
+			req.camper = camper;
+		}),
+		handleValidation,
+		async (req, res, next) => {
+			res.json(req.camper);
+		}],
 };
 
 module.exports = handler;

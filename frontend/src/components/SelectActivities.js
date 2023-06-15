@@ -1,186 +1,248 @@
 import useActivityAttendance from "../hooks/useActivityAttendance";
-import {useContext} from 'react'
-import { DragDropContext, Droppable, Draggable } from "@react-forked/dnd";
-import fetchWithToken from "../fetchWithToken";
-import tw, { styled } from "twin.macro";
-import "styled-components/macro";
+import { useContext } from "react";
+import lodash from "lodash";
+import { postCampersToActivity } from "../requests/activity";
 import toTitleCase from "../toTitleCase";
 import UserContext from "./UserContext";
+import {
+  Box,
+  Container,
+  Chip,
+  Drawer,
+  Grid,
+  Skeleton,
+  Stack,
+  styled,
+  Typography,
+  Alert,
+} from "@mui/material";
 
-const CamperItem = styled.li(({ isDragging }) => [
-  tw`border p-1 bg-green-50`,
-  isDragging && tw`bg-green-400`,
-]);
-const ActivityList = styled.ul(({ blue, isDraggingOver }) => [
-  tw`p-3 bg-purple-200 justify-center flex flex-col items-center gap-1`,
-  blue && tw`bg-blue-200`,
-  isDraggingOver && tw`bg-purple-600`,
-  isDraggingOver && blue && tw`bg-blue-500`,
-]);
+const drawerWidth = 175;
+
+const ActivityList = styled(Box)(({ bg, theme }) => ({
+  backgroundColor: bg
+    ? theme.palette.background[bg]
+    : theme.palette.background.secondary,
+  borderRadius: "2%",
+}));
+
 const SelectActivities = ({
   periodId,
   cabinName,
-  dayName,
-  periodNumber,
-  isTheLastPeriod,
-  selectNext,
+  selectedCampers,
+  handleSelectCamper,
+  clearSelection,
 }) => {
   const {
     loading: activitiesLoading,
     activityLists,
-    updateActivityAttendance,
+    setLists,
+    refresh,
   } = useActivityAttendance(periodId, cabinName);
-  const auth = useContext(UserContext)
-  const addCamperActivityToDB = async (camperWeekId, activityId, periodId) => {
-    const camper = {
-      camperWeekId,
-      periodId,
-    };
-    const reqConfig = {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify(camper),
-    };
-    console.log(reqConfig);
-    const result = await fetchWithToken(
-      `/api/activities/${activityId}/campers`,
-      reqConfig,
-      auth
-    );
-    const data = await result.json();
-  };
-  const handleListMovement = async (
-    sourceListId,
-    sourceIndex,
-    destinationListId,
-    destinationIndex
-  ) => {
-    if (sourceListId === destinationListId) {
-      return;
-    }
-    const newDestination = [...activityLists[destinationListId].campers];
-    const newSource = [...activityLists[sourceListId].campers];
-    const camper = newSource.splice(sourceIndex, 1)[0];
-    newDestination.splice(destinationIndex, 0, camper);
-    updateActivityAttendance(
-      sourceListId,
-      destinationListId,
-      newSource,
-      newDestination
-    );
-    if (destinationListId === "unassigned") {
-      return;
-    }
-    await addCamperActivityToDB(camper.weekId, destinationListId, periodId);
-  };
-  return (
-    <DragDropContext
-      onDragEnd={({ source, destination }) => {
-        if (!destination) {
-          return;
-        }
-        handleListMovement(
-          source.droppableId,
-          source.index,
-          destination.droppableId,
-          destination.index
+
+  const auth = useContext(UserContext);
+
+  const handleSubmit = async (activitySessionId) => {
+    if (
+      selectedCampers.length > 0 &&
+      selectedCampers.some((c) => c.sourceId !== activitySessionId)
+    ) {
+      const campersToAdd = [...selectedCampers];
+      try {
+        await postCampersToActivity(
+          campersToAdd.map((c) => c.camper),
+          activitySessionId,
+          auth
         );
-      }}
-    >
-      <div tw="flex flex-col max-w-3xl mx-auto">
-        {activitiesLoading ? (
-          <h2 tw="animate-bounce">Loading</h2>
-        ) : (
-          <>
-            <div tw=" flex-col md:flex-row flex justify-center ">
-              {activityLists.unassigned &&
-                activityLists.unassigned.campers.length > 0 && (
-                  <div tw="w-full my-2 md:mx-2">
-                    <Droppable droppableId="unassigned">
-                      {(provided, snapshot) => (
-                        <ActivityList
-                          blue
-                          isDraggingOver={snapshot.isDraggingOver}
-                          ref={provided.innerRef}
-                          {...provided.droppableProps}
-                        >
-                          <header tw="w-full font-bold ">
-                            <h2>Unassigned</h2>
-                          </header>
-                          {activityLists.unassigned &&
-                            activityLists.unassigned.campers.map((c, index) => (
-                              <Draggable
-                                index={index}
-                                draggableId={`${c.weekId}`}
-                                key={`unassigned-draggable-${c.weekId}`}
-                              >
-                                {(provided, snapshot) => (
-                                  <CamperItem
-                                    {...provided.dragHandleProps}
-                                    {...provided.draggableProps}
-                                    ref={provided.innerRef}
-                                    isDragging={snapshot.isDragging}
-                                  >
-                                    {c.firstName} {c.lastName}
-                                  </CamperItem>
-                                )}
-                              </Draggable>
-                            ))}
-                          {provided.placeholder}
-                        </ActivityList>
-                      )}
-                    </Droppable>
-                  </div>
-                )}
-              <div tw=" gap-1 flex flex-row md:flex-col w-full my-2 md:mx-2 flex-wrap ">
+      } catch (e) {
+        console.log("Something went wrong assigning campers to db", e);
+        refresh();
+      }
+      // Eagerly update UI
+      let newState = lodash.cloneDeep(activityLists);
+      for (const selectedCamper of campersToAdd) {
+        // Remove camper from source
+        newState[selectedCamper.sourceId].campers = newState[
+          selectedCamper.sourceId
+        ].campers.filter(
+          (c) => c.camperSessionId !== selectedCamper.camper.camperSessionId
+        );
+        // Add camper to destination
+        newState[activitySessionId].campers.push(selectedCamper.camper);
+      }
+      // update state
+      clearSelection();
+      setLists(newState);
+    }
+  };
+  const dropZoneSize = (activityId) => {
+    switch (activityLists[activityId].campers.length) {
+      case 0:
+        return 4;
+      case 1:
+        return 2;
+      case 2:
+        return 1;
+      default:
+        return 0;
+    }
+  };
+
+  return (
+    <>
+      <Box width={1} display="flex">
+        {/* CAMPERS */}
+        <Drawer
+          variant="permanent"
+          sx={{
+            width: drawerWidth,
+            zIndex: 0,
+            flexShrink: 0,
+            [`& .MuiDrawer-paper`]: {
+              width: drawerWidth,
+              boxSizing: "border-box",
+            },
+          }}
+        >
+          <Box mb={20} />
+          {activityLists.unassigned &&
+            activityLists.unassigned.campers.length === 0 && (
+              <Box px={0.75}>
+                <Alert severity="success" variant="filled">
+                  All Campers Assigned!
+                </Alert>
+              </Box>
+            )}
+          {activityLists.unassigned &&
+            activityLists.unassigned.campers.length > 0 && (
+              <Box px={0.75}>
+                <Box position="sticky" top={0} component="header">
+                  <Typography variant="subtitle1" fontWeight="bold">
+                    Unassigned
+                  </Typography>
+                </Box>
+                <Stack direction="column" spacing={1}>
+                  {activityLists.unassigned &&
+                    [...activityLists.unassigned.campers]
+                      .sort((a, b) => a.lastName.localeCompare(b.lastName))
+                      .map((camper, index) => (
+                        <Chip
+                          key={`camper-unassigned-${camper.camperSessionId}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSelectCamper(camper, "unassigned");
+                          }}
+                          color={
+                            selectedCampers.some(
+                              (sc) =>
+                                sc.camper.camperSessionId ===
+                                camper.camperSessionId
+                            )
+                              ? "primary"
+                              : "default"
+                          }
+                          label={`${camper.firstName} ${camper.lastName} ${camper.age}`}
+                        />
+                        /*<CamperItem
+                            selectable
+                            camper={camper}
+                            key={`unassigned-camper-${camper.camperSessionId}`}
+                            isSelected={selectedCampers.some(
+                              (sc) =>
+                                sc.camper.camperSessionId ===
+                                camper.camperSessionId
+                            )}
+                            handleSelect={() =>
+                              handleSelectCamper(camper, "unassigned")
+                            }
+                          ></CamperItem>*/
+                      ))}
+                </Stack>
+              </Box>
+            )}
+        </Drawer>
+        <Grid container justifyContent="center">
+          {activitiesLoading ? (
+            <Box>
+              <Skeleton
+                animation="wave"
+                variant="rectangular"
+                height={400}
+                width={350}
+              />
+              <Skeleton
+                animation="wave"
+                variant="rectangular"
+                height={400}
+                width={350}
+              />
+            </Box>
+          ) : (
+            <>
+              {/* ACTIVITIES */}
+
+              <Stack
+                width={1}
+                maxWidth={666}
+                spacing={2}
+                pl={0.33}
+                alignItems="stretch"
+                py={1}
+              >
                 {activityLists.activityIds &&
                   activityLists.activityIds.map((aid, index) => (
-                    <Droppable
-                      key={`activity-container=${index}`}
-                      droppableId={`${aid}`}
+                    <ActivityList
+                      key={`activity-list-${aid}`}
+                      px={1}
+                      width={1}
+                      onClick={() => {
+                        handleSubmit(aid);
+                      }}
                     >
-                      {(provided, snapshot) => (
-                        <ActivityList
-                          tw="flex-grow"
-                          isDraggingOver={snapshot.isDraggingOver}
-                          ref={provided.innerRef}
-                          {...provided.droppableProps}
-                        >
-                          <header>
-                            <h2 tw="font-bold">
-                              {toTitleCase(activityLists[aid].name)}
-                            </h2>
-                          </header>
-                          {activityLists[aid].campers.map((c, index) => (
-                            <Draggable
-                              draggableId={`${c.weekId}`}
-                              index={index}
-                              key={`draggable-camper-${c.weekId}`}
-                            >
-                              {(provided, snapshot) => (
-                                <CamperItem
-                                  isDragging={snapshot.isDragging}
-                                  {...provided.dragHandleProps}
-                                  {...provided.draggableProps}
-                                  ref={provided.innerRef}
-                                >
-                                  {toTitleCase(c.firstName)}{" "}
-                                  {toTitleCase(c.lastName)}
-                                </CamperItem>
-                              )}
-                            </Draggable>
-                          ))}
-                          {/* {provided.placeholder} */}
-                        </ActivityList>
-                      )}
-                    </Droppable>
+                      <Box component="header" mb={1}>
+                        <Typography fontWeight="bold" variant="subtitle1">
+                          {toTitleCase(activityLists[aid].name)}
+                        </Typography>
+                      </Box>
+                      {/* Alphabetize here, so that ui updates are consistant*/}
+                      <Container maxWidth="sm">
+                        <Stack spacing={1}>
+                          {[...activityLists[aid].campers]
+                            .sort((a, b) =>
+                              a.lastName.localeCompare(b.lastName)
+                            )
+                            .map((camper) => (
+                              <Chip
+                                key={`activity-${aid}-${camper.camperSessionId}`}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleSelectCamper(camper, aid);
+                                }}
+                                color={
+                                  selectedCampers.some(
+                                    (sc) =>
+                                      sc.camper.camperSessionId ===
+                                      camper.camperSessionId
+                                  )
+                                    ? "primary"
+                                    : "default"
+                                }
+                                label={`${camper.firstName} ${camper.lastName}`}
+                              />
+                            ))}
+                        </Stack>
+                      </Container>
+                      <Box id={`${aid}-dropzone`} py={dropZoneSize(aid)}></Box>
+                    </ActivityList>
                   ))}
-              </div>
-            </div>
-          </>
-        )}
-      </div>
-    </DragDropContext>
+              </Stack>
+              {/*
+              )*/}
+            </>
+          )}
+        </Grid>
+      </Box>
+    </>
   );
 };
 

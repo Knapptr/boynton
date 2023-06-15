@@ -19,7 +19,10 @@ oldtests/
 tests/tryIfExists.js
 config-heroku.json
 frontend/src/hooks/useGetData.js
-frontend/src/pages/CabinAssignment.js
 .productionDB
 .productionDB
 dummyReport.csv
+/config.js
+configToJson.js
+2022.config.js
+2023.config.js

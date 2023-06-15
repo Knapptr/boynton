@@ -14,6 +14,7 @@ class Cabin {
 		this.area = area;
 		this.sessions = sessions;
 	}
+	static VALID_AREAS = ["BA", "GA"];
 	static _parseResults(dbResponse) {
 		return {
 			name: dbResponse.name,
@@ -113,8 +114,8 @@ class Cabin {
 		return ids;
 	}
 	async getCampers({ weekID }) {
-		const query = 
-        `SELECT cabin_session_id, camper_id,week_id,cabin_name,first_name,last_name,gender,age,sessions,campers.id as id FROM camper_cabin_sessions 
+		const query =
+			`SELECT cabin_session_id, camper_id,week_id,cabin_name,first_name,last_name,gender,age,sessions,campers.id as id FROM camper_cabin_sessions 
 JOIN cabin_sessions 
 ON cabin_sessions.id = camper_cabin_sessions.cabin_session_id
 JOIN campers

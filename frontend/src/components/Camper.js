@@ -1,56 +1,62 @@
-import { Draggable } from "@react-forked/dnd";
 import tw, { styled } from "twin.macro";
 import "styled-components/macro";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUserMinus } from "@fortawesome/free-solid-svg-icons";
+import { useState } from "react";
+import { Box, IconButton, Stack } from "@mui/material";
 
-const RemoveButton = tw.button`rounded bg-red-500 text-white p-1 m-0.5 hover:bg-red-700 mr-3`;
-const CamperItem = styled.li(({ full, isDragging, removable }) => [
-  tw`p-1 bg-green-200 flex items-center`,
-  !removable && tw`pl-4`,
-  isDragging && tw`bg-green-500`,
-  full && tw`w-full`,
-]);
 
 const Camper = ({
-  camper,
-  full,
-  index,
-  cabinName,
-  unassignCamper,
-  removable,
+    camper,
+    full,
+    index,
+    cabinName,
+    unassignCamper,
+    removable,
+    select,
+    selectable,
+    deselect
 }) => {
-  const { firstName, lastName, age, id,dayCamp } = camper;
-  return (
-    <Draggable key={id} draggableId={`${id}`} index={index}>
-      {(provided, snapshot) => {
-        return (
-          <CamperItem
+    const { firstName, lastName, age, id, dayCamp, camperID, fl } = camper;
+    const [isSelected, setIsSelected] = useState(false);
+    return (
+        <Box
+            onClick={(e) => {
+                e.stopPropagation();
+                if (selectable) {
+                    if (isSelected) {
+                        deselect(id);
+                        setIsSelected(false);
+                    } else {
+                        select(camper);
+                        setIsSelected(true);
+                    }
+                }
+            }}
             full={full}
             removable={removable}
-            {...provided.draggableProps}
-            {...provided.dragHandleProps}
-            ref={provided.innerRef}
-            isDragging={snapshot.isDragging}
-          >
-            {removable && !snapshot.isDragging && (
-              <RemoveButton
-                onClick={() => {
-                  unassignCamper(camper, index, cabinName);
-                }}
-              >
-                <FontAwesomeIcon icon={faUserMinus} />
-              </RemoveButton>
+            select={select}
+            isSelected={isSelected}
+            dayCamp={dayCamp}
+            fl={fl}
+        >
+            {removable && (
+                <IconButton
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        unassignCamper(camper.id);
+                    }}
+                >
+                    <FontAwesomeIcon icon={faUserMinus} />
+                </IconButton>
             )}
-            <p tw="text-lg">
-              <span tw="font-light"> {age}</span> {firstName} {lastName}
-              {dayCamp && <span tw="italic"> DAY</span>}
-            </p>
-          </CamperItem>
-        );
-      }}
-    </Draggable>
-  );
+            <Stack >
+                <span > {age}</span>  {firstName} {lastName}
+                {dayCamp && <span >{" "}day</span>}
+                {fl && <span >{" "}FL</span>}
+            </Stack>
+        </Box>
+    );
 };
 
 export default Camper;

@@ -5,10 +5,9 @@ const SCOPES = ["https://www.googleapis.com/auth/drive"];
 
 const credentials = {
   email: process.env.SERVICE_ACCOUNT_EMAIL,
-  key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g,"\n"),
+  key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, "\n"),
 };
 
-console.log(credentials)
 
 const uploadFile = async (auth, filePath, fileName, folderID) => {
   const drive = google.drive({ version: "v3", auth });
@@ -35,17 +34,17 @@ const uploadFile = async (auth, filePath, fileName, folderID) => {
 };
 const auth = () => {
   try {
-    const serviceAuth = new google.auth.JWT(credentials.email,null,credentials.key,SCOPES)
+    const serviceAuth = new google.auth.JWT(credentials.email, null, credentials.key, SCOPES)
     // const serviceAuth = new GoogleAuth({
     //   // keyFile: "./credentials.json",
     //   // credentials: JSON.parse(process.env.GOOGLE_CREDENTIALS),
     //   credentials,
     //   scopes: SCOPES,
     // });
-      console.log(serviceAuth)
+    // console.log(serviceAuth)
     return serviceAuth;
   } catch (e) {
-    console.log('errer with service auth',e);
+    console.log('error with service auth', e);
   }
 };
 const authAndUpload = async (filePath, fileName, folderID) => {

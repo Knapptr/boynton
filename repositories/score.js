@@ -8,7 +8,7 @@ module.exports = {
       (
       points integer NOT NULL,
       id serial NOT NULL,
-      awarded_to character varying(1) NOT NULL,
+      awarded_to character varying(11) NOT NULL,
       awarded_for character varying(255) NOT NULL,
       awarded_at date NOT NULL,
       week_number integer,
@@ -52,6 +52,7 @@ module.exports = {
       "INSERT INTO scores (awarded_to,points,awarded_for,week_number,awarded_at) VALUES ($1, $2, $3, $4,$5) RETURNING *; ";
     const awardedAt = formatmmddyyyy(new Date());
     const values = [awardedTo, points, awardedFor, weekNumber, awardedAt];
+    console.log({ values });
     const result = await fetchOne(query, values);
     return this._mapResponse(result);
   },

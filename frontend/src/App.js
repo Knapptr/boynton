@@ -1,80 +1,115 @@
 import "./App.css";
-import { Route, Routes, BrowserRouter } from "react-router-dom";
+import { Route, Routes, BrowserRouter} from "react-router-dom";
 import CabinAssignmentRoutes from "./pages/CabinAssignment";
 import NotFound from "./pages/NotFound";
-import ScheduleRoutes from "./pages/ScheduleRoutes";
 import LoginPage from "./pages/login";
 import NavWrapper from "./components/NavWrapper";
 import Protected from "./components/Protected";
-import Dashboard from "./pages/dashboard";
-import UserContext, { useUserData } from "./components/UserContext";
-import CabinListPage from "./pages/CabinList";
-import tw from "twin.macro";
-import "styled-components/macro";
 import CabinListIndex from "./pages/CabinListIndex";
-import Scoreboard from "./pages/Scoreboard";
-import Score from "./components/Score"
+import ProgrammingSchedule from "./pages/ProgrammingSchedule";
+import Slay from "./pages/Slay";
+import UsersPage from "./pages/UsersPage";
+import StaffSchedule from "./pages/StaffSchedule";
+import ProfilePage from "./pages/ProfilePage";
+import CreateAward from "./pages/CreateAward";
+import "@fontsource/roboto/300.css";
+import "@fontsource/roboto/400.css";
+import "@fontsource/roboto/500.css";
+import "@fontsource/roboto/700.css";
+import RoleProtected from "./components/protectedRoutes";
+import SignUpIndex from "./pages/SignUpIndex";
+import CreateSchedulePage from "./pages/CreateSchedule";
+import AttendanceDisplay from "./pages/Attendance";
+import { UserContextProvider } from "./components/UserContext";
+import { WeekContextProvider } from "./components/WeekContext";
 
 function App() {
-  const userState = useUserData();
   return (
     <div className="App">
-      <div tw="max-w-4xl mx-auto" >
-        <UserContext.Provider value={userState}>
-          <BrowserRouter>
-            <Routes>
-              <Route path="/login" element={<LoginPage />} />
+    <UserContextProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="login" element={<LoginPage />} />
+            <Route path="slay" element={<Slay />} />
+            <Route
+              path=""
+              element={
+                <Protected>
+                <WeekContextProvider>
+                  <NavWrapper />
+                </WeekContextProvider>
+                </Protected>
+              }
+            >
               <Route
-                path="/"
+                path=""
                 element={
                   <Protected>
-                    <Dashboard />
+                    <ProfilePage />
                   </Protected>
                 }
               ></Route>
+
+              <Route path="award/:weekNumber" element={<CreateAward />} />
+              <Route path="cabins/">
+                {CabinAssignmentRoutes()}{" "}
+                <Route path="list/:weekNumber">
+                  <Route
+                    index
+                    element={
+                      <Protected>
+                        <CabinListIndex />
+                      </Protected>
+                    }
+                  ></Route>
+                </Route>
+              </Route>
               <Route
-                path="/*"
+                path="users"
                 element={
-                  <Protected>
-                    <NavWrapper />
-                  </Protected>
+                  <RoleProtected role="admin">
+                    <UsersPage />
+                  </RoleProtected>
                 }
-              >
-                <Route path="cabins/">
-                  {CabinAssignmentRoutes()}{" "}
-                  <Route path="list/">
-                    <Route
-                      index
-                      element={
-                        <Protected>
-                          <CabinListIndex />
-                        </Protected>
-                      }
-                    ></Route>
-                    <Route
-                      path=":weekNumber"
-                      element={<CabinListPage />}
-                    ></Route>
-                  </Route>
-                </Route>
-                <Route path="scoreboard" element={<Scoreboard/>}>
-                  <Route path=":weekNumber" element={<Score/>}/>
-                </Route>
-                <Route path="cabins/*">{CabinAssignmentRoutes()}</Route>
+              />
+              <Route path="schedule">
+
                 <Route
-                  path="schedule/*"
+                  path="programming/:weekNumber"
                   element={
-                    <Protected>
-                      <ScheduleRoutes />
-                    </Protected>
+                    <RoleProtected role="programming">
+                      <ProgrammingSchedule />
+                    </RoleProtected>
                   }
                 />
-                <Route path="*" element={<NotFound />} />
+
+                <Route path="sign-up" element={<SignUpIndex />}>
+                  <Route
+                    path=":cabin/:weekNumber"
+                    element={<CreateSchedulePage />}
+                  />
+                </Route>
+
+
+                <Route
+                  path="staffing/:weekNumber"
+                  element={
+                    <RoleProtected role="unit_head">
+                      <StaffSchedule />
+                    </RoleProtected>
+                  }
+                />
+
+                <Route
+                  path="attendance/:periodId"
+                  element={<AttendanceDisplay />}
+                />
               </Route>
+            </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
-      </UserContext.Provider></div>
+      </UserContextProvider>
     </div>
   );
 }

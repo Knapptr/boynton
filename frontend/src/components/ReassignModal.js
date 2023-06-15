@@ -1,85 +1,108 @@
-import tw from 'twin.macro';
-import 'styled-components/macro'
-import {useState} from 'react'
-import {PopOut} from './styled'
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
-import {faCircleXmark} from '@fortawesome/free-regular-svg-icons'
+import { useContext, useState } from "react";
+import { postCampersToActivity } from "../requests/activity";
+import UserContext from "./UserContext";
+import {
+  Button,
+    Container,
+  Dialog,
+  DialogTitle,
+  Divider,
+  FormControl,
+  InputLabel,
+  List,
+  ListItem,
+  ListItemText,
+  MenuItem,
+  Select,
+  Stack,
+} from "@mui/material";
 
 const ReassignModal = ({
   setDisplayModal,
   selectedCampers,
   camperSelection,
   updatePeriod,
+  show,
   period,
 }) => {
-  const [reassignmentOption, setReassignmentOption] = useState("default");
+  const auth = useContext(UserContext);
+  const [reassignmentOption, setReassignmentOption] = useState("");
   const reassignCampers = async () => {
-    const activity = period.activities.find(
-      (a) => a.id === reassignmentOption
-    );
-    await Promise.all(
-      selectedCampers.map((c) => camperSelection.reassign(c, activity))
+    await postCampersToActivity(
+      selectedCampers.map((c) => ({ ...c, camperSessionId: c.sessionId })),
+      reassignmentOption,
+      auth
     );
     updatePeriod();
     camperSelection.clear();
     setDisplayModal(false);
   };
   return (
-    <PopOut
-      onClick={() => {
-        setDisplayModal(false);
-      }}
-      shouldDisplay={true}
-    >
-      <div
-        tw="bg-coolGray-50 rounded pb-8 relative shadow-2xl w-full md:w-1/2"
-        onClick={(e) => e.stopPropagation()}
+    period && (
+      <Dialog
+        maxWidth="sm"
+        fullWidth
+        open={show}
+        onClose={() => {
+          setDisplayModal(false);
+        }}
       >
-        <button
-          onClick={() => setDisplayModal(false)}
-          tw="top-0 right-1 absolute"
-        >
-          <FontAwesomeIcon size="lg"icon={faCircleXmark}/>
-        </button>
-        <h2 tw="bg-orange-400 p-2 rounded-t mb-2">
-          Reassign {selectedCampers.length} camper(s)?
-        </h2>
-        <div tw="flex flex-col justify-center items-center">
-          <ul tw="flex flex-col gap-1 my-2">
-            {selectedCampers.map((c,cIndex) => (
-              <li key={`reassignmentCamper-${cIndex}`} tw="bg-green-300 shadow border">
+        <DialogTitle>
+          Reassign <em>{selectedCampers.length}</em> camper
+          {selectedCampers.length > 1 ? "s" : ""}?
+        </DialogTitle>
+        <Container maxWidth="xs">
+        <List dense>
+          {selectedCampers.map((c, cIndex) => (
+            <ListItem key={`reassignmentCamper-${cIndex}`}>
+              <ListItemText>
                 {c.firstName} {c.lastName}
-              </li>
-            ))}
-          </ul>
-          <label htmlFor="reassignTo">Reassign To:</label>
-          <select
-            tw="text-xl"
-            name="reassignTo"
-            id="reassignTo"
-            //defaultValue={"default"}
-            value={reassignmentOption}
-            onChange={(e) => {
-              setReassignmentOption(e.target.value);
-            }}
-          >
-            <option disabled value={"default"}>
-              Select an option
-            </option>
-            {period.activities.filter(a=>a.id !== 'Unassigned').map((a,aIndex) => (
-              <option key={`reassign-option-${aIndex}`}value={a.id}>{a.name}</option>
-            ))}
-          </select>
-          <button
-            tw="bg-green-600 px-3 py-2 rounded shadow mb-2 mt-6"
-            onClick={async () => reassignCampers()}
-          >
-            Reassign
-          </button>
-        </div>
-      </div>
-    </PopOut>
+              </ListItemText>
+            </ListItem>
+          ))}
+        </List>
+        <Divider color="primary" sx={{width:11/12, marginBottom:2}}/>
+        <FormControl fullWidth >
+        <InputLabel id="reassign-label">Reassign To</InputLabel>
+        <Select
+        labelId="reassign-label"
+        label="Reassign To"
+          value={reassignmentOption}
+          onChange={(e) => {
+            setReassignmentOption(Number.parseInt(e.target.value));
+          }}
+        >
+          {period.activities
+            .filter((a) => a.id !== "Unassigned")
+            .map((a, aIndex) => {
+              return (
+                <MenuItem key={`reassign-option-${aIndex}`} value={a.sessionId}>
+                  {a.name}
+                </MenuItem>
+              );
+            })}
+        </Select>
+        </FormControl>
+
+        </Container>
+        <Stack direction="row" px={2} py={3} justifyContent="center" spacing={3}>
+        <Button 
+        color ="warning"
+        variant="outlined"
+        onClick={()=>{setDisplayModal(false)}}>
+        Cancel
+        </Button>
+        <Button
+            color="success"
+        variant="contained"
+          onClick={() => reassignCampers()}
+        >
+          Reassign
+        </Button>
+        </Stack>
+      </Dialog>
+    )
   );
 };
 
-export default ReassignModal
+export default ReassignModal;

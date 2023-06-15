@@ -9,11 +9,11 @@ const useGetDataOnMount = ({
   beforeSet,
   afterSet,
   optionalSortFunction,
-  runOn = [],
+  // runOn = [],
   useToken = false,
 }) => {
   const [data, setData] = useState(initialState);
-  const [loaded,setLoaded] = useState(false)
+  const [loaded, setLoaded] = useState(false)
   const auth = useContext(UserContext);
   const navigate = useNavigate();
   const location = useLocation();
@@ -44,17 +44,19 @@ const useGetDataOnMount = ({
     if (callback) {
       callback(data);
     }
-  },[auth,location.pathname,navigate]);
-  const update = useCallback( () => {
+  }, [auth, location.pathname, navigate]);
+  const update = useCallback(() => {
+    console.log("Updating");
     fetchAndSet({
       url,
-      beforeSet,
+      beforeSet: (d) => { console.log({ d }); return d },
       handler: setData,
       afterSet,
       optionalSortFunction,
       useToken,
     });
-  },[beforeSet,optionalSortFunction,useToken,afterSet,url,fetchAndSet]);
+  }, [optionalSortFunction, useToken, afterSet, url, fetchAndSet]);
+
   useEffect(() => {
     fetchAndSet({
       url,
@@ -64,9 +66,9 @@ const useGetDataOnMount = ({
       optionalSortFunction,
       useToken,
     });
-  }, [...runOn]);
+  }, [afterSet,beforeSet,fetchAndSet,optionalSortFunction,url,useToken]);
 
-  return [data, setData, update,loaded];
+  return [data, setData, update, loaded];
 };
 
 export default useGetDataOnMount;
