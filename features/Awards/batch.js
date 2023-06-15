@@ -1,29 +1,29 @@
-const { templatePaths  } = JSON.parse(process.env.CONFIG);
-// const { createDocsPDF } = require("./createDocs");
-const { createDocsPPT } = require("./createDocs");
+// const { templatePaths  } = JSON.parse(process.env.CONFIG);
+// // const { createDocsPDF } = require("./createDocs");
+// const { createDocsPPT } = require("./createDocs");
 
-const createAwardBatch = async (awards, format) => {
-	const programAreas = Object.keys(awards);
+// const createAwardBatch = async (awards, format) => {
+// 	const programAreas = Object.keys(awards);
 
-	if (!["pdf", "pptx"].includes(format)) {
-		throw new Error('format must be "pdf" or "pptx"');
-	}
-	const createDocsFormat = {
-		// pdf: createDocsPDF,
-		pptx: createDocsPPT,
-	}[format];
-	for (programArea of programAreas) {
-		try {
-			await createDocsFormat(
-				programArea,
-				awards[programArea],
-				templatePaths
-			);
-		} catch (e) {
-			throw new Error(e);
-		}
-	}
-	return true;
-};
+// 	if (!["pdf", "pptx"].includes(format)) {
+// 		throw new Error('format must be "pdf" or "pptx"');
+// 	}
+// 	const createDocsFormat = {
+// 		// pdf: createDocsPDF,
+// 		pptx: createDocsPPT,
+// 	}[format];
+// 	for (programArea of programAreas) {
+// 		try {
+// 			await createDocsFormat(
+// 				programArea,
+// 				awards[programArea],
+// 				templatePaths
+// 			);
+// 		} catch (e) {
+// 			throw new Error(e);
+// 		}
+// 	}
+// 	return true;
+// };
 
-module.exports = createAwardBatch;
+// module.exports = createAwardBatch;
