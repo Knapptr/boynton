@@ -135,7 +135,7 @@ const AddScoreDialog = ({ onClose, show, week }) => {
             <Button
               variant="contained"
               color="success"
-              enabled={allFieldsFilled()}
+              enabled={allFieldsFilled()?"false":undefined}
               onClick={() => {
                 if (allFieldsFilled()) {
                   handleSubmit();
@@ -419,7 +419,6 @@ const UserSchedule = ({ sessions, user }) => {
   };
 
   useEffect(() => {
-    console.log({ selectedSession });
     if (selectedSession !== null) {
       const fetchSelected = async () => {
         const url = `/api/users/${user.username}/schedule/${selectedSession}`;
@@ -456,10 +455,10 @@ const UserSchedule = ({ sessions, user }) => {
           ))}
         </ToggleButtonGroup>
         {currentSchedule && (
-          <Fade in={currentSchedule}>
+          <Fade in={!!currentSchedule}>
             <Box>
               {currentSchedule.map((day) => (
-                <TableContainer component={Paper}>
+                <TableContainer key={`sched-day-${day.name}`}component={Paper}>
                   <header>
                     <Typography variant="h5" component="h6">
                       {day.name}
@@ -469,14 +468,14 @@ const UserSchedule = ({ sessions, user }) => {
                     <TableHead>
                       <TableRow>
                         {day.periods.map((p) => (
-                          <TableCell>Act {p.number}</TableCell>
+                          <TableCell key={`period-cell-${p.number}`}>Act {p.number}</TableCell>
                         ))}
                       </TableRow>
                     </TableHead>
                     <TableBody>
                       <TableRow>
-                        {day.periods.map((p) => (
-                          <TableCell>{p.activityName}</TableCell>
+                        {day.periods.map((p,i) => (
+                          <TableCell key={`period-act-${i}`}>{p.activityName}</TableCell>
                         ))}
                       </TableRow>
                     </TableBody>
