@@ -22,6 +22,8 @@ const dayAbbrev = {
   FRI: "Friday",
 };
 
+const drawerSize = 0;
+const topMargin = 12;
 
 const CreateSchedulePage = () => {
   const [selectedDay, setSelectedDay] = useState(0);
@@ -124,7 +126,7 @@ const CreateSchedulePage = () => {
     bgcolor="background.primary.light"
     py={0.75}
     position="sticky"
-    top={72}
+    top={topMargin}
     zIndex={100}
     >
       <Stack

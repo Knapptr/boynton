@@ -18,6 +18,8 @@ import {
 } from "@mui/material";
 
 const drawerWidth = 175;
+const topMargin = 0;
+
 const ActivityList = styled(Box)(({ bg, theme }) => ({
   backgroundColor: bg
     ? theme.palette.background[bg]
