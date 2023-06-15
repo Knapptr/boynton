@@ -18,7 +18,7 @@ receiver.router.use(
 );
 
 receiver.router.use("/auth", authRouter);
-receiver.router.use("/action", actionRouter);
+// receiver.router.use("/action", actionRouter);
 receiver.router.use("/api", apiRouter);
 
 receiver.router.get("/*", (req, res, next) => {
