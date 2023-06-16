@@ -5,7 +5,6 @@
 	"main": "index.js",
 	"scripts": {
 		"test": "jest --watch",
-		"build": "cd frontend && npm install && npm run build",
 		"start": "node index.js",
 		"dev": "nodemon index.js",
 		"heroku-postbuild": "cd frontend && npm install && npm run build"
@@ -19,6 +18,7 @@
 		"@slack/bolt": "^3.11.0",
 		"babel-plugin-macros": "^3.1.0",
 		"bcrypt": "^5.0.1",
+		"cors": "^2.8.5",
 		"csv-parser": "^3.0.0",
 		"docxtemplater": "^3.29.1",
 		"dotenv": "^16.0.0",
