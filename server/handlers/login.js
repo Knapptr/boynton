@@ -11,13 +11,16 @@ module.exports = {
     body("password").exists().trim().notEmpty(),
     handleValidation,
     async (req, res) => {
-
       const { username, password } = req.body;
       const authResponse = await User.authenticate({
         username,
         password,
       });
-      if (!authResponse) { res.status(401); res.json(error('Not authorized')); return; }
+      if (!authResponse) {
+        res.status(401);
+        res.json(error("Not authorized"));
+        return;
+      }
       const { user, isAuthenticated } = authResponse;
       // console.log({ isAuthenticated });
       if (!isAuthenticated) {
@@ -35,20 +38,38 @@ module.exports = {
         role: user.role,
       };
       res.json({ token, user: userInfo });
-    }],
+    },
+  ],
   create: [
-    body("username").exists().trim().notEmpty(),
-    body("password").exists().trim().notEmpty(),
-    body("role").exists().trim().notEmpty(),
+    body("createSecret").trim().notEmpty().equals(process.env.CREATE_SECRET),
+    body("users").isArray().notEmpty(),
+    body("users.*.username").exists().trim().notEmpty(),
+    body("users.*.password").exists().trim().notEmpty(),
+    body("users.*.firstName").exists().trim().notEmpty(),
+    body("users.*.lastName").exists().trim().notEmpty(),
+    body("users.*.lifeguard").optional().isBoolean(),
+    body("users.*.archery").optional().isBoolean(),
+    body("users.*.ropes").optional().isBoolean(),
+    body("users.*.firstYear").optional().isBoolean(),
+    body("users.*.senior").optional().isBoolean(),
+    body("users.*.role")
+      .exists()
+      .trim()
+      .notEmpty()
+      .custom((role) => {
+        if (!User.VALID_ROLES.includes(role)) {
+          throw new Error("Invalid User Role");
+        }
+        return role;
+      }),
     handleValidation,
-    async (req, res) => {
-      const { username, password, role } = req.body;
+    async (req, res, next) => {
       try {
-        const user = await User.create({ username, password, role });
-        res.json({ username: user.username, role: user.role });
+        const createdUsers = await User.createMany(req.body.users);
+        res.json(createdUsers);
       } catch (e) {
-        res.status(500);
-        res.send(e.message);
+        next(e);
       }
-    }],
+    },
+  ],
 };

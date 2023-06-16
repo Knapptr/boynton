@@ -40,6 +40,67 @@ module.exports = class User {
   }
   static VALID_ROLES = ["admin", "programming", "counselor", "unit_head"]
 
+  static createMany = async (users)=>{
+    const client = await pool.connect()
+    const query = `
+    INSERT INTO users
+    (username,
+    password,
+    first_name,
+    last_name,
+    role,
+    first_year,
+    senior,
+    lifeguard,
+    ropes,
+    archery)
+    VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+    ON CONFLICT DO NOTHING
+    RETURNING *
+    `
+    try{
+      await client.query("BEGIN");
+      const reqs = users.map(async user=>{
+        const hashedPassword = await encrypt(user.password);
+
+        const values = [
+          user.username,
+          hashedPassword,
+          user.firstName,
+          user.lastName,
+          user.role,
+          user.firstYear || false,
+          user.senior || false ,
+          user.lifeguard || false,
+          user.ropes || false,
+          user.archery || false];
+        const result = await client.query(query,values)
+        return result;
+      })
+      const results = await Promise.all(reqs);
+      await client.query("COMMIT");
+      return results.map(data=>{
+        const r = data.rows[0]
+        return {
+          username: r.username,
+          firstName: r.first_name,
+          lastName: r.last_name,
+          role: r.role,
+          senior: r.senior,
+          firstYear: r.firstYear,
+          lifeguard: r.lifeGuard,
+          ropes: r.ropes,
+          archery: r.archery
+        }
+      })
+
+    }catch(e){
+      client.query("ROLLBACK")
+      throw new Error("Transaction failed: " + e)
+    }finally{
+      client.release();
+    }
+  }
   static async get(username) {
     const query = `
     SELECT 
