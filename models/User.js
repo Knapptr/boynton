@@ -80,9 +80,10 @@ module.exports = class User {
       const results = await Promise.all(reqs);
       await client.query("COMMIT");
       return results.map(data=>{
+        if (data.rows.length === 0) return "User already exists"
         const r = data.rows[0]
         return {
-          username: r.username,
+          username: r.username ,
           firstName: r.first_name,
           lastName: r.last_name,
           role: r.role,
