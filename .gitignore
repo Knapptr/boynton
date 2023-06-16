@@ -32,3 +32,4 @@ configToJson.js
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
 ebvars.sh
+config/*
