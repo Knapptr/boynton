@@ -1,12 +1,12 @@
 const router = require("express").Router();
 const activitySessionHandler = require("../handlers/activitySessionHandler");
-const { adminOnly } = require("../middleware/authRole");
+const { adminOnly, programmingOnly } = require("../middleware/authRole");
 
 router.get("/", activitySessionHandler.getAllSessions);
 router.get("/:activitySessionId", activitySessionHandler.getOneSession);
 router.post("/:activitySessionId/campers", activitySessionHandler.addCampersToActivity);
 // Protected
-router.use(adminOnly);
+router.use(programmingOnly)
 router.post("/", activitySessionHandler.create)
 router.delete("/:activitySessionId", activitySessionHandler.delete);
 router.post("/:activitySessionId/staff", activitySessionHandler.addStaffToActivity);
