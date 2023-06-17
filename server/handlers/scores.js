@@ -33,12 +33,14 @@ module.exports = {
     handleValidation,
     async (req, res) => {
       const { awardedTo, points, awardedFor, weekNumber } = req.body;
+      console.log({awardedTo,points,awardedFor,weekNumber})
       try {
         scoreToInsert = { awardedTo, points, awardedFor, weekNumber };
         const createdScore = await Score.create(scoreToInsert);
         res.json(createdScore);
       } catch (e) {
         res.status(500);
+        console.log(e)
         res.send(e);
       }
     }],

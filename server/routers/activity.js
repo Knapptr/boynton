@@ -5,7 +5,7 @@ const { adminOnly } = require("../middleware/authRole");
 router.get("/", activityHandler.getAll);
 router.get("/:activityID", activityHandler.getOne);
 router.post("/:activityID/campers", activityHandler.addCamper);
-router.put(
+router.post(
 	"/:activityID/campers/:camperActivityID",
 	activityHandler.attendance
 );
