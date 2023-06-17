@@ -107,12 +107,15 @@ module.exports = class User {
     SELECT 
     u.*, 
     cab.name as cabin_assignment,
+    w.begins as begins,
+    w.ends as ends,
     cs.id as cabin_session_id,
     ss.week_number as week_number, 
     ss.id as staff_session_id from users u
     LEFT JOIN staff_sessions ss ON ss.username = u.username
     LEFT JOIN cabin_sessions cs ON cs.id = ss.cabin_assignment
     LEFT JOIN cabins cab ON cab.name = cs.cabin_name
+    LEFT JOIN weeks w ON ss.week_number = w.number
     WHERE u.username = $1
     ORDER BY ss.week_number
     `;
@@ -155,7 +158,9 @@ module.exports = class User {
             id: db.staff_session_id,
             weekNumber: db.week_number,
             cabinAssignment: db.cabin_assignment,
-            cabinSessionId: db.cabin_session_id
+            cabinSessionId: db.cabin_session_id,
+            begins: db.begins,
+            ends: db.ends
           }
         )
       }
