@@ -5,7 +5,7 @@ const ApiError = require("../../utils/apiError");
 const DbError = require("../../utils/DbError");
 const handleValidation = require("../../validation/validationMiddleware");
 const { validatePeriodId, validateExistingActivityId, validateActivitySessionExists, validateStaffMembers } = require("../../validation/activitySession");
-const { body } = require("express-validator");
+const { body, param } = require("express-validator");
 
 const activitySessionHandler = {
   async getAllSessions(req, res, next) {
@@ -17,12 +17,17 @@ const activitySessionHandler = {
     res.json(results);
   },
 
-  async getOneSession(req, res, next) {
+  getOneSession:[
+    param("activitySessionId").isInt(),
+    handleValidation,
+async (req, res, next) =>{
     const { activitySessionId } = req.params;
     const activitySession = await ActivitySession.get(activitySessionId);
-    if (!activitySession) { next(DbError.notFound("Session Does not exist")) }
+    if (!activitySession) { next(DbError.notFound("Session Does not exist")); return; }
+    
     res.json(activitySession);
   },
+  ],
 
   create: [
     validateExistingActivityId(),
