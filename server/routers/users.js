@@ -13,7 +13,7 @@ const selfOrAdminOnly = (req, res, next) => {
 }
 
 userRouter.get("/:username", selfOrAdminOnly, usersHandler.get);
-userRouter.put("/:username", selfOrAdminOnly, usersHandler.update);
+userRouter.post("/:username", selfOrAdminOnly, usersHandler.update);
 userRouter.get("/:username/schedule/:weekNumber", selfOrAdminOnly, usersHandler.weekSchedule)
 userRouter.use(adminOnly);
 userRouter.get("/", usersHandler.getAll);

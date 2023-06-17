@@ -1,7 +1,7 @@
 // const { weeks } = JSON.parse(process.env.CONFIG);
-// const getYear = () => {
-// 	return new Date().getFullYear();
-// };
+const getYear = () => {
+	return new Date().getFullYear();
+};
 
 // const getWeek = (dateArg) => {
 // 	const date = dateArg ? Date.parse(dateArg) : new Date();
@@ -19,15 +19,15 @@
 // 	// console.log({week})
 // 	return week || "non";
 // };
-// const formatmmddyyyy = (date) => {
-// 	const mm = date.getMonth() + 1;
-// 	const dd = date.getDate();
-// 	const yyyy = date.getFullYear();
-// 	return `${mm}/${dd}/${yyyy}`;
-// };
+const formatmmddyyyy = (date) => {
+	const mm = date.getMonth() + 1;
+	const dd = date.getDate();
+	const yyyy = date.getFullYear();
+	return `${mm}/${dd}/${yyyy}`;
+};
 
-// const getTodayFormatted = () => {
-// 	return formatmmddyyyy(new Date());
-// };
+const getTodayFormatted = () => {
+	return formatmmddyyyy(new Date());
+};
 
-// module.exports = { getWeek, getYear, formatmmddyyyy, getTodayFormatted };
+module.exports = { /*getWeek*/ getYear, formatmmddyyyy, getTodayFormatted };
