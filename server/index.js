@@ -4,6 +4,7 @@ const express = require("express");
 const path = require("path");
 const authRouter = require("./routers/auth");
 const cors = require('cors');
+const awardsHandler = require("./handlers/awards");
 // const actionRouter = require('./routers/action');
 const passport = require("passport");
 require("./auth")(passport);
