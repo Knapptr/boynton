@@ -6,19 +6,10 @@ const Camper = require("../../models/camper");
 const CamperWeek = require("../../models/camperWeek");
 const ProgramArea = require("../../models/programArea");
 const handleValidation = require("../../validation/validationMiddleware");
-const { param } = require("../routers/awards");
+const { param } = require("express-validator");
 const Week = require("../../models/week");
+const AwardPrinter = require("../../models/AwardPrinter");
 
-const TEMPLATEFILES = {
-  "Challenge Activities": "challengeActivitiesAward_template.pptx",
-  Waterfront: "waterfrontAward_template.pptx",
-  "Creative Arts": "creativeArtsAward_template.pptx",
-  Ropes: "ropesAward_template.pptx",
-  Superstar: "superstarAward_template.pptx",
-  "Polar Bear Dip": "polarBearDipAward_template.pptx",
-  "Clean Cabin": "cleanCabinAward_template.pptx",
-  Archery: "archeryAward_template.pptx",
-};
 
 module.exports = {
   getAll: async (req, res, next) => {
@@ -58,47 +49,60 @@ module.exports = {
     },
   ],
   print: [
-    param(":weekNumber")
+    param("weekNumber")
       .isInt()
-      .custom(async (wn) => {
+      .custom(async (wn,{req}) => {
+        console.log("validating:",wn)
         const week = await Week.get(wn);
         if (!week) {
           throw new Error("Invalid Week");
         }
+        req.body.week = week
         return wn;
       }),
     handleValidation,
-    async (req, res, next) => {
-      const { weekNumber } = req.params;
-      const packagedFile = new PizZip();
+    async(req,res,next)=>{
+      console.log("validated. printing")
+      const {week} = req.body;
+      console.log("week",{week})
+      const awards = await Award.getGrouped(week.number)
+      const printer = new AwardPrinter()
+      const stream = await printer.stream(awards)
+      res.attachment(`awards-week-${week.display}.pptx`);
+      stream.pipe(res)
+    }
+    // This will generate individual zip files for each award. Which is a pain to handle the printing of.
+    // async (req, res, next) => {
+    //   const { weekNumber } = req.params;
+    //   const packagedFile = new PizZip();
 
-      const awards = await Award.getGrouped(weekNumber);
-      const awardTypes = Object.keys(awards);
+    //   const awards = await Award.getGrouped(weekNumber);
+    //   const awardTypes = Object.keys(awards);
 
-      try {
-        await Promise.all(
-          awardTypes.map(async (awardType) => {
-            const result = Promise.all(
-              awards[awardType].map(async (award) => {
-                const templateFileName = TEMPLATEFILES[awardType];
-                const buffer = await award.toTemplateBuffer(templateFileName);
-                packagedFile.file(
-                  `${award.camperFirstName}_${award.camperLastName}_${award.reason}.pptx`,
-                  buffer
-                );
-                return "done";
-              })
-            );
-            return result;
-          })
-        );
-        const content = packagedFile.generate({ type: "nodebuffer" });
-        res.attachment("awardsnew.zip");
-        res.send(content);
-        return;
-      } catch (e) {
-        next(e);
-      }
-    },
+    //   try {
+    //     await Promise.all(
+    //       awardTypes.map(async (awardType) => {
+    //         const result = Promise.all(
+    //           awards[awardType].map(async (award) => {
+    //             const templateFileName = TEMPLATEFILES[awardType];
+    //             const buffer = await award.toTemplateBuffer(templateFileName);
+    //             packagedFile.file(
+    //               `${award.camperFirstName}_${award.camperLastName}_${award.reason}.pptx`,
+    //               buffer
+    //             );
+    //             return "done";
+    //           })
+    //         );
+    //         return result;
+    //       })
+    //     );
+    //     const content = packagedFile.generate({ type: "nodebuffer" });
+    //     res.attachment("awardsnew.zip");
+    //     res.send(content);
+    //     return;
+    //   } catch (e) {
+    //     next(e);
+    //   }
+    // },
   ],
 };
