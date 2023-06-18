@@ -21,7 +21,6 @@ receiver.router.use(express.urlencoded({ extended: true }));
 // 	express.static(path.join(__dirname, "..", "frontend", "build"))
 // );
 
-receiver.router.get("/print/:weekNumber", awardsHandler.print)
 receiver.router.get("/",(req,res,next)=>{
 	res.status(200);
 	res.send("knapptr@gmail.com")
