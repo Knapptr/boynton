@@ -1,6 +1,7 @@
 const { fetchOne, fetchMany } = require("../utils/pgWrapper");
 const pool = require("../db/index");
 const DbError = require("../utils/DbError");
+const Period = require("./period");
 
 class ActivitySession {
   constructor({ name, id, description, activityId, campers, periodId }) {
@@ -117,9 +118,9 @@ class ActivitySession {
   static async create(activityId, periodId) {
     const client = await pool.connect();
     try {
-        await client.query("BEGIN");
-        // Allocate result space
-        let createdActivitySessions= [];
+      await client.query("BEGIN");
+      // Allocate result space
+      let createdActivitySessions = [];
       // check if period is an all week period
       const periodResults = await client.query(
         `SELECT p.all_week, w.number as week_number from periods p 
@@ -132,7 +133,7 @@ class ActivitySession {
       // if it is an all week period
       // add the activity to every period with the same number for that week
       const period = periodResults.rows[0];
-    
+
       if (period.all_week) {
         // get all period ids of period number in week
         const query = `
@@ -151,13 +152,13 @@ class ActivitySession {
         const periodIdResults = await client.query(query, values);
         const periodIds = periodIdResults.rows;
         await Promise.all(
-          periodIds.map(async(p) => {
+          periodIds.map(async (p) => {
             const query = ` INSERT INTO activity_sessions (activity_id, period_id) VALUES ($1, $2) RETURNING * `;
             const values = [activityId, p.id];
-              console.log("creating",{values})
+            console.log("creating", { values });
             const createdResponse = await client.query(query, values);
-              const createdSession = createdResponse.rows[0];
-            createdActivitySessions.push(createdSession)
+            const createdSession = createdResponse.rows[0];
+            createdActivitySessions.push(createdSession);
           })
         );
       } else {
@@ -165,15 +166,19 @@ class ActivitySession {
         INSERT INTO activity_sessions (activity_id, period_id) VALUES ($1, $2) RETURNING *
         `;
         const values = [activityId, periodId];
-          const actSResult = await client.query(query,values);
-          createdActivitySessions = actSResult.rows
+        const actSResult = await client.query(query, values);
+        createdActivitySessions = actSResult.rows;
       }
-        await client.query("COMMIT");
-        return createdActivitySessions.map(s=>({id:s.id, activityId: s.activity_id, periodId: s.period_id}))
+      await client.query("COMMIT");
+      return createdActivitySessions.map((s) => ({
+        id: s.id,
+        activityId: s.activity_id,
+        periodId: s.period_id,
+      }));
     } catch (e) {
-        client.query("ROLLBACK")
-        console.log(e);
-        throw e
+      client.query("ROLLBACK");
+      console.log(e);
+      throw e;
     } finally {
       client.release();
     }
@@ -194,21 +199,50 @@ class ActivitySession {
     }
   }
   async delete() {
-    const query = `
-        DELETE FROM activity_sessions acts WHERE acts.id = $1
-        RETURNING *
-        `;
-    const values = [this.id];
+    // check if period is an all-week
+    const client = await pool.connect();
+    try {
+    await client.query("BEGIN");
+      // Allocate result space
+      const results = [];
 
-    const result = await fetchOne(query, values);
-    if (!result) {
-      return false;
+      const period = await Period.get(this.periodId);
+        console.log({period})
+      if (period.allWeek) {
+        const query = `DELETE FROM activity_sessions acts WHERE acts.id IN
+            (SELECT acts.id FROM activity_sessions acts
+            JOIN periods p on p.id = acts.period_id
+            JOIN days d ON d.id = p.day_id
+            WHERE p.period_number = $1 AND d.week_id = $2
+            AND acts.activity_id = $3
+            )
+            `;
+        const values = [period.number, period.weekNumber,this.activityId];
+        const result = await client.query(query, values);
+          results.push(...result.rows);
+          console.log({results})
+      } else {
+        const query = `
+            DELETE FROM activity_sessions acts WHERE acts.id = $1
+            RETURNING *
+            `;
+        const values = [this.id];
+        const results = await client.query(query, values);
+        if (results.rows.length === 0) {
+          return false;
+        }
+        const deleted = results.rows[0];
+          results.push(deleted)
+      }
+        await client.query("COMMIT")
+        return results.map(r=>({id:r.id,activityId:r.activity_id,periodId:r.period_id}))
+    } catch (e) {
+      client.query("ROLLBACK");
+      console.log("error:", { e });
+      throw e;
+    } finally {
+      client.release();
     }
-    return {
-      id: result.id,
-      periodId: result.period_id,
-      activityId: result.activity_id,
-    };
   }
   async addCampers(campersList) {
     const client = await pool.connect();
