@@ -116,165 +116,109 @@ class ActivitySession {
     }
   }
   static async create(activityId, periodId) {
-    const client = await pool.connect();
-    try {
-      await client.query("BEGIN");
-      // Allocate result space
-      let createdActivitySessions = [];
-      // check if period is an all week period
-      const periodResults = await client.query(
-        `SELECT p.all_week, w.number as week_number from periods p 
-                JOIN days d on p.day_id = d.id
-                JOIN weeks w on w.number = d.week_id
-                WHERE p.id = $1 `,
-        [periodId]
-      );
+    const query = `
+WITH target_period AS(
+SELECT 
+p.id,
+p.period_number,
+p.all_week,
+w.number as week_number
+from periods p
+JOIN days d on p.day_id = d.id
+JOIN weeks w on w.number = d.week_id
+where p.id=$1)
 
-      // if it is an all week period
-      // add the activity to every period with the same number for that week
-      const period = periodResults.rows[0];
+INSERT INTO activity_sessions (period_id,activity_id)
+SELECT p.id as period_id, $2 as activity_id
+FROM target_period
+JOIN periods p ON p.id = target_period.id 
+OR p.period_number = target_period.period_number AND target_period.all_week = true
+JOIN days d ON d.id = p.day_id
+JOIN weeks w ON w.number = d.week_id AND w.number = target_period.week_number
+RETURNING *`
+    const values = [periodId,activityId]
+    const result = await pool.query(query,values)
+    if(result.rows.length === 0){return false}
+    return result.rows.map(r=>({
+      id: r.id,
+      activityId: r.activityId,
+      periodId: r.period_id
+    }))
 
-      if (period.all_week) {
-        // get all period ids of period number in week
-        const query = `
-                    SELECT p.id from periods p 
-                    where p.period_number in
-                    (SELECT p.period_number from periods p where p.id = $1 
-                        AND p.all_week = true) 
-                    AND p.day_id in 
-                    (SELECT p.day_id FROM periods p 
-                     JOIN days d on p.day_id = d.id
-                     JOIN weeks w on w.number = d.week_id
-                     WHERE w.number = $2
-                    )
-                `;
-        const values = [periodId, period.week_number];
-        const periodIdResults = await client.query(query, values);
-        const periodIds = periodIdResults.rows;
-        await Promise.all(
-          periodIds.map(async (p) => {
-            const query = ` INSERT INTO activity_sessions (activity_id, period_id) VALUES ($1, $2) RETURNING * `;
-            const values = [activityId, p.id];
-            console.log("creating", { values });
-            const createdResponse = await client.query(query, values);
-            const createdSession = createdResponse.rows[0];
-            createdActivitySessions.push(createdSession);
-          })
-        );
-      } else {
-        const query = `
-        INSERT INTO activity_sessions (activity_id, period_id) VALUES ($1, $2) RETURNING *
-        `;
-        const values = [activityId, periodId];
-        const actSResult = await client.query(query, values);
-        createdActivitySessions = actSResult.rows;
-      }
-      await client.query("COMMIT");
-      return createdActivitySessions.map((s) => ({
-        id: s.id,
-        activityId: s.activity_id,
-        periodId: s.period_id,
-      }));
-    } catch (e) {
-      client.query("ROLLBACK");
-      console.log(e);
-      throw e;
-    } finally {
-      client.release();
-    }
-
-    try {
-      const result = await fetchOne(query, values);
-      console.log({ result });
-      if (!result) {
-        throw new Error("Cannot create activity session");
-      }
-      return {
-        id: result.id,
-        activityId: result.activity_id,
-        periodId: result.period_id,
-      };
-    } catch (e) {
-      throw e;
-    }
   }
+  
   async delete() {
-    // check if period is an all-week
-    const client = await pool.connect();
-    try {
-    await client.query("BEGIN");
-      // Allocate result space
-      const results = [];
+    const query = `
+      WITH target_period AS(
+      SELECT 
+      p.id,
+      p.period_number,
+      p.all_week,
+      w.number as week_number
+      from periods p
+      JOIN days d on p.day_id = d.id
+      JOIN weeks w on w.number = d.week_id
+      where p.id=$1)
 
-      const period = await Period.get(this.periodId);
-        console.log({period})
-      if (period.allWeek) {
-        const query = `DELETE FROM activity_sessions acts WHERE acts.id IN
-            (SELECT acts.id FROM activity_sessions acts
-            JOIN periods p on p.id = acts.period_id
-            JOIN days d ON d.id = p.day_id
-            WHERE p.period_number = $1 AND d.week_id = $2
-            AND acts.activity_id = $3
-            )
-            `;
-        const values = [period.number, period.weekNumber,this.activityId];
-        const result = await client.query(query, values);
-          results.push(...result.rows);
-          console.log({results})
-      } else {
-        const query = `
-            DELETE FROM activity_sessions acts WHERE acts.id = $1
-            RETURNING *
-            `;
-        const values = [this.id];
-        const results = await client.query(query, values);
-        if (results.rows.length === 0) {
-          return false;
-        }
-        const deleted = results.rows[0];
-          results.push(deleted)
-      }
-        await client.query("COMMIT")
-        return results.map(r=>({id:r.id,activityId:r.activity_id,periodId:r.period_id}))
-    } catch (e) {
-      client.query("ROLLBACK");
-      console.log("error:", { e });
-      throw e;
-    } finally {
-      client.release();
-    }
+      DELETE FROM activity_sessions acts WHERE acts.id IN(
+      SELECT 
+      acts.id
+      FROM
+      periods p
+      JOIN target_period tp ON tp.id = p.id OR tp.all_week = true AND p.period_number = tp.period_number
+      JOIN days d ON d.id = p.day_id
+      JOIN weeks w ON d.week_id = w.number AND w.number = tp.week_number
+      JOIN activity_sessions acts ON acts.period_id = p.id AND acts.activity_id = $2
+          )
+      RETURNING *
+    `
+    const values = [this.periodId,this.activityId]
+    const results = await pool.query(query,values);
+    if(results.rows.length === 0){return false}
+    return results.rows.map(r=>({
+      id: r.id,
+      activityId: r.activity_id,
+      periodId: r.period_id
+    }))
+
   }
-  async addCampers(campersList) {
-    const client = await pool.connect();
-    try {
-      await client.query("BEGIN");
-      const queries = campersList.map((camper) => {
-        const query = `
-         INSERT INTO camper_activities (camper_week_id,activity_id,period_id) 
-            VALUES ($1,$2,$3) 
-            ON CONFLICT ON CONSTRAINT one_activity_per_camper 
-            DO UPDATE SET activity_id = $2 ,period_id = $3, is_present = false 
-            RETURNING id, period_id,activity_id`;
-        const values = [camper.camperSessionId, this.id, this.periodId];
-        return client.query(query, values);
-      });
 
-      const results = await Promise.all(queries);
-      const camperActivities = results.map((r) => {
-        return {
-          periodId: r.rows[0].period_id,
-          activitySessionId: r.rows[0].activity_id,
-          id: r.rows[0].id,
-        };
-      });
-      await client.query("COMMIT");
-      return camperActivities;
-    } catch (e) {
-      client.query("ROLLBACK");
-      throw DbError.transactionFailure(e.message);
-    } finally {
-      client.release();
-    }
+  async addCampers(campersList) {
+   const query = `
+    WITH target_activity_session AS (SELECT acts.id,acts.activity_id,w.number as week_number, p.period_number, p.id as period_id, p.all_week as all_week
+    FROM activity_sessions acts 
+    JOIN periods p on acts.period_id = p.id   
+    JOIN days d on d.id = p.day_id
+    JOIN weeks w on w.number = d.week_id                                 
+    WHERE acts.id = $1),
+    target_campers AS (
+    SELECT * from camper_weeks cw WHERE cw.id = ANY($2))
+
+    INSERT INTO camper_activities (period_id,activity_id,camper_week_id)
+    SELECT 
+    p.id as period_id, acts.id as activity_session_id, tc.id as camper_session_id
+    FROM target_activity_session tas
+    JOIN periods p ON tas.all_week AND p.period_number = tas.period_number OR p.id = tas.period_id
+    JOIN days d on d.id = p.day_id
+    JOIN weeks w on w.number = d.week_id AND w.number = tas.week_number
+    JOIN activity_sessions acts ON acts.period_id = p.id AND acts.activity_id = tas.activity_id
+    JOIN activities act ON act.id = acts.activity_id
+    CROSS JOIN target_campers tc
+    ON CONFLICT ON CONSTRAINT "one_activity_per_camper"
+    DO UPDATE SET activity_id = excluded.activity_id, period_id = excluded.period_id, is_present = false 
+    RETURNING *
+    `
+
+    const camperSessionIds = campersList.map(c=>c.camperSessionId)
+    const values = [this.id,camperSessionIds];
+    const results = await pool.query(query,values);
+    const data = results.rows;
+    if(data.length ===0){return false}
+    return data.map(r=>({
+      periodId: r.period_id,
+      activitySessionId: r.activity_id,
+      id: r.id
+    }))
   }
   async addStaff(staff) {
     const client = await pool.connect();

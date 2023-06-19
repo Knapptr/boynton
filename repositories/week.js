@@ -48,6 +48,7 @@ const weekRepository = {
       const currentPeriod = currentDay.periods.at(-1) && currentDay.periods.at(-1).id === response.period_id ? currentDay.periods.pop() : {
         id: response.period_id,
         number: response.period_number,
+        allWeek: response.period_all_week
       }
       // check if is activity, check if is staff
       if (response.activity_session_id !== undefined) {
@@ -170,6 +171,7 @@ const weekRepository = {
       d.id AS day_id,
       d.name AS day_name,
       p.id AS period_id,
+      p.all_week AS period_all_week,
       p.period_number AS period_number,
       act.id AS activity_id,
       act.name AS activity_name,
@@ -193,6 +195,7 @@ const weekRepository = {
       d.name AS day_name,
       p.id AS period_id,
       p.period_number AS period_number,
+      p.all_week AS period_all_week,
       act.id AS activity_id,
       sta.id AS staff_activity_id,
       act.name AS activity_name,
