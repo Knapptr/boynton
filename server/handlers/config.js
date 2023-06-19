@@ -15,6 +15,7 @@ module.exports = {
     body("weeks.*.days").isArray(),
     body("weeks.*.days.*.name").trim().notEmpty(),
     body("weeks.*.days.*.periods").isInt(),
+    body("weeks.*.days.*.periods.*.allWeek").isBoolean(),
     body("users").isArray(),
     body("users.*.username").trim().notEmpty(),
     body("users.*.password").trim().notEmpty(),
