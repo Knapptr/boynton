@@ -52,6 +52,7 @@ const main = async ()=>{
   console.log("Got Authorization token")
   const url = destinationUrl + "/api/config"
   const createdData = await requestWithToken(url,token,data);
+    console.log({createdData});
   console.log("Configured.")
   }catch(e){
 	console.error("Something went wrong ...")

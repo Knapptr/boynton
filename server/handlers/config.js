@@ -14,7 +14,7 @@ module.exports = {
     body("weeks.*.ends").trim().isDate({ format: "YYYY-MM-DD" }),
     body("weeks.*.days").isArray(),
     body("weeks.*.days.*.name").trim().notEmpty(),
-    body("weeks.*.days.*.periods").isInt(),
+    body("weeks.*.days.*.periods").isArray(),
     body("weeks.*.days.*.periods.*.allWeek").isBoolean(),
     body("users").isArray(),
     body("users.*.username").trim().notEmpty(),
