@@ -8,6 +8,7 @@ class Period {
     number,
     dayId,
     id,
+    allWeek = false,
     activities,
     weekNumber,
     weekDisplay,
@@ -15,6 +16,7 @@ class Period {
     dayName,
   }) {
     (this.number = number), (this.dayId = dayId);
+    this.allWeek = allWeek;
     (this.weekNumber = weekNumber),
       (this.dayName = dayName),
       (this.activities = activities || []);
@@ -33,10 +35,10 @@ class Period {
     return period;
   }
   static async create(
-    { number, dayId },
+    { number, dayId, allWeek =false},
     periodRepository = defaultPeriodRepository
   ) {
-    const result = await periodRepository.create({ number, dayId });
+    const result = await periodRepository.create({ number, dayId,allWeek });
     if (!result) {
       throw new Error("Cannot create period.");
     }

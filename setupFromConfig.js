@@ -5,8 +5,8 @@ const Config = require("./models/config");
 const [ex, cpath, configYear] = process.argv;
 
 VALIDYEARS = {
-  2022: "./2022.config",
-  2023: "./2023.config"
+  2022: "./config/2022.config",
+  2023: "./config/2023.config"
 }
 
 if (!VALIDYEARS[configYear]) {

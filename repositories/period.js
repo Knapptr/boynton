@@ -7,6 +7,7 @@ module.exports = {
     (
     id serial NOT NULL  ,
     day_id integer NOT NULL  ,
+    all_week boolean DEFAULT false,
     period_number integer NOT NULL,
     CONSTRAINT period_pkey PRIMARY KEY (id),
     CONSTRAINT day_id FOREIGN KEY (day_id)
@@ -51,6 +52,7 @@ module.exports = {
       SELECT 
       day_id,
       period_number,
+      all_week,
       p.id, 
       act.name as activity_name,
       act.description as activity_description,
@@ -76,6 +78,7 @@ module.exports = {
 ( SELECT 
       day_id,
       period_number,
+  all_week,
       w.number as week_number,
       w.display as week_display,
       w.title as week_title,
@@ -121,6 +124,7 @@ module.exports = {
       SELECT 
       day_id,
       period_number,
+  all_week,
       w.number as week_number,
       w.display as week_display,
       w.title as week_title,
@@ -179,7 +183,7 @@ module.exports = {
     // campers {firstName,lastName,age,pronouns,sessionId}[]
     // }[]}
     const oneRes = results[0];
-    const period = { id: oneRes.period_id, dayId: oneRes.day_id, number: oneRes.period_number, dayName: oneRes.day_name, weekNumber: oneRes.week_number, weekTitle: oneRes.week_title, weekDisplay: oneRes.week_display, activities: [] }
+    const period = { id: oneRes.period_id, dayId: oneRes.day_id, number: oneRes.period_number, allWeek: oneRes.all_week, dayName: oneRes.day_name, weekNumber: oneRes.week_number, weekTitle: oneRes.week_title, weekDisplay: oneRes.week_display, activities: [] }
     for (const data of results) {
       //check if current activity is == to last activity
       if (data.activity_id === null) { continue; }
@@ -224,9 +228,9 @@ module.exports = {
     }
     return period
   },
-  async create({ dayId, number }) {
-    const query = `INSERT INTO periods (day_id,period_number) VALUES ($1,$2) RETURNING *`;
-    const values = [dayId, number];
+  async create({ dayId, number,allWeek=false }) {
+    const query = `INSERT INTO periods (day_id,period_number,all_week) VALUES ($1,$2,$3) RETURNING *`;
+    const values = [dayId, number,allWeek];
     const response = await fetchOne(query, values);
     if (!response) {
       return false;
@@ -234,6 +238,7 @@ module.exports = {
     return {
       id: response.id,
       number: response.period_number,
+      allWeek: response.all_week,
       dayId: response.day_id,
     };
   },

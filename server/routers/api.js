@@ -5,6 +5,7 @@ const periodRouter = require("./period");
 const configRouter = require("./config");
 const daysRouter = require("./days");
 const cabinSessionRouter = require("./cabinSession");
+const scheduleRouter = require("./scheduleRouter");
 const cabinRouter = require("./cabins");
 const camperWeekRouter = require("./camperWeeks");
 const weekRouter = require("./weeks");
@@ -39,6 +40,7 @@ router.use("/weeks", weekRouter);
 router.use("/users", usersRouter);
 router.use("/program-areas", programAreaRouter);
 router.use("/awards", awardsRouter);
+router.use("/schedule",scheduleRouter);
 
 // Admin Only Routes
 router.use(adminOnly);
