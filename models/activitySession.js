@@ -202,7 +202,6 @@ RETURNING *`
     JOIN days d on d.id = p.day_id
     JOIN weeks w on w.number = d.week_id AND w.number = tas.week_number
     JOIN activity_sessions acts ON acts.period_id = p.id AND acts.activity_id = tas.activity_id
-    JOIN activities act ON act.id = acts.activity_id
     CROSS JOIN target_campers tc
     ON CONFLICT ON CONSTRAINT "one_activity_per_camper"
     DO UPDATE SET activity_id = excluded.activity_id, period_id = excluded.period_id, is_present = false 
@@ -221,33 +220,42 @@ RETURNING *`
     }))
   }
   async addStaff(staff) {
-    const client = await pool.connect();
-    try {
-      client.query("BEGIN");
-      const allQueries = staff.map((staffer) =>
-        client.query(
-          `INSERT INTO staff_activities (activity_session_id, staff_session_id,period_id) VALUES ($1, $2, $3) ON CONFLICT ON CONSTRAINT "one staff assignment per period" DO UPDATE SET activity_session_id = $1  returning *`,
-          [this.id, staffer.staffSessionId, this.periodId]
-        )
-      );
-      const results = await Promise.all(allQueries);
-      await client.query("COMMIT");
-      const staffActivitySessions = results.map((r) =>
-        r.rows.map((dbSession) => ({
-          activitySessionId: dbSession.activity_session_id,
-          staffSessionId: dbSession.staff_session_id,
-          id: dbSession.id,
-        }))
-      );
-      return staffActivitySessions;
-    } catch (e) {
-      client.query("ROLLBACK");
-      console.log("ERROR", e);
-      throw DbError.transactionFailure("Staff add transaction failed");
-    } finally {
-      client.release();
-    }
-  }
+     const query = `
+    WITH target_activity_session AS (SELECT acts.id,acts.activity_id,w.number as week_number, p.period_number, p.id as period_id, p.all_week as all_week
+    FROM activity_sessions acts 
+    JOIN periods p on acts.period_id = p.id   
+    JOIN days d on d.id = p.day_id
+    JOIN weeks w on w.number = d.week_id                                 
+    WHERE acts.id = $1),
+
+    target_staff AS (
+    SELECT * from staff_sessions ss WHERE ss.id = ANY($2))
+
+    INSERT INTO staff_activities (period_id,activity_session_id,staff_session_id)
+    SELECT 
+    p.id as period_id, acts.id as activity_session_id, ts.id as staff_session_id
+    FROM target_activity_session tas
+    JOIN periods p ON tas.all_week AND p.period_number = tas.period_number OR p.id = tas.period_id
+    JOIN days d on d.id = p.day_id
+    JOIN weeks w on w.number = d.week_id AND w.number = tas.week_number
+    JOIN activity_sessions acts ON acts.period_id = p.id AND acts.activity_id = tas.activity_id
+    CROSS JOIN target_staff ts
+    ON CONFLICT ON CONSTRAINT "one staff assignment per period"
+    DO UPDATE SET activity_session_id = excluded.activity_session_id, period_id = excluded.period_id
+    RETURNING *
+    `
+
+    const staffSessionIds = staff.map(c=>c.staffSessionId)
+    const values = [this.id,staffSessionIds];
+    const results = await pool.query(query,values);
+    const data = results.rows;
+    if(data.length ===0){return false}
+    return data.map(r=>({
+      periodId: r.period_id,
+      activitySessionId: r.activity_id,
+      id: r.id
+    }))
+}
 }
 
 module.exports = ActivitySession;

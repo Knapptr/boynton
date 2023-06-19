@@ -136,6 +136,7 @@ const activitySessionHandler = {
     const staffActivitySession = await StaffActivity.delete(staffActivityId);
     if (!staffActivitySession) {
       res.send("Could not delete");
+      return;
     }
     res.json(staffActivitySession);
   },
