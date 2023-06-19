@@ -3,7 +3,6 @@ credentials.json
 .env
 token.json
 output/*
-!output/.gitkeep
 config.json
 todo.md
 routes.md
@@ -24,16 +23,9 @@ frontend/src/hooks/useGetData.js
 dummyReport.csv
 /config.js
 configToJson.js
-2022.config.js
-2023.config.js
 
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
 ebvars.sh
-
-#Files that are not in git, but are included on EB deploy
-campData/
-templates/
-config/*
