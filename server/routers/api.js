@@ -13,6 +13,7 @@ const scoreRouter = require('./scores');
 const passport = require("passport");
 const activitySessionRouter = require("./activitySession");
 const camperActivityRouter = require("./camperActivity");
+const signUpTokenRouter = require("./signUpToken");
 const usersRouter = require("./users");
 const staffSessionRouter = require("./staffSessions");
 const programAreaRouter = require("./programAreas");
@@ -25,6 +26,7 @@ router.use((req, res, next) => {
 	console.log(`${req.method} Request to: ${req.url}. Params:`, req.params, "Query:", req.query, "User", { username: req.user.username, first: req.user.firstName, last: req.user.lastName });
 	next()
 })
+router.use("/sign-up-token", signUpTokenRouter);
 router.use('/scores', scoreRouter);
 router.use("/activities", activityRouter);
 router.use("/activity-sessions", activitySessionRouter);

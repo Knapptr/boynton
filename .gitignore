@@ -37,3 +37,5 @@ ebvars.sh
 campData/
 templates/
 config/*
+ConfigProduction.sh
+resetAfterStaffTraining.js

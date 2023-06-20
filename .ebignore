@@ -28,3 +28,5 @@ configToJson.js
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
 ebvars.sh
+ConfigProduction.sh
+resetAfterStaffTraining.js
