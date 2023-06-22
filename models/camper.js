@@ -2,11 +2,12 @@ const pool = require('../db');
 const defaultCamperRepository = require('../repositories/camper');
 
 class Camper {
-	constructor({ firstName, lastName, gender, id, age, weeks = undefined }, camperRepository = defaultCamperRepository) {
+	constructor({ firstName, lastName, pronouns, gender, id, age, weeks = undefined }, camperRepository = defaultCamperRepository) {
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.weeks = weeks;
 		this.gender = gender;
+		this.pronouns / pronouns;
 		this.id = id;
 		this.age = age;
 		this.camperRepository = camperRepository
@@ -19,6 +20,7 @@ class Camper {
 			age: this.age,
 			gender: this.gender,
 			weeks: this.weeks,
+			pronouns: this.pronouns
 		}
 	}
 	static async getByWeek(weekNumber) {
@@ -27,6 +29,7 @@ class Camper {
 camp.first_name,
 camp.last_name,
 camp.age,
+camp.pronouns,
 camp.id as camper_id,
 gender as gender,
 cw.cabin_session_id as cabin_session_id,
@@ -74,6 +77,18 @@ ORDER BY camp.last_name, camp.first_name, camp.age
 		const response = await camperRepository.getOne(id)
 		if (!response) { return false }
 		return new Camper(response);
+
+	}
+	async setPronouns(pronouns){
+		const query = "UPDATE campers SET pronouns = $1 WHERE id = $2";
+		const values = [pronouns,this.id];
+		try{
+			await pool.query(query,values);
+			this.pronouns = pronouns;
+			return this;
+		}catch(e){
+			throw e
+		}
 
 	}
 }

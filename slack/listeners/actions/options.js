@@ -1,6 +1,8 @@
 const pool = require("../../../db/index");
 
 const sendCampers = async ({ ack, payload }) => {
+	console.log({v:payload.value})
+	console.log("Thing happened");
 	const value = payload.value;
 	const values = [`^${value}`];
 	const camperResults = await pool.query(
@@ -11,6 +13,7 @@ const sendCampers = async ({ ack, payload }) => {
 	const options = results.map((camper) => {
 		return {
 			value: JSON.stringify({
+				id: camper.id,
 				first: camper.first_name,
 				last: camper.last_name,
 			}),
