@@ -92,6 +92,7 @@ const createSchedule = async (client, weeks) => {
 
     const scheduleQueries = weeks.map(async week => {
         // Create week
+        console.log("creating week: ", week)
         const days = [];
         const periods = [];
         const weekResults = await weekToQuery(client, week);
@@ -183,6 +184,7 @@ class Config {
 
         } catch (e) {
             await client.query("ROLLBACK");
+            console.log("ERROR",e)
             throw e;
         } finally {
             client.release()

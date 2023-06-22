@@ -4,7 +4,7 @@ const passport = require("passport");
 const authRouter = require("express").Router();
 
 authRouter.post("/login", login);
-authRouter.post("/create", create)
+authRouter.post("/create/:signUpToken", create)
 authRouter.get(
 	"/protected",
 	passport.authenticate("jwt", { session: false }),

@@ -150,7 +150,9 @@ module.exports = {
     ON DELETE CASCADE,
     CONSTRAINT fkey_cabin_assignment FOREIGN KEY (cabin_assignment) REFERENCES cabin_sessions (id)
     ON UPDATE CASCADE
-    ON DELETE CASCADE
+    ON DELETE CASCADE,
+    CONSTRAINT one_week_per_staff UNIQUE (week_number, username)
+
   )
 `,
 
