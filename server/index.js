@@ -1,11 +1,10 @@
 const { ExpressReceiver } = require("@slack/bolt");
 const apiRouter = require("./routers/api");
+const docRouter = require("./routers/docs");
 const express = require("express");
-const path = require("path");
 const authRouter = require("./routers/auth");
 const cors = require('cors');
-const awardsHandler = require("./handlers/awards");
-// const actionRouter = require('./routers/action');
+
 const passport = require("passport");
 require("./auth")(passport);
 
@@ -26,6 +25,7 @@ receiver.router.get("/",(req,res,next)=>{
 	res.send("knapptr@gmail.com")
 })
 receiver.router.use("/auth", authRouter);
+receiver.router.use("/docs",docRouter);
 // receiver.router.use("/action", actionRouter);
 receiver.router.use("/api", apiRouter);
 
