@@ -1,6 +1,7 @@
 const { fetchMany, fetchOne } = require("../utils/pgWrapper");
 const StaffActivity = {
     async delete(id) {
+        console.log("Delete staffer: ", id)
         const query = `
         WITH target_staff_activity AS (
 SELECT acts.activity_id as activity_id, sa.activity_session_id as activity_session_id, sa.id as staff_activity_id,sa.staff_session_id,  all_week,sa.period_id,p.period_number,w.number as week_number 
@@ -13,11 +14,12 @@ SELECT acts.activity_id as activity_id, sa.activity_session_id as activity_sessi
     DELETE FROM staff_activities sa WHERE sa.id IN 
 (SELECT sa.id from 
 target_staff_activity tsa
-JOIN staff_activities sa ON tsa.all_week = true AND sa.staff_session_id = tsa.staff_session_id
+JOIN staff_activities sa ON tsa.all_week = true AND sa.staff_session_id = tsa.staff_session_id OR tsa.staff_activity_id = sa.id
 JOIN activity_sessions acts ON sa.activity_session_id = acts.id
 JOIN periods p ON sa.period_id = p.id AND p.period_number = tsa.period_number
 JOIN days d ON d.id = p.day_id
-JOIN weeks w ON w.number = d.week_id AND w.number = tsa.week_number)`
+JOIN weeks w ON w.number = d.week_id AND w.number = tsa.week_number)
+RETURNING *`
         const values = [id];
 
         const result = await fetchOne(query, values);
