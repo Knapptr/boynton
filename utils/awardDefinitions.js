@@ -7,7 +7,7 @@ const AWARDS = [
   // {awardType: "Waterfront", template: "waterfrontAward_template.pptx"},
 ];
 const getAwardTemplate = (programAreaString) => {
-  const templates = ["Challenge Activities"];
+  const templates = [/*"Challenge Activities"*/];
   if (templates.includes(programAreaString)) {
     return programAreaString;
   } else {
