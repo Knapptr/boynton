@@ -35,7 +35,7 @@ ebvars.sh
 
 #Files that are not in git, but are included on EB deploy
 campData/
-templates/
+templates/*
 config/*
 ConfigProduction.sh
 resetAfterStaffTraining.js
