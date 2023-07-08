@@ -88,11 +88,14 @@ const weekHandler = {
 		res.json(response);
 	},
 
-	async getCampers(req, res, next) {
+	getCampers:[
+		param("weekNumber").isInt(),
+		handleValidation,
+		async (req, res, next)=> {
 		const { weekNumber } = req.params;
 		const campers = await Camper.getByWeek(weekNumber);
 		res.json(campers);
-	}
+	}]
 	// getWeekCampers: [
 	// 	param.
 	// 	handleValidation,
