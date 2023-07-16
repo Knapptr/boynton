@@ -58,6 +58,7 @@ const weekHandler = {
 	getOne: [
 		param("weekNumber").exists().isInt().custom(async (weekNumber, { req }) => {
 			const getStaff = req.query.staff === "true";
+			console.log(req.query)
 			const week = await Week.get(weekNumber, getStaff);
 			if (!week) {
 				throw new Error("Week does not exist");
