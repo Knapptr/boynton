@@ -1,5 +1,6 @@
 const router = require("express").Router();
 const activityRouter = require("./activity");
+const commentRouter = require("./camperCommentRouter.js");
 const camperRouter = require("./campers");
 const periodRouter = require("./period");
 const configRouter = require("./config");
@@ -23,7 +24,7 @@ const { adminOnly } = require("../middleware/authRole");
 router.use(passport.authenticate("jwt", { session: false }));
 //log all api requs
 router.use((req, res, next) => {
-	console.log(`${req.method} Request to: ${req.url}. Params:`, req.params, "Query:", req.query, "User", { username: req.user.username, first: req.user.firstName, last: req.user.lastName });
+	console.log(`${req.method} Request to: ${req.url}. Params:`, req.params, "Query:", req.query, "Body:", req.body, "User", { username: req.user.username, first: req.user.firstName, last: req.user.lastName });
 	next()
 })
 router.use("/sign-up-token", signUpTokenRouter);
@@ -42,6 +43,7 @@ router.use("/weeks", weekRouter);
 router.use("/users", usersRouter);
 router.use("/program-areas", programAreaRouter);
 router.use("/awards", awardsRouter);
+router.use("/camper-comment", commentRouter);
 router.use("/schedule",scheduleRouter);
 
 // Admin Only Routes

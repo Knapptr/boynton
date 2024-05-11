@@ -1,4 +1,5 @@
 const populateList = require('../../features/Schedule/main');
+
 const actionController = {
   populateActivityList(req,res,next){
     const weekNumber = req.params.weekNumber

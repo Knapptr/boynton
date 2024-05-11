@@ -90,7 +90,8 @@ module.exports = {
   CREATE TABLE IF NOT EXISTS activities (
   id serial NOT NULL UNIQUE,
   name character varying(255) NOT NULL UNIQUE,
-  description character varying(255) COLLATE pg_catalog."default",
+  capacity integer,
+  description character varying(255) NOT NULL COLLATE pg_catalog."default",
   CONSTRAINT act_pkey PRIMARY KEY (id)
   )
 
@@ -134,7 +135,6 @@ module.exports = {
   )
   `,
 
-
   staffSession: `
   CREATE TABLE IF NOT EXISTS staff_sessions(
     id serial NOT NULL,
@@ -175,7 +175,20 @@ module.exports = {
     ON DELETE SET NULL
     ON UPDATE CASCADE
   )
-  `
-
-}
-
+  `,
+  camperComment: `
+  CREATE TABLE IF NOT EXISTS camper_comments(
+    id serial NOT NULL PRIMARY KEY,
+    camper_id INTEGER NOT NULL,
+    username CHARACTER VARYING, 
+    date TIMESTAMP NOT NULL,
+    content CHARACTER VARYING NOT NULL,
+    CONSTRAINT fk_camper_id FOREIGN KEY (camper_id) REFERENCES campers(id)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+    CONSTRAINT fk_user FOREIGN KEY (username) REFERENCES users(username)
+    ON DELETE SET NULL
+    ON UPDATE CASCADE
+  )
+  `,
+};

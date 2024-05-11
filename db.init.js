@@ -5,6 +5,7 @@ env.config();
 
 const queries = require("./initQueries");
 const { fetchOne } = require("./utils/pgWrapper");
+
 const init = (query, values) => {
   return async () => {
     try {
@@ -35,6 +36,7 @@ const pool = require("./db");
 const encrypt = require("./utils/encryptPassword");
 const programAreaRepo = { init: init(queries.programAreas) };
 const awardRepo = { init: init(queries.awards) };
+const camperComments = {init:init(queries.camperComment)};
 
 //order matters here
 const repos = [
@@ -53,7 +55,8 @@ const repos = [
   camperActivityRepo,
   scoreRepo,
   programAreaRepo,
-  awardRepo
+  awardRepo,
+  camperComments
 ];
 
 module.exports = async () => {

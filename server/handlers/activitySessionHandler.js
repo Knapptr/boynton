@@ -9,10 +9,12 @@ const {
   validateExistingActivityId,
   validateActivitySessionExists,
   validateStaffMembers,
+  validateCampers,
 } = require("../../validation/activitySession");
 const { body, param } = require("express-validator");
 const Period = require("../../models/period");
 const Activity = require("../../models/activity");
+const pool = require("../../db");
 
 const activitySessionHandler = {
   async getAllSessions(req, res, next) {
@@ -21,6 +23,7 @@ const activitySessionHandler = {
     if (period) {
       results = results.filter((a) => a.periodId === Number.parseInt(period));
     }
+    console.log({campers:results[1].campers});
     res.json(results);
   },
 
@@ -100,8 +103,7 @@ const activitySessionHandler = {
 
   addCampersToActivity: [
     validateActivitySessionExists(),
-    body("campers").exists().isArray(),
-    body("campers.*.camperSessionId").exists().isInt(),
+    validateCampers(),
     handleValidation,
     async (req, res, next) => {
       const { campers } = req.body;

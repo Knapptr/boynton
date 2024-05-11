@@ -88,7 +88,7 @@ class Period {
 	        ca.is_present,
 	        act.name as activity_name,
 	        ca.id as camper_activity_id,
-			cab.name 
+			cab.name as cabin_name
 	        from camper_weeks cw
 			JOIN days d ON d.week_id = cw.week_id
 	        JOIN periods p ON p.day_id = d.id
@@ -105,12 +105,12 @@ class Period {
     const parsedQuery = queryResult.map((res) => {
       return {
         camperActivityId: res.camper_activity_id,
-        camperSessionId: res.camper_session_id,
+        sessionId: res.camper_session_id,
         weekId: res.week_id,
         firstName: res.first_name,
         lastName: res.last_name,
         age: res.age,
-        cabinName: res.name,
+        cabinName: res.cabin_name,
         isPresent: res.is_present,
         activityId: res.activity_id || "Unassigned",
         activityName: res.activity_name,

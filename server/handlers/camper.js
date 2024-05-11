@@ -39,7 +39,7 @@ const handler = {
 	},
 	getOneCamper: [
 		param("camperID").exists().isInt().custom(async (value, { req }) => {
-			let camper = await Camper.getById(value);
+			let camper = await Camper.getById(value).catch(e=>console.log(e));
 			if (!camper) {
 				throw new Error("Camper does not exist");
 			}

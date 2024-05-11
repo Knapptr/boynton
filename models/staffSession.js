@@ -54,10 +54,7 @@ const StaffSession = {
         LEFT JOIN cabins cab ON cab.name = cs.cabin_name
         WHERE ss.id = ANY ($1)`
         const values = [idList];
-        console.log({ query, values });
         const response = await pool.query(query, values);
-        console.log("GET SOME");
-        console.log({ r: response.rows });
         return response.rows.map(r => ({
             staffSessionId: r.staff_session_id,
             username: r.username,
