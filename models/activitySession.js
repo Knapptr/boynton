@@ -7,6 +7,7 @@ class ActivitySession {
   constructor({
     name,
     id,
+    capacity,
     description,
     activityId,
     periodId,
@@ -25,6 +26,7 @@ class ActivitySession {
     this.description = description;
     this.activityId = activityId;
     this.campers = campers;
+    this.capacity = capacity;
     this.periodId = periodId;
     this.weekTitle = weekTitle;
     this.weekNumber = weekNumber;
@@ -44,6 +46,7 @@ class ActivitySession {
             act_s.id as id, 
             act_s.period_id as period_id,
             act.name as activity_name ,
+      act.capacity as activity_capacity,
             act.description as description,
             act.id as activity_id,
             c.first_name,
@@ -83,6 +86,7 @@ class ActivitySession {
             id: cv.id,
             periodId: cv.period_id,
             activityName: cv.activity_name,
+            capacity: cv.activity_capacity,
             description: cv.description,
             activityId: cv.activity_id,
             campers: initialCampers,
@@ -194,6 +198,7 @@ SELECT
       act_s.id as activity_session_id,
       act.name as activity_name,
       act.capacity as capacity,
+      act_s.period_id as period_id,
       COUNT(ca.camper_week_id) as camper_count
       FROM activity_sessions act_s 
       JOIN activities act ON act.id = act_s.activity_id
@@ -201,18 +206,20 @@ SELECT
       JOIN days d ON p.day_id = d.id
       JOIN weeks w ON w.number = d.week_id
       LEFT JOIN camper_activities ca ON ca.activity_id = act_s.id
-      WHERE act_s.activity_id = $1 AND  w.number = $2 AND act_s.id != $3
+      WHERE act_s.activity_id = $1 AND  w.number = $2 AND act_s.id != $3 AND act_s.id > $1
       GROUP BY (act_s.id,act.name,act.capacity)
       `
       const overflowValues = [activityId,weekNumber,activitySessionId];
       const response = await pool.query(overflowQuery,overflowValues);
       overflowActivities = response.rows.map(r=>({
         id: r.activity_session_id,
-        availableSpace: r.capacity - r.camper_count
-      }))
+        availableSpace: r.capacity - r.camper_count,
+        periodId: r.period_id
+      })).filter(r=>r.availableSpace >0);
       console.log({overflowActivities});
     }
 
+    console.log({capacity});
     return new ActivitySession({
       name,
       id,
@@ -227,7 +234,8 @@ SELECT
       campers,
       staff,
       dayId,
-      overflow: overflowActivities
+      overflow: overflowActivities,
+      capacity
     });
   }
   static async create(activityId, periodId) {
@@ -302,11 +310,43 @@ RETURNING *`;
 
   async addCampers(campersList) {
     const client = await pool.connect();
+
+
     try {
       await client.query("BEGIN");
-      const reqs = campersList.map(async (camper) => {
-        const periodId = this.periodId;
-        const activityId = this.id;
+    // deal with capacity
+    // divide camper list into chunks that will fit into current activity and overflows
+      
+      const allQueries = [];
+      const currentActivityTarget = this.id;
+      // pop campers off list and add them while the currentSession has space
+
+      const getAvailableActivitySession=(spaceRemaining,overflow)=>{
+        if(spaceRemaining === Infinity){return {id:this.id,periodId:this.periodId}}
+        if(spaceRemaining <= 0){
+          // return the first available actvity from the overflow actvities
+          if(overflow.length === 0){throw new Error(`OUT OF OVERFLOW SPACE FOR ${this.name} `)};
+          return overflow[0];
+        }else{
+          return {id:this.id,periodId:this.periodId}
+        }
+      }
+      const handleOverflowSpaceCalculations=(overflow)=>{
+        if(overflow.length === 0){throw new Error(`OUT OF OVERFLOW SPACE FOR ${this.name}`)}
+        overflow[0].availableSpace -= 1;
+        if (overflow[0].availableSpace === 0){
+          overflow = overflow.slice(1);
+        }
+        return overflow;
+      }
+      
+      
+      let spaceRemaining = this.capacity?(this.capacity - this.campers.length ): Infinity;
+      let overflowOptions = [...this.overflow];
+      while (campersList.length > 0){
+        console.log({spaceRemaining,overflowOptions});
+        const camper = campersList.pop();
+        const {id,periodId} = getAvailableActivitySession(spaceRemaining,overflowOptions);
         const camperWeekId = camper.sessionId;
         const query = `
       INSERT INTO camper_activities (period_id,activity_id,camper_week_id)
@@ -315,17 +355,13 @@ RETURNING *`;
       DO UPDATE SET activity_id = excluded.activity_id, period_id = excluded.period_id, is_present = false
       RETURNING *
       `;
-        const values = [periodId, activityId, camperWeekId];
+        const values = [periodId, id, camperWeekId];
         const response = await client.query(query, values);
-        const data = response.rows.map((r) => ({
-          id: r.id,
-          periodId: r.period_id,
-          camperWeekId: r.camper_week_id,
-          activitySessionId: r.activity_id,
-        }));
-        return data;
-      });
-      const results = await Promise.all(reqs);
+        //handle logic of remaining space
+        if(id===this.id){spaceRemaining-=1}else{overflowOptions=handleOverflowSpaceCalculations(overflowOptions)}
+        allQueries.push(response);
+      }
+      const results = await Promise.all(allQueries);
       console.log("Commiting");
       await client.query("COMMIT");
       return results;
@@ -335,6 +371,10 @@ RETURNING *`;
     } finally {
       client.release();
     }
+
+
+
+    /// OLD method
     // const query = `
     // WITH target_activity_session AS (SELECT acts.id,acts.activity_id,w.number as week_number, p.period_number, p.id as period_id, p.all_week as all_week
     // FROM activity_sessions acts

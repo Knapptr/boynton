@@ -21,7 +21,7 @@ module.exports = {
       await fetchOne(query);
       return true;
     } catch (e) {
-      throw new Error(`Cannot init with query: ${query}`)
+      throw new Error(`Cannot init with query: ${query}`);
     }
   },
   _mapResponse(dbResponse) {
@@ -30,7 +30,7 @@ module.exports = {
         name: cv.activity_name,
         description: cv.activity_description,
         activityId: cv.activity_id,
-        activitySessionId: cv.activity_session_id
+        activitySessionId: cv.activity_session_id,
       };
       const currentPeriod = acc.find((p) => p.id === cv.id);
       if (currentPeriod) {
@@ -61,7 +61,7 @@ module.exports = {
       FROM periods p 
       LEFT JOIN activity_sessions act_s ON act_s.period_id = p.id
       LEFT JOIN activities act ON act.id = act_s.activity_id
-`
+`;
     const results = await fetchMany(query);
     if (!results) {
       return [];
@@ -69,8 +69,9 @@ module.exports = {
     const mapped = this._mapResponse(results);
     return mapped;
   },
-  /** Get single period, and populate camper and staff lists 
-  * @param id period id*/
+
+  /** Get single period, and populate camper and staff lists
+   * @param id period id*/
   // TODO rework this as a transaction
   async get(id) {
     const query = `
@@ -171,7 +172,7 @@ module.exports = {
       return false;
     }
     // deserialize into:
-    // period 
+    // period
     // { id,
     // dayId,
     // periodNumber,
@@ -183,34 +184,56 @@ module.exports = {
     // campers {firstName,lastName,age,pronouns,sessionId}[]
     // }[]}
     const oneRes = results[0];
-    const period = { id: oneRes.period_id, dayId: oneRes.day_id, number: oneRes.period_number, allWeek: oneRes.all_week, dayName: oneRes.day_name, weekNumber: oneRes.week_number, weekTitle: oneRes.week_title, weekDisplay: oneRes.week_display, activities: [] }
+    const period = {
+      id: oneRes.period_id,
+      dayId: oneRes.day_id,
+      number: oneRes.period_number,
+      allWeek: oneRes.all_week,
+      dayName: oneRes.day_name,
+      weekNumber: oneRes.week_number,
+      weekTitle: oneRes.week_title,
+      weekDisplay: oneRes.week_display,
+      activities: [],
+    };
     for (const data of results) {
       //check if current activity is == to last activity
-      if (data.activity_id === null) { continue; }
-      let activity = { name: data.activity_name, description: data.activity_description, activityId: data.activity_id, sessionId: data.activity_session_id, campers: [], staff: [] }
+      if (data.activity_id === null) {
+        continue;
+      }
+      let activity = {
+        name: data.activity_name,
+        description: data.activity_description,
+        activityId: data.activity_id,
+        sessionId: data.activity_session_id,
+        campers: [],
+        staff: [],
+      };
 
-      if (period.activities.at(-1) && period.activities.at(-1).sessionId === data.activity_session_id) {
-        activity = period.activities.pop()
+      if (
+        period.activities.at(-1) &&
+        period.activities.at(-1).sessionId === data.activity_session_id
+      ) {
+        activity = period.activities.pop();
       }
       /** Add camper to camper list if row is camper info */
       if (data.camper_session_id !== null) {
-        activity.campers.push(
-          {
-            firstName: data.camper_first_name,
-            lastName: data.camper_last_name,
-            cabinName: data.camper_cabin_assignment,
-            age: data.camper_age,
-            pronouns: data.camper_pronouns,
-            sessionId: data.camper_session_id,
-            isPresent: data.camper_is_present,
-            activityId: data.camper_activity_id
-          }
-        )
+        activity.campers.push({
+          firstName: data.camper_first_name,
+          lastName: data.camper_last_name,
+          cabin: data.camper_cabin_assignment,
+          age: data.camper_age,
+          pronouns: data.camper_pronouns,
+          sessionId: data.camper_session_id,
+          isPresent: data.camper_is_present,
+          activityId: data.camper_activity_id,
+        });
       }
       /** Add staff to staff list if row is staff info */
-      if (data.staff_session_id !== undefined && data.staff_session_id !== null) {
+      if (
+        data.staff_session_id !== undefined &&
+        data.staff_session_id !== null
+      ) {
         activity.staff.push({
-
           staffSessionId: data.staff_session_id,
           firstName: data.staff_first_name,
           lastName: data.staff_last_name,
@@ -220,17 +243,16 @@ module.exports = {
           lifeguard: data.staff_lifeguard,
           firstYear: data.staff_first_year,
           senior: data.staff_senior,
-          staffActivityId: data.staff_activity_id
-
-        })
+          staffActivityId: data.staff_activity_id,
+        });
       }
       period.activities.push(activity);
     }
-    return period
+    return period;
   },
-  async create({ dayId, number,allWeek=false }) {
+  async create({ dayId, number, allWeek = false }) {
     const query = `INSERT INTO periods (day_id,period_number,all_week) VALUES ($1,$2,$3) RETURNING *`;
-    const values = [dayId, number,allWeek];
+    const values = [dayId, number, allWeek];
     const response = await fetchOne(query, values);
     if (!response) {
       return false;

@@ -41,6 +41,7 @@ const activitySessionValidator = {
       .isInt()
       .custom(async (activitySessionId, { req }) => {
         const activitySession = await ActivitySession.get(activitySessionId);
+	      console.log({activitySession});
         if (!activitySession) {
           throw ApiError.notFound("activity session does not exist");
         }

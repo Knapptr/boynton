@@ -53,12 +53,10 @@ module.exports = {
 		handleValidation,
 		async (req, res, next) => {
 			const { cabin, assigned } = req.query;
-			const { periodId } = req.params;
 			const period = req.period
 			let campers = await period.getCampers();
-			console.log({campers});
 			if (cabin) {
-				campers = campers.filter((c) => c.cabinName === cabin);
+				campers = campers.filter((c) => c.cabin === cabin);
 			}
 			if (assigned) {
 				if (assigned === "true") {

@@ -23,7 +23,7 @@ const activitySessionHandler = {
     if (period) {
       results = results.filter((a) => a.periodId === Number.parseInt(period));
     }
-    console.log({campers:results[1].campers});
+    // console.log({campers:results[1].campers});
     res.json(results);
   },
 

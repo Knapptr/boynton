@@ -110,7 +110,7 @@ class Period {
         firstName: res.first_name,
         lastName: res.last_name,
         age: res.age,
-        cabinName: res.cabin_name,
+        cabin: res.cabin_name,
         isPresent: res.is_present,
         activityId: res.activity_id || "Unassigned",
         activityName: res.activity_name,
