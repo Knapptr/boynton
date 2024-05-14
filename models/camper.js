@@ -60,6 +60,7 @@ ORDER BY camp.last_name, camp.first_name, camp.age
 
     const results = await pool.query(query, values);
     // TODO error handling
+
     return results.rows.map((r) => ({
       firstName: r.first_name,
       lastName: r.last_name,
@@ -69,7 +70,7 @@ ORDER BY camp.last_name, camp.first_name, camp.age
       cabinSessionId: r.cabin_session_id,
       cabinAssignment: r.cabin_assignment,
       sessionId: r.camper_session_id,
-      camperId: r.camper_id,
+      id: r.camper_id,
     }));
   }
   async save() {
@@ -112,7 +113,7 @@ ORDER BY camp.last_name, camp.first_name, camp.age
 
     // get camper weeks
     const camperWeekQuery = `
-	  SELECT w.number, w.title, cw.id AS camper_week_id, cw.cabin_session_id AS cabin_session_id, cab.name AS cabin_name, cw.day_camp as day, cw.fl
+	  SELECT w.number,w.display, w.title, cw.id AS camper_week_id, cw.cabin_session_id AS cabin_session_id, cab.name AS cabin_name, cw.day_camp as day, cw.fl
 		FROM camper_weeks cw
 		LEFT JOIN cabin_sessions cs ON cs.id = cw.cabin_session_id
 		LEFT JOIN cabins cab ON cs.cabin_name = cab.name
@@ -128,10 +129,13 @@ ORDER BY camp.last_name, camp.first_name, camp.age
     const camperWeeks = camperWeekResponse.rows.reduce((acc, week) => {
       const currentWeekNumber = week.number;
       acc[currentWeekNumber] = {
+        id: week.camper_week_id,
         title: week.title,
         camperWeekId: week.camper_week_id,
+        display: week.display,
+        weekNumber: week.number,
         cabinSessionId: week.cabin_session_id,
-        cabinName: week.cabin_name,
+        cabin: week.cabin_name,
         day: week.day,
         fl: week.fl,
         schedule: {},
@@ -178,6 +182,7 @@ WHERE c.id = $1
               id: act.period_id,
               activitySessionId: act.activity_session_id,
               activity: act.name,
+              activityId: act.activity_id
             },
           },
         },
@@ -208,6 +213,7 @@ WHERE c.id = $1
       firstName,
       lastName,
       age,
+      pronouns,
       gender,
       id: camperId,
       weeks: camperWeekArray,

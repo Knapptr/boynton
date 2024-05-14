@@ -7,6 +7,7 @@ const error = require("../../utils/jsonError");
 const handleValidation = require("../../validation/validationMiddleware");
 const { param } = require("express-validator");
 const Score = require("../../models/score");
+const ActivitySession = require("../../models/activitySession");
 
 const weekHandler = {
 	getHeaders: [
@@ -39,6 +40,16 @@ const weekHandler = {
 		res.json(week);
 
 	},
+  getWeeklyCapacityInfo: [
+    param("weekNumber").exists().isInt(),
+    handleValidation,
+    async(req,res,next)=>{
+      const {weekNumber} = req.params
+      const sessions = await ActivitySession.getCapacityActs(weekNumber);
+      if(!sessions){res.sendStatus(404);return;}
+      res.json(sessions);
+    }
+  ],
 	getScores: [
 		param("weekNumber").isInt().custom(async (weekNumber, { req }) => {
 			const week = Week.get(weekNumber);

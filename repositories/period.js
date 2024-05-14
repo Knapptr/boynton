@@ -90,6 +90,7 @@ module.exports = {
       act.id as activity_id,
       act_s.id as activity_session_id,
       camp.last_name AS camper_last_name,
+      camp.id AS camper_id,
       camp.first_name AS camper_first_name,
       camp.pronouns AS camper_pronouns,
       camp.age AS camper_age,
@@ -143,6 +144,7 @@ module.exports = {
       null AS camper_session_id,
       null AS camper_is_present,
       null AS camper_activity_id,
+      null AS camper_id,
       u.username AS staff_username,
       u.first_name AS staff_first_name,
       u.last_name AS staff_last_name,
@@ -225,6 +227,7 @@ module.exports = {
           pronouns: data.camper_pronouns,
           sessionId: data.camper_session_id,
           isPresent: data.camper_is_present,
+          id: data.camper_id,
           activityId: data.camper_activity_id,
         });
       }
