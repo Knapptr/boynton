@@ -18,7 +18,7 @@ class ActivitySession {
     periodNumber,
     campers = [],
     staff = [],
-    overflow = [],
+    overflow = {},
   }) {
     this.name = name;
     this.id = id;
@@ -123,7 +123,7 @@ class ActivitySession {
 
     const response = await pool.query(query, values);
 
-    const [_actSet,capacityActivityList] = response.rows.reduce(
+    const [_actSet, capacityActivityList] = response.rows.reduce(
       (acc, cv) => {
         const [set, list] = acc;
         if (set[cv.activity_id] === undefined) {
@@ -139,8 +139,8 @@ class ActivitySession {
       },
       [{}, []]
     );
-    console.log({capacityActivityList});
-    return capacityActivityList
+    console.log({ capacityActivityList });
+    return capacityActivityList;
   }
 
   static async get(activitySessionId) {
@@ -231,7 +231,7 @@ SELECT
     }));
 
     // if has capacity - get overflow optons
-    let overflowActivities = [];
+    let overflowActivities = {};
     if (capacity !== undefined) {
       const overflowQuery = `
       SELECT 
@@ -239,7 +239,7 @@ SELECT
       act.name as activity_name,
       act.capacity as capacity,
       act_s.period_id as period_id,
-      COUNT(ca.camper_week_id) as camper_count
+      COUNT(ca.camper_week_id)::int as camper_count
       FROM activity_sessions act_s 
       JOIN activities act ON act.id = act_s.activity_id
       JOIN periods p ON act_s.period_id = p.id
@@ -251,17 +251,15 @@ SELECT
       `;
       const overflowValues = [activityId, weekNumber, activitySessionId];
       const response = await pool.query(overflowQuery, overflowValues);
-      overflowActivities = response.rows
-        .map((r) => ({
+      response.rows.forEach((r) => {
+        overflowActivities[r.activity_session_id] = {
           id: r.activity_session_id,
-          availableSpace: r.capacity - r.camper_count,
+          totalEnrollment: r.camper_count,
           periodId: r.period_id,
-        }))
-        .filter((r) => r.availableSpace > 0);
-      console.log({ overflowActivities });
+        };
+      });
     }
 
-    // console.log({capacity});
     return new ActivitySession({
       name,
       id,
@@ -355,72 +353,57 @@ RETURNING *`;
 
     try {
       await client.query("BEGIN");
-      // deal with capacity
-      // divide camper list into chunks that will fit into current activity and overflows
+      let thisTotalCampers = this.campers.length;
+      const overflow = this.overflow;
 
-      const allQueries = [];
-      const currentActivityTarget = this.id;
-      // pop campers off list and add them while the currentSession has space
-
-      const getAvailableActivitySession = (spaceRemaining, overflow) => {
-        if (spaceRemaining === Infinity) {
-          return { id: this.id, periodId: this.periodId };
-        }
-        if (spaceRemaining <= 0) {
-          // return the first available actvity from the overflow actvities
-          if (overflow.length === 0) {
-            throw new Error(`OUT OF OVERFLOW SPACE FOR ${this.name} `);
+      const getLowestEnrollmentInfo = () => {
+        return Object.values(overflow).reduce(
+          (acc, cv) => {
+            console.log({cv});
+            if (cv.totalEnrollment < acc.totalEnrollment) {
+              acc.totalEnrollment = cv.totalEnrollment;
+              acc.periodId = cv.periodId;
+              acc.id = cv.id;
+            }
+            return acc;
+          },
+          {
+            id: this.id,
+            periodId: this.periodId,
+            totalEnrollment: thisTotalCampers,
           }
-          return overflow[0];
-        } else {
-          return { id: this.id, periodId: this.periodId };
-        }
-      };
-      const handleOverflowSpaceCalculations = (overflow) => {
-        if (overflow.length === 0) {
-          throw new Error(`OUT OF OVERFLOW SPACE FOR ${this.name}`);
-        }
-        overflow[0].availableSpace -= 1;
-        if (overflow[0].availableSpace === 0) {
-          overflow = overflow.slice(1);
-        }
-        return overflow;
-      };
-
-      let spaceRemaining = this.capacity
-        ? this.capacity - this.campers.length
-        : Infinity;
-      let overflowOptions = [...this.overflow];
-      while (campersList.length > 0) {
-        console.log({ spaceRemaining, overflowOptions });
-        const camper = campersList.pop();
-        const { id, periodId } = getAvailableActivitySession(
-          spaceRemaining,
-          overflowOptions
         );
-        const camperWeekId = camper.sessionId;
-        const query = `
-      INSERT INTO camper_activities (period_id,activity_id,camper_week_id)
-      VALUES ($1,$2,$3)
-      ON CONFLICT ON CONSTRAINT "one_activity_per_camper"
-      DO UPDATE SET activity_id = excluded.activity_id, period_id = excluded.period_id, is_present = false
-      RETURNING *
-      `;
-        const values = [periodId, id, camperWeekId];
-        const response = await client.query(query, values);
-        //handle logic of remaining space
+      };
+      const handleEnrollmentIncrement = (id) => {
         if (id === this.id) {
-          spaceRemaining -= 1;
+          thisTotalCampers += 1;
         } else {
-          overflowOptions = handleOverflowSpaceCalculations(overflowOptions);
+          overflow[id].totalEnrollment += 1;
         }
-        allQueries.push(response);
-      }
-      const results = await Promise.all(allQueries);
-      console.log("Commiting");
-      await client.query("COMMIT");
+      };
+      const allReqs = campersList.map(async (c) => {
+        const insertQuery = `
+        INSERT INTO camper_activities (period_id,activity_id,camper_week_id) 
+        VALUES ($1, $2, $3)
+        ON CONFLICT ON CONSTRAINT "one_activity_per_camper"
+        DO UPDATE SET activity_id = excluded.activity_id, period_id = excluded.period_id, is_present = false
+        RETURNING *
+        `;
+        const targetSession = getLowestEnrollmentInfo();
+        const values = [targetSession.periodId, targetSession.id, c.sessionId];
+        console.log({values});
 
-      return results.map(r=>r.rows)
+        // make request
+        const result = await client.query(insertQuery, values);
+        // increment accordingly
+        handleEnrollmentIncrement(targetSession.id);
+
+        return result;
+      });
+      const allResults = await Promise.all(allReqs);
+      const allInserts = allResults.map(r=> r.rows[0]);
+      await client.query("COMMIT");
+      return allInserts;
     } catch (e) {
       client.query("ROLLBACK");
       throw new Error("Transaction failed: " + e);
