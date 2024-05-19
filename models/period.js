@@ -2,6 +2,8 @@ const mapManyToOne = require("../utils/remap");
 const Activity = require("./activity");
 const defaultPeriodRepository = require("../repositories/period");
 const { fetchManyAndCreate, fetchMany } = require("../utils/pgWrapper");
+const pool = require("../db");
+const DbError = require("../utils/DbError");
 
 class Period {
   constructor({
@@ -35,10 +37,10 @@ class Period {
     return period;
   }
   static async create(
-    { number, dayId, allWeek =false},
+    { number, dayId, allWeek = false },
     periodRepository = defaultPeriodRepository
   ) {
-    const result = await periodRepository.create({ number, dayId,allWeek });
+    const result = await periodRepository.create({ number, dayId, allWeek });
     if (!result) {
       throw new Error("Cannot create period.");
     }
@@ -124,6 +126,68 @@ class Period {
       return { ...act, campers: campersInActivity };
     });
     return parsedQuery;
+  }
+
+  async assignStaffOn(staffList) {
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+      const allReqs = staffList.map(async(s) => {
+        const query =
+          "INSERT INTO staff_on_periods (staff_session_id,period_id) VALUES ($1,$2) RETURNING *";
+        const values = [s.id, this.id];
+
+	const results = await client.query(query, values)
+        return results ;
+      });
+      const allResults = await Promise.all(allReqs);
+      const staffOnPeriods = allResults.map((r) => {
+        const {
+          id,
+          staff_session_id: staffSessionId,
+          period_id: periodId,
+        } = r.rows[0];
+        return { id, staffSessionId, periodId };
+      });
+      await client.query("COMMIT");
+      return staffOnPeriods;
+    } catch (e) {
+      client.query("ROLLBACK");
+      throw  DbError.transactionFailure("Error assigning staff");
+    } finally {
+      client.release();
+    }
+  }
+  async removeStaffOn(staffList){
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+      const allReqs = staffList.map(async(s) => {
+        const query =
+          "DELETE FROM staff_on_periods WHERE staff_session_id = $1 AND period_id = $2 RETURNING *";
+        const values = [s.id, this.id];
+
+	const results = await client.query(query, values)
+        return results ;
+      });
+      const allResults = await Promise.all(allReqs);
+      const staffOnPeriods = allResults.map((r) => {
+        const {
+          id,
+          staff_session_id: staffSessionId,
+          period_id: periodId,
+        } = r.rows[0];
+        return { id, staffSessionId, periodId };
+      });
+      await client.query("COMMIT");
+      return staffOnPeriods;
+    } catch (e) {
+      client.query("ROLLBACK");
+      throw  DbError.transactionFailure("Error deleting staff");
+    } finally {
+      client.release();
+    }
+
   }
 }
 module.exports = Period;

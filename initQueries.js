@@ -191,4 +191,28 @@ module.exports = {
     ON UPDATE CASCADE
   )
   `,
+  freetimes: `
+  CREATE TABLE IF NOT EXISTS freetimes(
+    id serial NOT NULL PRIMARY KEY,
+    number integer NOT NULL,
+    day_id integer NOT NULL ,
+    CONSTRAINT fk_day FOREIGN KEY (day_id) REFERENCES days(id)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+  )
+  `,
+  staffOnPeriods: `
+  CREATE TABLE IF NOT EXISTS staff_on_periods(
+    id serial NOT NULL PRIMARY KEY,
+    staff_session_id integer NOT NULL,
+    period_id integer NOT NULL,
+    CONSTRAINT fk_staff_session FOREIGN KEY (staff_session_id) REFERENCES staff_sessions(id)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+    CONSTRAINT fk_period_staff FOREIGN KEY (period_id) REFERENCES periods(id)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+    CONSTRAINT one_period_max UNIQUE (period_id, staff_session_id)
+  )
+  `
 };

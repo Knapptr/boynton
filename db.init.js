@@ -37,6 +37,8 @@ const encrypt = require("./utils/encryptPassword");
 const programAreaRepo = { init: init(queries.programAreas) };
 const awardRepo = { init: init(queries.awards) };
 const camperComments = {init:init(queries.camperComment)};
+const freetimes = {init:init(queries.freetimes)};
+const staffOns = {init:init(queries.staffOnPeriods)};
 
 //order matters here
 const repos = [
@@ -44,19 +46,21 @@ const repos = [
   weekRepo,
   dayRepo,
   periodRepo,
+  freetimes,
   activityRepo,
   activitySessionsRepo,
   cabinRepo,
   cabinSessionRepo,
   staffSession,
   staffActivities,
+  staffOns,
   camperRepo,
   camperWeekRepo,
   camperActivityRepo,
   scoreRepo,
   programAreaRepo,
   awardRepo,
-  camperComments
+  camperComments,
 ];
 
 module.exports = async () => {

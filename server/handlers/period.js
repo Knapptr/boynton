@@ -1,6 +1,7 @@
-const { param } = require("express-validator");
+const { param, body } = require("express-validator");
 const Period = require("../../models/period");
 const handleValidation = require("../../validation/validationMiddleware");
+const StaffSession = require("../../models/staffSession");
 
 module.exports = {
 	async getAll(req, res, next) {
@@ -67,4 +68,67 @@ module.exports = {
 			}
 			res.json(campers);
 		}],
+	deleteStaff:[
+		//validate that the period exists, and place it on the request object
+		param("periodId").isInt().custom(async(id,{req})=>{
+			const period = await Period.get(id);
+			console.log({period});
+			if(!period){throw new Error("Period not found")}
+			req.period=period;
+		}),
+		
+		// validate that there is a staff list, and set up an empty array on the request for holding retrieved staffSessions
+		body("staffList").isArray({min:1}).withMessage("arrlen"),
+		(req,res,next)=>{req.staffList = []; next()},
+		body("staffList.*.id").exists().withMessage("idnotinarr").isInt().withMessage("not int").custom(async(sid,{req})=>{
+			//validate staffSessionIds and add to request array
+			const staffSession = await StaffSession.get(sid);
+			if(!staffSession){throw new Error(`Staff session with id ${sid} not found`)};
+			req.staffList.push(staffSession);
+		}).withMessage("custom failure"),
+		// delete the staff
+		async (req,res) =>{
+			const {period,staffList} = req;
+			try{
+			const results = await period.removeStaffOn(staffList);
+			res.json(results);
+			}catch(e){
+				res.status(404);
+				res.send(e.message);
+			}
+		}
+
+	],
+	assignStaff: [
+		//validate that the period exists, and place it on the request object
+		param("periodId").isInt().custom(async(id,{req})=>{
+			const period = await Period.get(id);
+			console.log({period});
+			if(!period){throw new Error("Period not found")}
+			req.period=period;
+		}),
+		
+		// validate that there is a staff list, and set up an empty array on the request for holding retrieved staffSessions
+		body("staffList").isArray({min:1}).withMessage("arrlen"),
+		(req,res,next)=>{req.staffList = []; next()},
+		body("staffList.*.id").exists().withMessage("idnotinarr").isInt().withMessage("not int").custom(async(sid,{req})=>{
+			//validate staffSessionIds and add to request array
+			const staffSession = await StaffSession.get(sid);
+			if(!staffSession){throw new Error(`Staff session with id ${sid} not found`)};
+			req.staffList.push(staffSession);
+		}).withMessage("custom failure"),
+		handleValidation,
+		// assign the staff
+		async (req,res) =>{
+			console.log({sl:req.staffList})
+			const {period,staffList} = req;
+			try{
+			const results = await period.assignStaffOn(staffList);
+			res.json(results);
+			}catch(e){
+				res.status(404);
+				res.send(e.message);
+			}
+		}
+	]
 };

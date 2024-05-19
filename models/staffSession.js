@@ -33,7 +33,8 @@ const StaffSession = {
             senior: response.senior,
             firstYear: response.first_year,
             cabinAssignment: response.cabin_assignment,
-            staffSessionId: response.staff_session_id
+            staffSessionId: response.staff_session_id,
+            id:response.staff_session_id
         }
     },
     async getSome(idList) {
