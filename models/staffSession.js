@@ -3,6 +3,45 @@ const DbError = require("../utils/DbError");
 const { fetchMany, fetchOne } = require("../utils/pgWrapper");
 const MAX_DAILY_ASSIGNMENTS = process.env.MAX_DAILY_ASSIGNMENTS || 2;
 const StaffSession = {
+  async getOnPeriod(periodId){
+    const query = `
+      SELECT 
+      us.username as username,
+      us.first_name as first_name,
+      us.last_name as last_name,
+      us.lifeguard as lifeguard,
+      us.archery as archery,
+      us.senior as senior,
+      us.first_year as first_year,
+      us.ropes as ropes,
+      ss.id as staff_session_id,
+      sop.activity_session_id as activity_session_id,
+      activities.name as activity_name
+      FROM
+      staff_on_periods sop
+      JOIN staff_sessions ss ON ss.id = sop.staff_session_id
+    LEFT JOIN activity_sessions acts ON acts.id = aop.id
+    LEFT JOIN activities on activities.id = 
+      JOIN users us on us.username = ss.username
+      WHERE sop.period_id=$1
+        `
+    const values = [periodId];
+    const result = await pool.query(query,values);
+    if(result.rowCount === 0){return false};
+    return result.rows.map(r=>({
+      username: r.username,
+      firstName:r.first_name,
+      lastName:r.last_name,
+      lifeguard:r.lifeguard,
+      archery:r.archery,
+      senior:r.senior,
+      firstYear:r.first_year,
+      ropes:r.ropes,
+      staffSessionId:r.staff_session_id,
+      activityName: r.activity_name,
+      activitySessionId:r.activity_session_id,
+    }))
+  },
   async get(id) {
     const client = await pool.connect();
     try {
@@ -45,6 +84,7 @@ const StaffSession = {
       //Get schedule data for session
       const onPeriodQuery = `
         SELECT
+        d.week_id as week_number,
         d.name as day_name,
         d.id as day_id,
         pe.period_number as period_number,
@@ -54,7 +94,7 @@ const StaffSession = {
         staff_sessions ss
         JOIN days d ON d.week_id = ss.week_number
         JOIN periods pe ON pe.day_id = d.id
-        LEFT JOIN staff_on_periods sop ON sop.period_id = pe.id
+        LEFT JOIN staff_on_periods sop ON sop.period_id = pe.id AND sop.staff_session_id = $1
         WHERE ss.id = $1
         ORDER BY day_id, period_number
         `;
@@ -82,6 +122,7 @@ const StaffSession = {
             const newDay = {
               dayName: currentDayName,
               id: currentPeriod.day_id,
+              weekNumber: currentPeriod.week_number,
               periods: [currentPeriodInfo],
             };
             schedule.push(newDay);
@@ -151,6 +192,19 @@ const StaffSession = {
       firstyear: r.first_year,
     }));
   },
+    // This would be a good use case for a class
+async assignToCabin(staffSession,cabinSessionId){
+    if(cabinSessionId === ""){cabinSessionId = null}
+    const query = `UPDATE staff_sessions
+    SET cabin_assignment = $1
+    WHERE staff_sessions.id = $2
+    RETURNING *`;
+    const values = [cabinSessionId,staffSession.id]
+    const result = await pool.query(query,values);
+    if(result.rowCount ===0){return false};
+    return true;
+
+},
   async getavailableperiod(periodid) {
     const query = `
             select 

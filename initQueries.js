@@ -114,26 +114,6 @@ module.exports = {
   ON DELETE CASCADE
   )`,
 
-  staffActivities: `
-  CREATE TABLE IF NOT EXISTS staff_activities
-  (
-  id serial NOT NULL,
-  staff_session_id integer NOT NULL,
-  period_id integer NOT NULL,
-  activity_session_id integer NOT NULL,
-  CONSTRAINT staffAct_pkey PRIMARY KEY (id),
-  CONSTRAINT "one staff assignment per period" UNIQUE (period_id, staff_session_id),
-  CONSTRAINT f_act_s FOREIGN KEY (activity_session_id) REFERENCES activity_sessions (id)
-  ON UPDATE CASCADE
-  ON DELETE CASCADE,
-  CONSTRAINT period_id FOREIGN KEY (period_id) REFERENCES periods (id)
-  ON UPDATE CASCADE
-  ON DELETE CASCADE,
-  CONSTRAINT staff_sess_relation FOREIGN KEY (staff_session_id) REFERENCES staff_sessions (id)
-  ON UPDATE CASCADE
-  ON DELETE CASCADE
-  )
-  `,
 
   staffSession: `
   CREATE TABLE IF NOT EXISTS staff_sessions(
@@ -206,13 +186,17 @@ module.exports = {
     id serial NOT NULL PRIMARY KEY,
     staff_session_id integer NOT NULL,
     period_id integer NOT NULL,
+    activity_session_id integer,
     CONSTRAINT fk_staff_session FOREIGN KEY (staff_session_id) REFERENCES staff_sessions(id)
     ON DELETE CASCADE
     ON UPDATE CASCADE,
     CONSTRAINT fk_period_staff FOREIGN KEY (period_id) REFERENCES periods(id)
     ON DELETE CASCADE
     ON UPDATE CASCADE,
-    CONSTRAINT one_period_max UNIQUE (period_id, staff_session_id)
+    CONSTRAINT one_period_max UNIQUE (period_id, staff_session_id),
+    CONSTRAINT fk_activity_session FOREIGN KEY(activity_session_id) REFERENCES activity_sessions(id)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
   )
   `
 };
