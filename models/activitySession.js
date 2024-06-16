@@ -450,6 +450,7 @@ RETURNING *`;
     // }));
   }
   async addStaff(staff) {
+    console.log({staff});
     const query = `
     WITH target_activity_session AS (SELECT acts.id,acts.activity_id,w.number as week_number, p.period_number, p.id as period_id, p.all_week as all_week
     FROM activity_sessions acts 

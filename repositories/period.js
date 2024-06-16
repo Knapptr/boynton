@@ -76,6 +76,7 @@ module.exports = {
    * @param id period id*/
   // TODO rework this as a transaction
   async get(id) {
+    console.log("Creating Client");
     const client = await pool.connect();
     try {
       // get period data
@@ -101,6 +102,7 @@ module.exports = {
       if (periodResult.rowCount === 0) {
         throw DbError.notFound("Period not found");
       }
+      console.log("Got period info");
       // initialize period with data
       const res = periodResult.rows[0];
       const period = {
@@ -132,10 +134,12 @@ module.exports = {
         LEFT JOIN campers camp ON campw.camper_id = camp.id
         WHERE acts.period_id = $1`;
       const activitiesCampersValues = [id];
+      console.log("Getting actvities campers");
       const activitiesCampersResult = await client.query(
         activitiesCampersQuery,
         activitiesCampersValues
       );
+      console.log("Got Campers and Activities");
       if (activitiesCampersResult.rowCount === 0) {
         throw DbError.notFound("No Activities Found");
       }
@@ -185,7 +189,7 @@ module.exports = {
         JOIN staff_on_periods sop ON sop.activity_session_id = acts.id
         JOIN staff_sessions ss ON ss.id = sop.staff_session_id
         JOIN users ON users.username = ss.username
-         WHERE acts.period_id = $1
+        WHERE acts.period_id = $1
       `;
       const activityStaffValues = [id];
       const activityStaffResults = await client.query(

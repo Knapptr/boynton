@@ -20,14 +20,13 @@ const StaffSession = {
       FROM
       staff_on_periods sop
       JOIN staff_sessions ss ON ss.id = sop.staff_session_id
-    LEFT JOIN activity_sessions acts ON acts.id = aop.id
-    LEFT JOIN activities on activities.id = 
+    LEFT JOIN activity_sessions acts ON acts.id = sop.activity_session_id
+    LEFT JOIN activities on activities.id = acts.activity_id
       JOIN users us on us.username = ss.username
       WHERE sop.period_id=$1
         `
     const values = [periodId];
     const result = await pool.query(query,values);
-    if(result.rowCount === 0){return false};
     return result.rows.map(r=>({
       username: r.username,
       firstName:r.first_name,
