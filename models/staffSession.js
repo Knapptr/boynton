@@ -44,6 +44,7 @@ const StaffSession = {
   async get(id) {
     const client = await pool.connect();
     try {
+      await client.query("BEGIN");
       const sessionQuery = `
         SELECT 
         ss.id as staff_session_id,
@@ -161,7 +162,7 @@ const StaffSession = {
       id: response.staff_session_id,
     };
   },
-  async getsome(idlist) {
+  async getSome(idlist) {
     const query = `select 
         ss.id as staff_session_id,
         cs.id as cabin_session_id,
@@ -204,7 +205,7 @@ async assignToCabin(staffSession,cabinSessionId){
     return true;
 
 },
-  async getavailableperiod(periodid) {
+  async getAvailablePeriod(periodId) {
     const query = `
             select 
             ss.id as staff_session_id,
@@ -250,8 +251,8 @@ async assignToCabin(staffSession,cabinSessionId){
                 )
         order by u.first_name
         `;
-    const values = [periodid, max_daily_assignments];
-    const results = await fetchmany(query, values);
+    const values = [periodId, max_daily_assignments];
+    const results = await fetchMany(query, values);
     if (!results) {
       return [];
     }

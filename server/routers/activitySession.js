@@ -17,7 +17,7 @@ router.post(
   activitySessionHandler.addStaffToActivity
 );
 router.delete(
-  "/:activitySessionId/staff/:staffActivityId",
+  "/:activitySessionId/staff/:staffOnPeriodId",
   activitySessionHandler.removeStaff
 );
 module.exports = router;

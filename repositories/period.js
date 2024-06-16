@@ -76,7 +76,6 @@ module.exports = {
    * @param id period id*/
   // TODO rework this as a transaction
   async get(id) {
-    console.log("Creating Client");
     const client = await pool.connect();
     try {
       // get period data
@@ -102,11 +101,10 @@ module.exports = {
       if (periodResult.rowCount === 0) {
         throw DbError.notFound("Period not found");
       }
-      console.log("Got period info");
       // initialize period with data
       const res = periodResult.rows[0];
       const period = {
-        id: res.id,
+        id: res.period_id,
         number: res.period_number,
         allWeek: res.all_week,
         weekNumber: res.week_number,
@@ -134,12 +132,10 @@ module.exports = {
         LEFT JOIN campers camp ON campw.camper_id = camp.id
         WHERE acts.period_id = $1`;
       const activitiesCampersValues = [id];
-      console.log("Getting actvities campers");
       const activitiesCampersResult = await client.query(
         activitiesCampersQuery,
         activitiesCampersValues
       );
-      console.log("Got Campers and Activities");
       if (activitiesCampersResult.rowCount === 0) {
         throw DbError.notFound("No Activities Found");
       }
@@ -174,14 +170,14 @@ module.exports = {
           });
         }
       });
-      console.log("Activities By Id", {activitiesById});
       // get activities and staff
       const activityStaffQuery = `
         SELECT
         acts.id as activity_session_id,
         users.first_name,
         users.last_name,
-        users.username
+        users.username,
+      sop.id as staff_on_period_id
         FROM
         activity_sessions acts
         JOIN periods per ON acts.period_id = per.id
@@ -203,11 +199,13 @@ module.exports = {
           first_name: firstName,
           last_name: lastName,
           username: username,
+          staff_on_period_id: staffOnPeriodId
         } = st;
         activitiesById[activitySessionId].staff.push({
           firstName,
           lastName,
           username,
+          staffOnPeriodId
         });
       });
       // add activities to period object
@@ -216,7 +214,6 @@ module.exports = {
       return period;
     } catch (e) {
       client.query("ROLLBACK");
-      console.log("ERROR:", { e });
       return false;
     } finally {
       client.release();

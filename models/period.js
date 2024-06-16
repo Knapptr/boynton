@@ -55,10 +55,52 @@ class Period {
   }
   static async get(id, periodRepository = defaultPeriodRepository) {
     const period = await periodRepository.get(id);
+    console.log({period});
     if (!period) {
       return false;
     }
     return new Period(period);
+  }
+  async getStaff(){
+    const query = `
+      SELECT 
+      us.username as username,
+      us.first_name as first_name,
+      us.last_name as last_name,
+      us.lifeguard as lifeguard,
+      us.archery as archery,
+      us.senior as senior,
+      us.first_year as first_year,
+      us.ropes as ropes,
+      ss.id as staff_session_id,
+      sop.activity_session_id as activity_session_id,
+      sop.id as staff_on_period_id,
+      activities.name as activity_name
+      FROM
+      staff_on_periods sop
+      JOIN staff_sessions ss ON ss.id = sop.staff_session_id
+    LEFT JOIN activity_sessions acts ON acts.id = sop.activity_session_id
+    LEFT JOIN activities on activities.id = acts.activity_id
+      JOIN users us on us.username = ss.username
+      WHERE sop.period_id=$1
+        `;
+    const values = [this.id];
+
+    const result = await pool.query(query,values);
+    return result.rows.map(r=>({
+      username: r.username,
+      firstName:r.first_name,
+      lastName:r.last_name,
+      lifeguard:r.lifeguard,
+      archery:r.archery,
+      senior:r.senior,
+      firstYear:r.first_year,
+      ropes:r.ropes,
+      staffSessionId:r.staff_session_id,
+      activityName: r.activity_name,
+      activitySessionId:r.activity_session_id,
+      staffOnPeriodId:r.staff_on_period_id
+    }))
   }
   async getActivities() {
     const query = "SELECT * from activities WHERE period_id = $1";

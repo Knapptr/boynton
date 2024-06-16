@@ -82,6 +82,17 @@ module.exports = {
       res.json(campers);
     },
   ],
+  getStaffOns:[
+    //validate that the period exists, and place it on the request object
+    periodValidateAndPopulate("periodId"),
+    handleValidation,
+    async (req,res,next) => {
+      const { period } = req;
+      console.log({period});
+      const staff = await period.getStaff()
+      res.json(staff);
+    }
+  ],
   deleteStaff: [
     //validate that the period exists, and place it on the request object
     periodValidateAndPopulate("periodId"),
@@ -92,6 +103,7 @@ module.exports = {
       next();
     },
     validateUserSessionList("staffList.*.id"),
+    handleValidation,
     // delete the staff
     async (req, res) => {
       const { period, staffList } = req;

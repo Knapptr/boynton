@@ -10,6 +10,7 @@ const {
   validateActivitySessionExists,
   validateStaffMembers,
   validateCampers,
+  validateStaffOns,
 } = require("../../validation/activitySession");
 const { body, param } = require("express-validator");
 const Period = require("../../models/period");
@@ -115,15 +116,12 @@ const activitySessionHandler = {
 
   addStaffToActivity: [
     validateActivitySessionExists(),
-    validateStaffMembers(),
-    body("staff").exists().isArray(),
-    body("staff.*.staffSessionId").exists().isInt(),
+    validateStaffOns(),
     handleValidation,
     async (req, res, next) => {
-      const { staff } = req.body;
-      const activitySession = req.activitySession;
+      const {activitySession,staffOns} = req;
       try {
-        const response = await activitySession.addStaff(staff);
+        const response = await activitySession.addStaff(staffOns);
         res.send(response);
         return;
       } catch (e) {
@@ -134,8 +132,8 @@ const activitySessionHandler = {
   ],
 
   async removeStaff(req, res, next) {
-    const { activitySessionId, staffActivityId } = req.params;
-    const staffActivitySession = await StaffActivity.delete(staffActivityId);
+    const { activitySessionId, staffOnPeriodId } = req.params;
+    const staffActivitySession = await StaffActivity.delete(staffOnPeriodId);
     if (!staffActivitySession) {
       res.send("Could not delete");
       return;

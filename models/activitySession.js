@@ -217,10 +217,10 @@ SELECT
     const staffQuery = `
     SELECT first_name, last_name, ss.username
     from
-    staff_activities sa
-    JOIN staff_sessions ss ON sa.staff_session_id = ss.id
+    staff_on_periods sop
+    JOIN staff_sessions ss ON sop.staff_session_id = ss.id
     JOIN users ON users.username = ss.username
-    WHERE sa.activity_session_id = $1
+    WHERE sop.activity_session_id = $1
     `;
     const staffValues = [activitySessionId];
     const staffResponse = await pool.query(staffQuery, staffValues);
@@ -359,7 +359,7 @@ RETURNING *`;
       const getLowestEnrollmentInfo = () => {
         return Object.values(overflow).reduce(
           (acc, cv) => {
-            console.log({cv});
+            console.log({ cv });
             if (cv.totalEnrollment < acc.totalEnrollment) {
               acc.totalEnrollment = cv.totalEnrollment;
               acc.periodId = cv.periodId;
@@ -391,7 +391,7 @@ RETURNING *`;
         `;
         const targetSession = getLowestEnrollmentInfo();
         const values = [targetSession.periodId, targetSession.id, c.sessionId];
-        console.log({values});
+        console.log({ values });
 
         // make request
         const result = await client.query(insertQuery, values);
@@ -401,7 +401,7 @@ RETURNING *`;
         return result;
       });
       const allResults = await Promise.all(allReqs);
-      const allInserts = allResults.map(r=> r.rows[0]);
+      const allInserts = allResults.map((r) => r.rows[0]);
       await client.query("COMMIT");
       return allInserts;
     } catch (e) {
@@ -449,45 +449,38 @@ RETURNING *`;
     //   id: r.id,
     // }));
   }
-  async addStaff(staff) {
-    console.log({staff});
-    const query = `
-    WITH target_activity_session AS (SELECT acts.id,acts.activity_id,w.number as week_number, p.period_number, p.id as period_id, p.all_week as all_week
-    FROM activity_sessions acts 
-    JOIN periods p on acts.period_id = p.id   
-    JOIN days d on d.id = p.day_id
-    JOIN weeks w on w.number = d.week_id                                 
-    WHERE acts.id = $1),
-
-    target_staff AS (
-    SELECT * from staff_sessions ss WHERE ss.id = ANY($2))
-
-    INSERT INTO staff_activities (period_id,activity_session_id,staff_session_id)
-    SELECT 
-    p.id as period_id, acts.id as activity_session_id, ts.id as staff_session_id
-    FROM target_activity_session tas
-    JOIN periods p ON tas.all_week AND p.period_number = tas.period_number OR p.id = tas.period_id
-    JOIN days d on d.id = p.day_id
-    JOIN weeks w on w.number = d.week_id AND w.number = tas.week_number
-    JOIN activity_sessions acts ON acts.period_id = p.id AND acts.activity_id = tas.activity_id
-    CROSS JOIN target_staff ts
-    ON CONFLICT ON CONSTRAINT "one staff assignment per period"
-    DO UPDATE SET activity_session_id = excluded.activity_session_id, period_id = excluded.period_id
-    RETURNING *
-    `;
-
-    const staffSessionIds = staff.map((c) => c.staffSessionId);
-    const values = [this.id, staffSessionIds];
-    const results = await pool.query(query, values);
-    const data = results.rows;
-    if (data.length === 0) {
+  async addStaff(staffOns) {
+    console.log({ staff: staffOns });
+    // assign the activity_session_id to the staff_on_period
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+      const allQueries = staffOns.map((sop) => {
+        const updateQuery = `UPDATE staff_on_periods SET activity_session_id = $1 WHERE id = $2`;
+        const updateValues = [this.id, sop.id];
+        return client.query(updateQuery, updateValues);
+      });
+      await Promise.all(allQueries);
+      await client.query("COMMIT");
+      return true;
+    } catch (e) {
+      client.query("ROLLBACK");
       return false;
+    } finally {
+      client.release();
     }
-    return data.map((r) => ({
-      periodId: r.period_id,
-      activitySessionId: r.activity_id,
-      id: r.id,
-    }));
+    // const staffSessionIds = staffOns.map((c) => c.staffSessionId);
+    // const values = [this.id, staffSessionIds];
+    // const results = await pool.query(query, values);
+    // const data = results.rows;
+    // if (data.length === 0) {
+    //   return false;
+    // }
+    // return data.map((r) => ({
+    //   periodId: r.period_id,
+    //   activitySessionId: r.activity_id,
+    //   id: r.id,
+    // }));
   }
 }
 

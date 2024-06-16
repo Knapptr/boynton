@@ -6,6 +6,7 @@ const StaffSession = require("../models/staffSession");
 const ApiError = require("../utils/apiError");
 const DbError = require("../utils/DbError");
 const pool = require("../db");
+const StaffOnPeriod = require("../models/StaffOnPeriod");
 
 const activitySessionValidator = {
   validateExistingActivityId: () =>
@@ -41,7 +42,7 @@ const activitySessionValidator = {
       .isInt()
       .custom(async (activitySessionId, { req }) => {
         const activitySession = await ActivitySession.get(activitySessionId);
-	      console.log({activitySession});
+        console.log({ activitySession });
         if (!activitySession) {
           throw ApiError.notFound("activity session does not exist");
         }
@@ -49,6 +50,19 @@ const activitySessionValidator = {
         req.activitySession = activitySession;
       }),
 
+  /** Check that staff member on assignmentns are valid, add them to the request as staffOns */
+  validateStaffOns: () =>
+    body("staffOns")
+      .exists()
+      .isArray()
+      .custom( (async (ons,{req}) => {
+        const staffOns = await StaffOnPeriod.getSome(ons);
+        if (ons.length !== staffOns.length) {
+          throw ApiError.notFound("One or more staff on periods not found");
+        }
+        req.staffOns = staffOns;
+        
+      })),
   /** Check that all staff members are valid */
   validateStaffMembers: () =>
     body("staff")
@@ -74,7 +88,7 @@ const activitySessionValidator = {
             const query = "SELECT id FROM camper_weeks cw WHERE cw.id = $1";
             const values = [c.sessionId];
             const response = await client.query(query, values);
-	  console.log({response:response.rows});
+            console.log({ response: response.rows });
             const data = response.rows.map((r) => r.id);
             camperResults.push(...data);
             return data;
