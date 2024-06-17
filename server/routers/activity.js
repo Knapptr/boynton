@@ -13,4 +13,5 @@ router.post(
 // Protected Routes
 router.use(programmingOnly)
 router.post("/", activityHandler.create)
+router.put("/:activityID",activityHandler.update)
 module.exports = router;

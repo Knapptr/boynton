@@ -353,6 +353,8 @@ RETURNING *`;
     }));
   }
 
+  // Handles only adding to overflow and regular activities
+  // needs to handle assigments to all week activties
   async addCampers(campersList) {
     const client = await pool.connect();
 
@@ -387,6 +389,20 @@ RETURNING *`;
         }
       };
       const allReqs = campersList.map(async (c) => {
+        if(this.allWeek){
+        const allWeekInsertQuery = `
+        INSERT INTO camper_activities (period_id,activity_id,camper_week_id)
+        SELECT actsess.period_id, actsess.id, $1
+        FROM activity_sessions actsess 
+        JOIN periods per ON per.id = actsess.period_id
+        JOIN days d ON d.id = per.day_id
+        WHERE per.period_number = $2 AND d.week_id = $3 AND actsess.activity_id = $4
+        ON CONFLICT ON CONSTRAINT "one_activity_per_camper"
+        DO UPDATE SET activity_id = excluded.activity_id, period_id = excluded.period_id, is_present = false
+        `
+        const allWeekInsertValues = [c.sessionId,this.periodNumber,this.weekNumber,this.activityId];
+          return client.query(allWeekInsertQuery,allWeekInsertValues);
+        }
         const insertQuery = `
         INSERT INTO camper_activities (period_id,activity_id,camper_week_id) 
         VALUES ($1, $2, $3)
@@ -394,6 +410,7 @@ RETURNING *`;
         DO UPDATE SET activity_id = excluded.activity_id, period_id = excluded.period_id, is_present = false
         RETURNING *
         `;
+
         const targetSession = getLowestEnrollmentInfo();
         const values = [targetSession.periodId, targetSession.id, c.sessionId];
         console.log({ values });
