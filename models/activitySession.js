@@ -19,6 +19,7 @@ class ActivitySession {
     campers = [],
     staff = [],
     overflow = {},
+    allWeek = false,
   }) {
     this.name = name;
     this.id = id;
@@ -36,6 +37,7 @@ class ActivitySession {
     this.campers = campers;
     this.staff = staff;
     this.overflow = overflow;
+    this.allWeek = allWeek;
   }
 
   /** Get all Activity Sessions */
@@ -153,6 +155,7 @@ SELECT
       act.name as activity_name,
       act.description as activity_description,
       act.id as activity_id,
+      pe.all_week as all_week,
     pe.period_number as period_number,
     d.name as day_name,
     d.id as day_id,
@@ -182,6 +185,7 @@ SELECT
       period_id: periodId,
       period_number: periodNumber,
       activity_name: name,
+      all_week: allWeek,
       activity_description: description,
       activity_id: activityId,
       day_name: dayName,
@@ -264,6 +268,7 @@ SELECT
       name,
       id,
       description,
+      allWeek,
       activityId,
       periodId,
       periodNumber,
@@ -449,9 +454,38 @@ RETURNING *`;
     //   id: r.id,
     // }));
   }
+  async assignStaffAllWeek(staffOns) {
+    // if(!this.allWeek){return [this]}
+    // get all activity sessions this period number, this week
+    const client = await pool.connect();
+    const allQueries = staffOns.map((sop) => {
+      const query = `
+      UPDATE staff_on_periods AS sop
+      SET activity_session_id = actsess.id
+      FROM activity_sessions AS actsess
+      JOIN periods per ON per.id = actsess.period_id
+      JOIN days d ON d.id = per.day_id
+      WHERE sop.period_id = actsess.period_id 
+      AND actsess.activity_id = $1 
+      AND sop.staff_session_id = (SELECT staff_session_id FROM staff_on_periods sop2 WHERE sop2.id = $2) 
+      AND d.week_id = $3
+      RETURNING *
+    `;
+      const values = [this.activityId, sop.id, this.weekNumber];
+      console.log({values});
+      return client.query(query,values);
+    });
+    const results = await Promise.all(allQueries);
+    console.log({results});
+    client.release();
+    return true;
+  }
   async addStaff(staffOns) {
-    console.log({ staff: staffOns });
     // assign the activity_session_id to the staff_on_period
+    if(this.allWeek){
+     return await this.assignStaffAllWeek(staffOns);
+    }
+
     const client = await pool.connect();
     try {
       await client.query("BEGIN");
@@ -461,6 +495,9 @@ RETURNING *`;
         return client.query(updateQuery, updateValues);
       });
       await Promise.all(allQueries);
+      // handle case of all week activity
+      if (this.allWeek) {
+      }
       await client.query("COMMIT");
       return true;
     } catch (e) {

@@ -111,6 +111,7 @@ module.exports = {
         weekTitle: res.week_title,
         weekDisplay: res.week_display,
         dayName: res.day_name,
+        activities: []
       };
       // initialize activity id object
       const activitiesById = {};
@@ -136,9 +137,9 @@ module.exports = {
         activitiesCampersQuery,
         activitiesCampersValues
       );
-      if (activitiesCampersResult.rowCount === 0) {
-        throw DbError.notFound("No Activities Found");
-      }
+      // if (activitiesCampersResult.rowCount === 0) {
+      //   throw DbError.notFound("No Activities Found");
+      // }
       activitiesCampersResult.rows.forEach((act) => {
         // define local vars for the for each function
         const {
