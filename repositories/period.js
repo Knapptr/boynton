@@ -123,7 +123,10 @@ module.exports = {
         acts.id as activity_session_id,
         camp.first_name as camper_first,
         camp.last_name as camper_last,
-        campw.id as camper_week_id
+        campw.id as camper_week_id,
+        campact.id as camper_activity_id,
+        cabin.name as cabin_name,
+      campact.is_present as is_present
         FROM
         activity_sessions acts
         JOIN periods per ON acts.period_id = per.id
@@ -131,6 +134,8 @@ module.exports = {
         LEFT JOIN camper_activities campact ON campact.activity_id = acts.id
         LEFT JOIN camper_weeks campw ON campw.id = campact.camper_week_id
         LEFT JOIN campers camp ON campw.camper_id = camp.id
+        LEFT JOIN cabin_sessions cabsess ON cabsess.id = campw.cabin_session_id
+        LEFT JOIN cabins cabin ON cabin.name = cabsess.cabin_name
         WHERE acts.period_id = $1`;
       const activitiesCampersValues = [id];
       const activitiesCampersResult = await client.query(
@@ -149,6 +154,9 @@ module.exports = {
           camper_first: camperFirst,
           camper_last: camperLast,
           camper_week_id: camperWeekId,
+          cabin_name: cabin,
+          camper_activity_id: camperActivityId,
+          is_present: isPresent
         } = act;
         const activityData = {
           id: activityId,
@@ -165,9 +173,12 @@ module.exports = {
         // if camper info, add camper to camper list
         if (camperWeekId !== null) {
           activitiesById[activitySessionId].campers.push({
-            firstName: camperFirst,
+            firstName:camperFirst,
             lastName: camperLast,
-            weekId: camperWeekId,
+            sessionId: camperWeekId,
+            cabin,
+            isPresent,
+            activityId :camperActivityId
           });
         }
       });
@@ -214,6 +225,7 @@ module.exports = {
       await client.query("COMMIT");
       return period;
     } catch (e) {
+      console.log({e});
       client.query("ROLLBACK");
       return false;
     } finally {
