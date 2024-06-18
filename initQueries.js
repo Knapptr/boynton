@@ -33,6 +33,10 @@ module.exports = {
   CONSTRAINT camper_id FOREIGN KEY (camper_id)
   REFERENCES campers (id) 
   ON UPDATE NO ACTION
+  ON DELETE CASCADE,
+  CONSTRAINT fk_week FOREIGN KEY (week_id)
+  REFERENCES weeks(number)
+  ON UPDATE NO ACTION
   ON DELETE CASCADE
   )
 `,

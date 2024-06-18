@@ -6,7 +6,8 @@ const [ex, cpath, configYear] = process.argv;
 
 VALIDYEARS = {
   2022: "./config/2022.config",
-  2023: "./config/2023.config"
+  2023: "./config/2023.config",
+  2024: "./config/2024.config"
 }
 
 if (!VALIDYEARS[configYear]) {

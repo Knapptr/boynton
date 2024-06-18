@@ -69,8 +69,8 @@ class Cabin {
 	async getAllSessions() {
 		const query = "SELECT * from cabin_sessions WHERE cabin_name = $1";
 		const values = [this.name];
-		let sessions = await fetchMany(query, values);
-		sessions = sessions.map((session) => {
+		const sessionsResponse = await pool.query(query,values);
+		const sessions = sessionsResponse.rows.map((session) => {
 			return {};
 		});
 		return sessions;

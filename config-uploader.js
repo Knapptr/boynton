@@ -3,7 +3,7 @@ require("dotenv").config()
 
 
 /**
-  * Run this with node config-uploader.js ./config/2023.config.js accountusername ccountpassword api.campleslie.xyz to populate production server
+  * Run this with node config-uploader.js ./config/2024.config.js accountusername accountpassword api.campleslie.xyz to populate production server
   */
 const filePath = process.argv[2];
 const username = process.argv[3];
@@ -49,6 +49,7 @@ const main = async ()=>{
   // get token
   console.log("Getting authorization token");
   const token = await getToken();
+    console.log({token});
   console.log("Got Authorization token")
   const url = destinationUrl + "/api/config"
   const createdData = await requestWithToken(url,token,data);
