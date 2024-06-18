@@ -1,4 +1,10 @@
+
 require("dotenv").config()
+
+
+/**
+  * Run this with node config-uploader.js ./config/2023.config.js accountusername ccountpassword api.campleslie.xyz to populate production server
+  */
 const filePath = process.argv[2];
 const username = process.argv[3];
 const password = process.argv[4];
@@ -46,11 +52,13 @@ const main = async ()=>{
   console.log("Got Authorization token")
   const url = destinationUrl + "/api/config"
   const createdData = await requestWithToken(url,token,data);
+    console.log({createdData});
   console.log("Configured.")
   }catch(e){
 	console.error("Something went wrong ...")
 	console.error(e);
   }
 }
+
 
 main();

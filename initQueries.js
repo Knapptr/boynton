@@ -90,7 +90,8 @@ module.exports = {
   CREATE TABLE IF NOT EXISTS activities (
   id serial NOT NULL UNIQUE,
   name character varying(255) NOT NULL UNIQUE,
-  description character varying(255) COLLATE pg_catalog."default",
+  capacity integer,
+  description character varying(255) NOT NULL COLLATE pg_catalog."default",
   CONSTRAINT act_pkey PRIMARY KEY (id)
   )
 
@@ -113,27 +114,6 @@ module.exports = {
   ON DELETE CASCADE
   )`,
 
-  staffActivities: `
-  CREATE TABLE IF NOT EXISTS staff_activities
-  (
-  id serial NOT NULL,
-  staff_session_id integer NOT NULL,
-  period_id integer NOT NULL,
-  activity_session_id integer NOT NULL,
-  CONSTRAINT staffAct_pkey PRIMARY KEY (id),
-  CONSTRAINT "one staff assignment per period" UNIQUE (period_id, staff_session_id),
-  CONSTRAINT f_act_s FOREIGN KEY (activity_session_id) REFERENCES activity_sessions (id)
-  ON UPDATE CASCADE
-  ON DELETE CASCADE,
-  CONSTRAINT period_id FOREIGN KEY (period_id) REFERENCES periods (id)
-  ON UPDATE CASCADE
-  ON DELETE CASCADE,
-  CONSTRAINT staff_sess_relation FOREIGN KEY (staff_session_id) REFERENCES staff_sessions (id)
-  ON UPDATE CASCADE
-  ON DELETE CASCADE
-  )
-  `,
-
 
   staffSession: `
   CREATE TABLE IF NOT EXISTS staff_sessions(
@@ -150,7 +130,9 @@ module.exports = {
     ON DELETE CASCADE,
     CONSTRAINT fkey_cabin_assignment FOREIGN KEY (cabin_assignment) REFERENCES cabin_sessions (id)
     ON UPDATE CASCADE
-    ON DELETE CASCADE
+    ON DELETE CASCADE,
+    CONSTRAINT one_week_per_staff UNIQUE (week_number, username)
+
   )
 `,
 
@@ -173,7 +155,48 @@ module.exports = {
     ON DELETE SET NULL
     ON UPDATE CASCADE
   )
+  `,
+  camperComment: `
+  CREATE TABLE IF NOT EXISTS camper_comments(
+    id serial NOT NULL PRIMARY KEY,
+    camper_id INTEGER NOT NULL,
+    username CHARACTER VARYING, 
+    date TIMESTAMP NOT NULL,
+    content CHARACTER VARYING NOT NULL,
+    CONSTRAINT fk_camper_id FOREIGN KEY (camper_id) REFERENCES campers(id)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+    CONSTRAINT fk_user FOREIGN KEY (username) REFERENCES users(username)
+    ON DELETE SET NULL
+    ON UPDATE CASCADE
+  )
+  `,
+  freetimes: `
+  CREATE TABLE IF NOT EXISTS freetimes(
+    id serial NOT NULL PRIMARY KEY,
+    number integer NOT NULL,
+    day_id integer NOT NULL ,
+    CONSTRAINT fk_day FOREIGN KEY (day_id) REFERENCES days(id)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+  )
+  `,
+  staffOnPeriods: `
+  CREATE TABLE IF NOT EXISTS staff_on_periods(
+    id serial NOT NULL PRIMARY KEY,
+    staff_session_id integer NOT NULL,
+    period_id integer NOT NULL,
+    activity_session_id integer,
+    CONSTRAINT fk_staff_session FOREIGN KEY (staff_session_id) REFERENCES staff_sessions(id)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+    CONSTRAINT fk_period_staff FOREIGN KEY (period_id) REFERENCES periods(id)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+    CONSTRAINT one_period_max UNIQUE (period_id, staff_session_id),
+    CONSTRAINT fk_activity_session FOREIGN KEY(activity_session_id) REFERENCES activity_sessions(id)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+  )
   `
-
-}
-
+};

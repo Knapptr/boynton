@@ -55,9 +55,9 @@ const dayToQuery = (client, day, weekNumber) => {
     * @param dayId the id of the day the period belongs to
     * @returns {Promise} the period query
     */
-const periodToQuery = (client, periodNumber, dayId) => {
-    const periodsQuery = "INSERT INTO periods (period_number,day_id) VALUES ($1,$2) ON CONFLICT DO NOTHING RETURNING *";
-    const values = [periodNumber, dayId];
+const periodToQuery = (client, period, dayId) => {
+    const periodsQuery = "INSERT INTO periods (period_number,day_id,all_week) VALUES ($1,$2,$3) ON CONFLICT DO NOTHING RETURNING *";
+    const values = [period.number, dayId, period.allWeek];
     return client.query(periodsQuery, values);
 }
 
@@ -92,6 +92,7 @@ const createSchedule = async (client, weeks) => {
 
     const scheduleQueries = weeks.map(async week => {
         // Create week
+        console.log("creating week: ", week)
         const days = [];
         const periods = [];
         const weekResults = await weekToQuery(client, week);
@@ -103,10 +104,10 @@ const createSchedule = async (client, weeks) => {
                     days.push(dayResult.rows[0]);
                     const dayId = dayResult.rows[0].id
                     // Create Periods for day
-                    const periodQueries = [];
-                    for (let p = 1; p <= day.periods; p++) {
-                        periodQueries.push(periodToQuery(client, p, dayId))
-                    }
+                    const periodQueries = day.periods.map((p,index)=>{
+                        const period = {number:index + 1, allWeek:p.allWeek} 
+                            return periodToQuery(client,period,dayId)
+                    });
                     const periodResultsData = await Promise.all(periodQueries);
 
                     for (result of periodResultsData) {
@@ -183,6 +184,7 @@ class Config {
 
         } catch (e) {
             await client.query("ROLLBACK");
+            console.log("ERROR",e)
             throw e;
         } finally {
             client.release()

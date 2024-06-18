@@ -5,6 +5,7 @@ env.config();
 
 const queries = require("./initQueries");
 const { fetchOne } = require("./utils/pgWrapper");
+
 const init = (query, values) => {
   return async () => {
     try {
@@ -25,7 +26,7 @@ const camperActivityRepo = { init: init(queries.camperActivities) };
 const camperWeekRepo = { init: init(queries.camperWeeks) };
 const userRepo = { init: init(queries.users) };
 const staffSession = { init: init(queries.staffSession) };
-const staffActivities = { init: init(queries.staffActivities) };
+// const staffActivities = { init: init(queries.staffActivities) };
 const camperRepo = require("./repositories/camper");
 const dayRepo = require("./repositories/day");
 const periodRepo = require("./repositories/period");
@@ -35,6 +36,9 @@ const pool = require("./db");
 const encrypt = require("./utils/encryptPassword");
 const programAreaRepo = { init: init(queries.programAreas) };
 const awardRepo = { init: init(queries.awards) };
+const camperComments = {init:init(queries.camperComment)};
+const freetimes = {init:init(queries.freetimes)};
+const staffOns = {init:init(queries.staffOnPeriods)};
 
 //order matters here
 const repos = [
@@ -42,18 +46,21 @@ const repos = [
   weekRepo,
   dayRepo,
   periodRepo,
+  freetimes,
   activityRepo,
   activitySessionsRepo,
   cabinRepo,
   cabinSessionRepo,
   staffSession,
-  staffActivities,
+  // staffActivities,
+  staffOns,
   camperRepo,
   camperWeekRepo,
   camperActivityRepo,
   scoreRepo,
   programAreaRepo,
-  awardRepo
+  awardRepo,
+  camperComments,
 ];
 
 module.exports = async () => {

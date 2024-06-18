@@ -1,4 +1,4 @@
-const { param } = require("express-validator");
+const { param, body } = require("express-validator");
 const Activity = require("../../models/activity");
 const CamperActivity = require("../../models/CamperActivity");
 const ApiError = require("../../utils/apiError");
@@ -22,6 +22,33 @@ module.exports = {
                 next(e);
             }
         }],
+    update:[
+        param("activityID").exists().custom(async (activityId, { req }) => {
+            const activity = await Activity.get(activityId);
+            if (!activity) {
+                throw new Error("Activity does not exist");
+            }
+            req.activity = activity;
+        }),
+        body("updatedFields").exists().isObject(),
+        body("updatedFields.name").isString().optional(),
+        body("updatedFields.description").isString().optional(),
+        body("updatedFields.capacity").isInt().optional({nullable:true}),
+        handleValidation,
+        async (req,res,next)=>{
+            // update fields as nesc
+            const {activity} = req;
+            const {updatedFields} = req.body;
+            const result = await activity.update(updatedFields)
+            if(result){
+                res.send("ok")
+            }else{
+                res.status(500);
+                res.send("not ok");
+            }
+            
+        }
+    ],
     getOne: [
         param("activityID").exists().custom(async (activityId, { req }) => {
             const activity = await Activity.get(activityId);

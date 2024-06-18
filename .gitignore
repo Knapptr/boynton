@@ -32,4 +32,10 @@ configToJson.js
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
 ebvars.sh
+
+#Files that are not in git, but are included on EB deploy
+campData/
+templates/*
 config/*
+ConfigProduction.sh
+resetAfterStaffTraining.js

@@ -2,12 +2,15 @@ const mapManyToOne = require("../utils/remap");
 const Activity = require("./activity");
 const defaultPeriodRepository = require("../repositories/period");
 const { fetchManyAndCreate, fetchMany } = require("../utils/pgWrapper");
+const pool = require("../db");
+const DbError = require("../utils/DbError");
 
 class Period {
   constructor({
     number,
     dayId,
     id,
+    allWeek = false,
     activities,
     weekNumber,
     weekDisplay,
@@ -15,6 +18,7 @@ class Period {
     dayName,
   }) {
     (this.number = number), (this.dayId = dayId);
+    this.allWeek = allWeek;
     (this.weekNumber = weekNumber),
       (this.dayName = dayName),
       (this.activities = activities || []);
@@ -33,10 +37,10 @@ class Period {
     return period;
   }
   static async create(
-    { number, dayId },
+    { number, dayId, allWeek = false },
     periodRepository = defaultPeriodRepository
   ) {
-    const result = await periodRepository.create({ number, dayId });
+    const result = await periodRepository.create({ number, dayId, allWeek });
     if (!result) {
       throw new Error("Cannot create period.");
     }
@@ -51,10 +55,52 @@ class Period {
   }
   static async get(id, periodRepository = defaultPeriodRepository) {
     const period = await periodRepository.get(id);
+    console.log({period});
     if (!period) {
       return false;
     }
     return new Period(period);
+  }
+  async getStaff(){
+    const query = `
+      SELECT 
+      us.username as username,
+      us.first_name as first_name,
+      us.last_name as last_name,
+      us.lifeguard as lifeguard,
+      us.archery as archery,
+      us.senior as senior,
+      us.first_year as first_year,
+      us.ropes as ropes,
+      ss.id as staff_session_id,
+      sop.activity_session_id as activity_session_id,
+      sop.id as staff_on_period_id,
+      activities.name as activity_name
+      FROM
+      staff_on_periods sop
+      JOIN staff_sessions ss ON ss.id = sop.staff_session_id
+    LEFT JOIN activity_sessions acts ON acts.id = sop.activity_session_id
+    LEFT JOIN activities on activities.id = acts.activity_id
+      JOIN users us on us.username = ss.username
+      WHERE sop.period_id=$1
+        `;
+    const values = [this.id];
+
+    const result = await pool.query(query,values);
+    return result.rows.map(r=>({
+      username: r.username,
+      firstName:r.first_name,
+      lastName:r.last_name,
+      lifeguard:r.lifeguard,
+      archery:r.archery,
+      senior:r.senior,
+      firstYear:r.first_year,
+      ropes:r.ropes,
+      staffSessionId:r.staff_session_id,
+      activityName: r.activity_name,
+      activitySessionId:r.activity_session_id,
+      staffOnPeriodId:r.staff_on_period_id
+    }))
   }
   async getActivities() {
     const query = "SELECT * from activities WHERE period_id = $1";
@@ -86,7 +132,7 @@ class Period {
 	        ca.is_present,
 	        act.name as activity_name,
 	        ca.id as camper_activity_id,
-			cab.name 
+			cab.name as cabin_name
 	        from camper_weeks cw
 			JOIN days d ON d.week_id = cw.week_id
 	        JOIN periods p ON p.day_id = d.id
@@ -103,12 +149,12 @@ class Period {
     const parsedQuery = queryResult.map((res) => {
       return {
         camperActivityId: res.camper_activity_id,
-        camperSessionId: res.camper_session_id,
+        sessionId: res.camper_session_id,
         weekId: res.week_id,
         firstName: res.first_name,
         lastName: res.last_name,
         age: res.age,
-        cabinName: res.name,
+        cabin: res.cabin_name,
         isPresent: res.is_present,
         activityId: res.activity_id || "Unassigned",
         activityName: res.activity_name,
@@ -122,6 +168,68 @@ class Period {
       return { ...act, campers: campersInActivity };
     });
     return parsedQuery;
+  }
+
+  async assignStaffOn(staffList) {
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+      const allReqs = staffList.map(async(s) => {
+        const query =
+          "INSERT INTO staff_on_periods (staff_session_id,period_id) VALUES ($1,$2) RETURNING *";
+        const values = [s.id, this.id];
+
+	const results = await client.query(query, values)
+        return results ;
+      });
+      const allResults = await Promise.all(allReqs);
+      const staffOnPeriods = allResults.map((r) => {
+        const {
+          id,
+          staff_session_id: staffSessionId,
+          period_id: periodId,
+        } = r.rows[0];
+        return { id, staffSessionId, periodId };
+      });
+      await client.query("COMMIT");
+      return staffOnPeriods;
+    } catch (e) {
+      client.query("ROLLBACK");
+      throw  DbError.transactionFailure("Error assigning staff");
+    } finally {
+      client.release();
+    }
+  }
+  async removeStaffOn(staffList){
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+      const allReqs = staffList.map(async(s) => {
+        const query =
+          "DELETE FROM staff_on_periods WHERE staff_session_id = $1 AND period_id = $2 RETURNING *";
+        const values = [s.id, this.id];
+
+	const results = await client.query(query, values)
+        return results ;
+      });
+      const allResults = await Promise.all(allReqs);
+      const staffOnPeriods = allResults.map((r) => {
+        const {
+          id,
+          staff_session_id: staffSessionId,
+          period_id: periodId,
+        } = r.rows[0];
+        return { id, staffSessionId, periodId };
+      });
+      await client.query("COMMIT");
+      return staffOnPeriods;
+    } catch (e) {
+      client.query("ROLLBACK");
+      throw  DbError.transactionFailure("Error deleting staff");
+    } finally {
+      client.release();
+    }
+
   }
 }
 module.exports = Period;

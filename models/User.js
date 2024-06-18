@@ -74,27 +74,38 @@ module.exports = class User {
           user.lifeguard || false,
           user.ropes || false,
           user.archery || false];
-        const result = await client.query(query,values)
-        return result;
+        const userResponse = await client.query(query,values)
+        const userResult=userResponse.rows;
+        const userData = {
+          username: userResult[0].username,
+          firstName: userResult[0].first_name,
+          lastName: userResult[0].last_name,
+          role: userResult[0].role,
+          firstYear: userResult[0].first_year,
+          senior: userResult[0].senior,
+          lifeguard: userResult[0].lifeguard,
+          ropes: userResult[0].ropes,
+          archery: userResult[0].archery
+
+        }
+          const sessionsQuery = `
+            INSERT INTO staff_sessions
+            (username, week_number)
+            SELECT username, week_number from (
+              SELECT $2 as username, number as week_number FROM
+              weeks w WHERE w.number = ANY($1)
+            )validWeeks
+        RETURNING *
+            `
+        const sessionsValues = [user.sessions.map(s=>s.weekNumber),user.username]
+        const sessionResponse = await client.query(sessionsQuery,sessionsValues);
+        const sessionsData = sessionResponse.rows.map(r=>({weekNumber:r.week_number, id:r.id}))
+        return {...userData,sessions:sessionsData}
+
       })
       const results = await Promise.all(reqs);
       await client.query("COMMIT");
-      return results.map(data=>{
-        if (data.rows.length === 0) return "User already exists"
-        const r = data.rows[0]
-        return {
-          username: r.username ,
-          firstName: r.first_name,
-          lastName: r.last_name,
-          role: r.role,
-          senior: r.senior,
-          firstYear: r.firstYear,
-          lifeguard: r.lifeGuard,
-          ropes: r.ropes,
-          archery: r.archery
-        }
-      })
-
+      return results
     }catch(e){
       client.query("ROLLBACK")
       throw new Error("Transaction failed: " + e)
@@ -107,12 +118,15 @@ module.exports = class User {
     SELECT 
     u.*, 
     cab.name as cabin_assignment,
+    w.begins as begins,
+    w.ends as ends,
     cs.id as cabin_session_id,
     ss.week_number as week_number, 
     ss.id as staff_session_id from users u
     LEFT JOIN staff_sessions ss ON ss.username = u.username
     LEFT JOIN cabin_sessions cs ON cs.id = ss.cabin_assignment
     LEFT JOIN cabins cab ON cab.name = cs.cabin_name
+    LEFT JOIN weeks w ON ss.week_number = w.number
     WHERE u.username = $1
     ORDER BY ss.week_number
     `;
@@ -155,7 +169,9 @@ module.exports = class User {
             id: db.staff_session_id,
             weekNumber: db.week_number,
             cabinAssignment: db.cabin_assignment,
-            cabinSessionId: db.cabin_session_id
+            cabinSessionId: db.cabin_session_id,
+            begins: db.begins,
+            ends: db.ends
           }
         )
       }

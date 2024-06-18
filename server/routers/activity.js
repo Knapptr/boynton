@@ -1,6 +1,6 @@
 const router = require("express").Router();
 const activityHandler = require("../handlers/activity");
-const { adminOnly } = require("../middleware/authRole");
+const { adminOnly, programmingOnly } = require("../middleware/authRole");
 
 router.get("/", activityHandler.getAll);
 router.get("/:activityID", activityHandler.getOne);
@@ -11,6 +11,7 @@ router.post(
 );
 
 // Protected Routes
-router.use(adminOnly);
+router.use(programmingOnly)
 router.post("/", activityHandler.create)
+router.put("/:activityID",activityHandler.update)
 module.exports = router;

@@ -51,7 +51,6 @@ class Score {
 
       const [summerRes, weekTRes, weekLRes] = await Promise.all([summerResp, weekTotalResp, weekEventsResp]);
       await client.query("COMMIT");
-      console.log({ summerRes });
       return {
         summerTotals: summerRes.rows.map(r => ({ team: r.awarded_to, total: r.total })),
         weekTotals: weekTRes.rows.map(r => ({ team: r.awarded_to, total: r.total })),

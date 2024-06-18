@@ -40,6 +40,7 @@ const usersHandler = {
       const { username, password, role, firstName, lastName, lifeguard, senior, firstYear, archery, ropes, sessions } = req.body;
       try {
         const user = await User.create({ username, password, role, firstName, lastName, lifeguard, archery, senior, firstYear, ropes, sessions });
+        console.log({createdUser:user});
         res.status(201).json(user);
         return;
 

@@ -57,7 +57,7 @@ module.exports = {
 		const query = `SELECT 
      c.first_name,
      c.last_name ,
-     c.gender,c.id,c.age,
+     c.gender,c.id,c.age,c.pronouns,
      w.number AS week_number, w.title AS week_title,
      cw.id AS camper_week_id,
      cw.cabin_session_id AS cabin_session_id,
