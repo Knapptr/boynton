@@ -3,6 +3,7 @@ const apiRouter = require("./routers/api");
 const docRouter = require("./routers/docs");
 const express = require("express");
 const authRouter = require("./routers/auth");
+const rootRouter = require("./routers/root");
 const cors = require('cors');
 
 const passport = require("passport");
@@ -20,14 +21,11 @@ receiver.router.use(express.urlencoded({ extended: true }));
 // 	express.static(path.join(__dirname, "..", "frontend", "build"))
 // );
 
-receiver.router.get("/",(req,res,next)=>{
-	res.status(200);
-	res.send("knapptr@gmail.com")
-})
 receiver.router.use("/auth", authRouter);
 receiver.router.use("/docs",docRouter);
 // receiver.router.use("/action", actionRouter);
 receiver.router.use("/api", apiRouter);
+receiver.router.use("/", rootRouter);
 
 // receiver.router.get("/*", (req, res, next) => {
 // 	res.sendFile(path.join(__dirname, "..", "frontend", "build", "index.html"));

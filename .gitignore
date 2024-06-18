@@ -26,6 +26,7 @@ dummyReport.csv
 configToJson.js
 2022.config.js
 2023.config.js
+curl_reqs
 
 # Elastic Beanstalk Files
 .elasticbeanstalk/*

@@ -1,0 +1,69 @@
+<!--
+    Template for Entry
+    <h4>route</h4>
+    <p><b>METHOD</b> description</p>
+    <pre><code>example_req</code></pre>
+
+--> 
+<header>
+    <h1>Boynton Api</h1>
+</header>
+
+<div>
+    <header>
+        <h2>Routes</h2>
+    </header>
+    <h3>Auth</h3>
+    <h4>/login</h4>
+    <p><b>POST</b> requests login a user with a JSON body.</p>
+    <pre><code>
+    {
+        "username": "user",
+        "password": "password"
+    }
+    </code></pre>
+
+    <p>On successful auth returns a JSON response with:</p>
+    <pre><code>
+    {
+        "token": "__a JWT to be used on future requests to get access to api"
+        "user":{
+            "username": "the logged in user"
+            "role": "the logged in users auth role"
+        }
+    }
+    </code></pre>
+
+    <p>Unsuccessful auth will respond with a 401 and:</p>
+    <pre>
+    <code>
+    {
+        "errors": [
+            {
+                "message": "Not authorized"
+            }
+        ]
+    }
+    </code>
+    </pre>
+    <h4>/create</h4>
+    <p><b>POST</b> Creates a user</p>
+    <!-- TODO Re-orient with the 'secret' technique I used here-->
+    <pre><code>{
+        "users": [
+         {
+            "username": "test_user",
+            "firstName": "user_first_name",
+            "lastName": "user_last_name",
+            "lifeguard": false,
+            "archery": false,
+            "ropes": false,
+            "firstYear": false,
+            "senior": false,
+            "role": "counselor",
+            "password": "test_password"}
+        ],
+        "createSecret": "A Secret"
+}</code></pre>
+
+</div>
