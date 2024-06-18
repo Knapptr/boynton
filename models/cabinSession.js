@@ -105,8 +105,9 @@ module.exports = class CabinSession {
 			ORDER BY cs.id, camp.age, camp.last_name
 		`
 			;
-		const response = await fetchMany(query)
-		const cabins = CabinSession.deserialize(response);
+		const response = await pool.query(query);
+		const results = response.rows;
+		const cabins = CabinSession.deserialize(results);
 
 		// cabins.sort(sortCabins)
 		// console.log({ sortedCabins: cabins })
