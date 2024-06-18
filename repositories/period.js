@@ -124,6 +124,7 @@ module.exports = {
         camp.first_name as camper_first,
         camp.last_name as camper_last,
         campw.id as camper_week_id,
+        camp.id as camper_id,
         campact.id as camper_activity_id,
         cabin.name as cabin_name,
       campact.is_present as is_present
@@ -150,6 +151,7 @@ module.exports = {
         const {
           activity_id: activityId,
           activity_name: activityName,
+          camper_id: camperId,
           activity_session_id: activitySessionId,
           camper_first: camperFirst,
           camper_last: camperLast,
@@ -173,6 +175,7 @@ module.exports = {
         // if camper info, add camper to camper list
         if (camperWeekId !== null) {
           activitiesById[activitySessionId].campers.push({
+            id: camperId,
             firstName:camperFirst,
             lastName: camperLast,
             sessionId: camperWeekId,
