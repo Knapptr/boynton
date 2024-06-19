@@ -9,7 +9,7 @@ const handleValidation = require("../../validation/validationMiddleware");
 const { param } = require("express-validator");
 const Week = require("../../models/week");
 const AwardPrinter = require("../../models/AwardPrinter");
-
+const { sendToDev, sendToNotifications } = require("../../slackMessages");
 
 module.exports = {
   getAll: async (req, res, next) => {
@@ -26,8 +26,10 @@ module.exports = {
     body("awards").isArray(),
     body("awards.*.camperSessionId")
       .isInt()
-      .custom(async (camperSessionId) => {
+      .custom(async (camperSessionId,{req}) => {
         const session = await CamperWeek.getOne(camperSessionId);
+       if(!req.awardedCampers) {req.awardedCampers = []};
+        req.awardedCampers.push(session);
         if (!session) {
           throw new Error("Camper session does not exist");
         }
@@ -43,34 +45,43 @@ module.exports = {
     body("awards.*.reason").exists(),
     handleValidation,
     async (req, res, next) => {
-      const { awards } = req.body;
+      const { awards} = req.body;
+      const {awardedCampers} = req;
       const results = await Award.create(awards);
+      //SLACK/////////////////
+      if(process.env.SEND_AWARDS === "true"){
+      let names = awardedCampers.map(c=>`${c.firstName} ${c.lastName}`);
+      names = names.join(", ");
+      const message = `just won ${awardedCampers.length > 1?"awards":"an award"} for "${awards[0].reason}"`;
+      sendToNotifications(`${names} ${message}!`);
+        }
+      ////////////////
       res.json(results);
     },
   ],
   print: [
     param("weekNumber")
       .isInt()
-      .custom(async (wn,{req}) => {
-        console.log("validating:",wn)
+      .custom(async (wn, { req }) => {
+        console.log("validating:", wn);
         const week = await Week.get(wn);
         if (!week) {
           throw new Error("Invalid Week");
         }
-        req.body.week = week
+        req.body.week = week;
         return wn;
       }),
     handleValidation,
-    async(req,res,next)=>{
-      console.log("validated. printing")
-      const {week} = req.body;
-      console.log("week",{week})
-      const awards = await Award.getGrouped(week.number)
-      const printer = new AwardPrinter()
-      const stream = await printer.stream(awards)
+    async (req, res, next) => {
+      console.log("validated. printing");
+      const { week } = req.body;
+      console.log("week", { week });
+      const awards = await Award.getGrouped(week.number);
+      const printer = new AwardPrinter();
+      const stream = await printer.stream(awards);
       res.attachment(`awards-week-${week.display}.pptx`);
-      stream.pipe(res)
-    }
+      stream.pipe(res);
+    },
     // This will generate individual zip files for each award. Which is a pain to handle the printing of.
     // async (req, res, next) => {
     //   const { weekNumber } = req.params;

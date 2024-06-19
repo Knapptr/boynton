@@ -3,6 +3,7 @@ const Camper = require("../../models/camper");
 const CamperComment = require("../../models/camperComment");
 const handleValidation = require("../../validation/validationMiddleware");
 const User = require("../../models/User");
+const { sendToNotifications } = require("../../slackMessages");
 
 const router = require("express").Router();
 
@@ -14,18 +15,48 @@ router.post("/", [
   }
   ,
   body("content").trim(),
-  body("camperId").exists().custom(async (camperId)=>{
+  body("camperId").exists().custom(async (camperId,{req})=>{
    const camper = await Camper.getById(camperId);
-    console.log({camperId});
-    console.log({camper});
 	if (!camper){
 	  throw new Error("Camper does not exist");
 	}
+    req.camper=camper;
   }),
   handleValidation,
   async (req,res,next) => {
 	const {camperId,username,content} = req.body;
+    const {camper,user} = req;
 	const comment = await CamperComment.create({camperId,username,content});
+    //////////SLACK
+    const message = {
+	"blocks": [
+		{
+			"type": "divider"
+		},
+		{
+			"type": "section",
+			"text": {
+				"type": "mrkdwn",
+				"text": `*${camper.firstName} ${camper.lastName}*: ${comment.content}`
+			}
+		},
+		{
+			"type": "divider"
+		},
+		{
+			"type": "context",
+			"elements": [
+				{
+					"type": "plain_text",
+					"text": `${user.firstName} ${user.lastName[0]}.`,
+					"emoji": true
+				}
+			]
+		}
+	]
+}
+    sendToNotifications(message)
+    /////////////////////////
 	res.json(comment);
 
   }
