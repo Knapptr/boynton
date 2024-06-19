@@ -324,8 +324,8 @@ module.exports = class User {
     FROM staff_sessions ss
     JOIN days d ON d.week_id = ss.week_number
     JOIN periods p ON p.day_id = d.id
-    LEFT JOIN staff_activities sa ON sa.staff_session_id = ss.id AND sa.period_id = p.id
-    LEFT JOIN activity_sessions acts ON acts.id = sa.activity_session_id
+    LEFT JOIN staff_on_periods sop ON sop.staff_session_id = ss.id AND sop.period_id = p.id
+    LEFT JOIN activity_sessions acts ON acts.id = sop.activity_session_id
     LEFT JOIN activities act ON act.id = acts.activity_id
     WHERE d.week_id = $2 AND ss.username = $1
     ORDER BY d.week_id, d.id, p.period_number

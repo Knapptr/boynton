@@ -27,6 +27,7 @@ router.post("/", [
 	const {camperId,username,content} = req.body;
     const {camper,user} = req;
 	const comment = await CamperComment.create({camperId,username,content});
+	res.json(comment);
     //////////SLACK
     const message = {
 	"blocks": [
@@ -57,7 +58,6 @@ router.post("/", [
 }
     sendToNotifications(message)
     /////////////////////////
-	res.json(comment);
 
   }
 ]);
