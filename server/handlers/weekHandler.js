@@ -1,15 +1,13 @@
 const Week = require("../../models/week");
 const CabinSession = require("../../models/cabinSession");
-const Period = require("../../models/period");
-const Day = require("../../models/day");
 const Camper = require("../../models/camper");
-const error = require("../../utils/jsonError");
 const handleValidation = require("../../validation/validationMiddleware");
 const { param, body } = require("express-validator");
 const Score = require("../../models/score");
 const ActivitySession = require("../../models/activitySession");
-const { validateWeek, validateWeekParam } = require("../../validation/scores");
+const { validateWeekParam } = require("../../validation/scores");
 const { validateUserSessionList } = require("../../validation/user");
+
 
 const weekHandler = {
   getHeaders: [

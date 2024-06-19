@@ -1,9 +1,6 @@
 const pool = require("../db");
-const weekRepository = require("../repositories/week");
 const defaultWeekRepository = require("../repositories/week");
-const { all } = require("../server/routers/weeks");
 const DbError = require("../utils/DbError");
-const { fetchOne } = require("../utils/pgWrapper");
 
 class Week {
   constructor(
@@ -40,7 +37,7 @@ class Week {
   }
 
   static async getOnDate(date, getStaff = false) {
-    const week = await weekRepository.getOnDate(date, getStaff);
+    const week = await defaultWeekRepository.getOnDate(date, getStaff);
     return week;
   }
   static async get(
