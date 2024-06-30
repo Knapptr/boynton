@@ -2,6 +2,7 @@ const router = require("express").Router();
 const { param, body } = require("express-validator");
 const Camper = require("../../models/camper");
 const handleValidation = require("../../validation/validationMiddleware");
+const { sendToCamperInfo } = require("../../slackMessages");
 
 const areaToGender = {
   BA: "Male",
@@ -68,12 +69,44 @@ const handler = {
     handleValidation,
     async (req, res, next) => {
       const camper = req.camper;
+      const { user } = req;
       const { pronouns } = req.body;
       try {
         await camper.setPronouns(pronouns);
-		  res.send("ok");
-		  return;
-
+        res.send("ok");
+        // SLACK
+        if (pronouns.length > 0) {
+          const message = {
+            blocks: [
+              {
+                type: "divider",
+              },
+              {
+                type: "section",
+                text: {
+                  type: "mrkdwn",
+                  text: `*${camper.firstName} ${camper.lastName}* uses _${pronouns}_ pronouns`,
+                },
+              },
+              {
+                type: "divider",
+              },
+              {
+                type: "context",
+                elements: [
+                  {
+                    type: "plain_text",
+                    text: `${user.firstName} ${user.lastName[0]}.`,
+                    emoji: true,
+                  },
+                ],
+              },
+            ],
+          };
+          sendToCamperInfo(message);
+        }
+        // /SLACK
+        return;
       } catch (e) {
         console.log(e);
         res.status(500);
