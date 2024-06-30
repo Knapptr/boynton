@@ -122,6 +122,7 @@ module.exports = class User {
     w.ends as ends,
     cs.id as cabin_session_id,
     ss.week_number as week_number, 
+    w.display as week_display,
     ss.id as staff_session_id from users u
     LEFT JOIN staff_sessions ss ON ss.username = u.username
     LEFT JOIN cabin_sessions cs ON cs.id = ss.cabin_assignment
@@ -168,6 +169,7 @@ module.exports = class User {
           {
             id: db.staff_session_id,
             weekNumber: db.week_number,
+            display: db.week_display,
             cabinAssignment: db.cabin_assignment,
             cabinSessionId: db.cabin_session_id,
             begins: db.begins,

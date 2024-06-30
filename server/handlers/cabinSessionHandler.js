@@ -33,7 +33,7 @@ module.exports = {
 		async (req, res, next) => {
 			const cabinSession = req.cabinSession;
 			const campers = await cabinSession.getCampers();
-			if (!campers) { res.json([]) }
+			if (!campers) { res.json([]);return; }
 			res.json(campers);
 		}],
 

@@ -3,7 +3,7 @@ const Camper = require("../../models/camper");
 const CamperComment = require("../../models/camperComment");
 const handleValidation = require("../../validation/validationMiddleware");
 const User = require("../../models/User");
-const { sendToNotifications } = require("../../slackMessages");
+const { sendToCamperInfo } = require("../../slackMessages");
 
 const router = require("express").Router();
 
@@ -25,6 +25,7 @@ router.post("/", [
     }),
   handleValidation,
   async (req, res, next) => {
+    console.log("this step");
     const { camperId, username, content } = req.body;
     const { camper, user } = req;
     const comment = await CamperComment.create({ camperId, username, content });
@@ -57,7 +58,7 @@ router.post("/", [
         },
       ],
     };
-    sendToNotifications(message);
+    sendToCamperInfo(message);
     /////////////////////////
   },
 ]);
