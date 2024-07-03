@@ -36,7 +36,7 @@ const AWARDS = [
   }
 ];
 const getAwardTemplate = (programAreaString) => {
-  const templates = ["Challenge Activities", "Waterfront", "Creative Arts","Archery","Ropes","Superstar","Polar Bear Dip", "Clean Cabin"];
+  const templates = ["Challenge Activities", "Waterfront", "Creative Arts","Archery","Ropes","Superstar","Polar Bear Dip", "Clean Cabin","Nature"];
   if (templates.includes(programAreaString)) {
     return programAreaString;
   } else {
