@@ -29,6 +29,10 @@ const AWARDS = [
   {
     awardType: "Clean Cabin",
     template: "cleancabin_template.pptx"
+  },
+  {
+    awardType: "Nature",
+    template: "nature_template.pptx"
   }
 ];
 const getAwardTemplate = (programAreaString) => {
