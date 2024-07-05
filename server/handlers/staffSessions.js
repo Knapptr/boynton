@@ -1,4 +1,6 @@
+const { param } = require("express-validator");
 const StaffSession = require("../../models/staffSession");
+const handleValidation = require("../../validation/validationMiddleware");
 const staffSessionHandler = {
   async assignToCabin  (req, res, next) {
     const { id } = req.params;
@@ -34,7 +36,42 @@ const staffSessionHandler = {
       return;
     }
     res.json(result);
-  }
+  },
+  
+  addThumbs: [
+    param("id").exists().isInt().custom(async (staffSessionId, {req})=>{
+      const staffSession = await StaffSession.get(staffSessionId);
+      if(!staffSession){
+        throw new Error("Staff Session does not exist");
+      }
+      req.staffSession = staffSession;
+
+    }),
+    handleValidation,
+    async (req,res,next)=>{
+      const {staffSession} = req;
+      const thumbsData = await StaffSession.addThumbs(staffSession.id);
+      res.json(thumbsData);
+    }
+
+  ],
+  removeThumbs: [
+    param("id").exists().isInt().custom(async (staffSessionId, {req})=>{
+      const staffSession = await StaffSession.get(staffSessionId);
+      if(!staffSession){
+        throw new Error("Staff Session does not exist");
+      }
+      req.staffSession = staffSession;
+
+    }),
+    handleValidation,
+    async (req,res,next)=>{
+      const {staffSession} = req;
+      const thumbsData = await StaffSession.removeThumbs(staffSession.id);
+      res.json(thumbsData);
+    }
+
+  ],
 };
 
 module.exports = staffSessionHandler;

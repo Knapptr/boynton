@@ -202,5 +202,14 @@ module.exports = {
     ON DELETE CASCADE
     ON UPDATE CASCADE
   )
+  `,
+  thumbsUp: `
+  CREATE TABLE IF NOT EXISTS thumbs_ups(
+    id serial NOT NULL PRIMARY KEY,
+    staff_session_id integer NOT NULL,
+    CONSTRAINT fk_staff_session FOREIGN KEY (staff_session_id) REFERENCES staff_sessions(id)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+  )
   `
 };

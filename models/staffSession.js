@@ -3,6 +3,19 @@ const DbError = require("../utils/DbError");
 const { fetchMany, fetchOne } = require("../utils/pgWrapper");
 const MAX_DAILY_ASSIGNMENTS = process.env.MAX_DAILY_ASSIGNMENTS || 2;
 const StaffSession = {
+  async addThumbs(staffSessionId){
+    const query = `INSERT INTO thumbs_ups (staff_session_id) VALUES ($1) RETURNING *` ;
+    const values = [staffSessionId] ;
+    const result = await pool.query(query,values);
+    return result.rows
+  },
+  async removeThumbs(staffSessionId){
+    const query = `DELETE FROM thumbs_ups tu_a
+WHERE tu_a.id IN (SELECT MAX(id) FROM thumbs_ups tu_b WHERE tu_b.staff_session_id = $1) RETURNING *`;
+    const values = [staffSessionId];
+    const result = await pool.query(query,values);
+    return result.rows
+  },
   async getOnPeriod(periodId){
     const query = `
       SELECT 

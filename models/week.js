@@ -232,6 +232,16 @@ class Week {
     });
     return new Week(weekResponse);
   }
+  async getThumbs(){
+    const query = `SELECT us.first_name,us.last_name,us.username,ss.id,COUNT(thumbs_ups.id) from users us
+JOIN staff_sessions ss ON ss.username = us.username
+LEFT JOIN thumbs_ups ON thumbs_ups.staff_session_id = ss.id
+WHERE ss.week_number = $1
+GROUP BY us.username, ss.id`;
+    const values = [this.number];
+    const result = await pool.query(query,values);
+    return result.rows.map(u=>({firstName:u.first_name,lastName:u.last_name,id:u.id,count:u.count}));
+  }
   async clearCabins(area) {
     const query = `
 		UPDATE camper_weeks 

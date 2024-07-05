@@ -7,10 +7,29 @@ const Score = require("../../models/score");
 const ActivitySession = require("../../models/activitySession");
 const { validateWeekParam } = require("../../validation/scores");
 const { validateUserSessionList } = require("../../validation/user");
-
+const StaffSession = require("../../models/staffSession");
 
 const weekHandler = {
   getHeaders: [
+    param("weekNumber")
+      .exists()
+      .isInt()
+      .custom(async (weekNumber, { req }) => {
+        const week = await Week.get(weekNumber, getStaff);
+        if (!week) {
+          throw new Error("Week does not exist");
+        }
+        req.week = week;
+      }),
+    handleValidation,
+    async (req, res, next) => {
+      const week = req.week;
+      const { number, display, title, begins, ends } = week;
+      const data = { number, display, title, begins, ends };
+      res.json(data);
+    },
+  ],
+  getThumbs: [
     param("weekNumber")
       .exists()
       .isInt()
@@ -24,10 +43,9 @@ const weekHandler = {
       }),
     handleValidation,
     async (req, res, next) => {
-      const week = req.week;
-      const { number, display, title, begins, ends } = week;
-      const data = { number, display, title, begins, ends };
-      res.json(data);
+      const { week } = req;
+      const thumbsData = await week.getThumbs();
+      res.json(thumbsData);
     },
   ],
 
@@ -147,9 +165,9 @@ const weekHandler = {
         // console.log({ result });
         res.json(result);
       } catch (e) {
-	      // console.log("Error",e);
-	      res.status(404);
-	      res.send(e)
+        // console.log("Error",e);
+        res.status(404);
+        res.send(e);
       }
     },
   ],
@@ -178,9 +196,9 @@ const weekHandler = {
         // console.log({ result });
         res.json(result);
       } catch (e) {
-	      // console.log("Error",e);
-	      res.status(404);
-	      res.send(e)
+        // console.log("Error",e);
+        res.status(404);
+        res.send(e);
       }
     },
   ],

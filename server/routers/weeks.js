@@ -12,6 +12,7 @@ router.get("/:weekNumber/headers", weekHandler.getHeaders);
 router.get("/:weekNumber/campers", weekHandler.getCampers);
 router.get("/:weekNumber/cabin-sessions", weekHandler.getCabinSessions);
 router.get("/:weekNumber/scores", weekHandler.getScores);
+router.get("/:weekNumber/thumbs", weekHandler.getThumbs);
 router.post(
   "/:weekNumber/periods/staff",
   weekHandler.assignStaffToPeriodNumber
