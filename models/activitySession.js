@@ -237,8 +237,6 @@ SELECT
     // if has capacity - get overflow optons
     let overflowActivities = {};
     if (capacity !== null) {
-      console.log("CAPACCITY!!!!!!!!!!!!!!!!");
-      console.log({capacity});
       const overflowQuery = `
       SELECT 
       act_s.id as activity_session_id,
