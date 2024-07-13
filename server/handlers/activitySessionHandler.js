@@ -109,6 +109,7 @@ const activitySessionHandler = {
     async (req, res, next) => {
       const { campers } = req.body;
       const activitySession = req.activitySession;
+      console.log({activitySession});
       const camperActivities = await activitySession.addCampers(campers);
       res.json({ camperActivities });
     },

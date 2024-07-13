@@ -236,7 +236,9 @@ SELECT
 
     // if has capacity - get overflow optons
     let overflowActivities = {};
-    if (capacity !== undefined) {
+    if (capacity !== null) {
+      console.log("CAPACCITY!!!!!!!!!!!!!!!!");
+      console.log({capacity});
       const overflowQuery = `
       SELECT 
       act_s.id as activity_session_id,
@@ -357,6 +359,7 @@ RETURNING *`;
   // needs to handle assigments to all week activties
   async addCampers(campersList) {
     const client = await pool.connect();
+    console.log("Adding campers");
 
     try {
       await client.query("BEGIN");
@@ -412,12 +415,13 @@ RETURNING *`;
         `;
 
         const targetSession = getLowestEnrollmentInfo();
+        console.log({targetSession});
         const values = [targetSession.periodId, targetSession.id, c.sessionId];
-        console.log({ values });
 
         // make request
         const result = await client.query(insertQuery, values);
         // increment accordingly
+        console.log({result});
         handleEnrollmentIncrement(targetSession.id);
 
         return result;
