@@ -77,7 +77,7 @@ const activitySessionHandler = {
           activityId,
           periodId
         );
-        console.log({activitySessions})
+        console.log({ activitySessions });
         res.json(activitySessions);
         return;
       } catch (e) {
@@ -87,6 +87,32 @@ const activitySessionHandler = {
     },
   ],
 
+  setLocation: [
+    validateActivitySessionExists(),
+    body("name")
+      .exists()
+      .custom(async (name, { req }) => {
+        const query = "SELECT * FROM activity_locations WHERE name= $1";
+        const values = [name];
+        const result = await pool.query(query, values);
+        if (result.rowCount !== 1) {
+          return false;
+        }
+        req.locationName = name;
+        return true;
+      }),
+    handleValidation,
+    async (req, res, next) => {
+      const activitySession = req.activitySession;
+      const locationName = req.locationName;
+      const result /* bool */ = activitySession.setLocation(locationName);
+      if (result) {
+        res.send("ok");
+      } else {
+        res.send("that didn't work");
+      }
+    },
+  ],
   delete: [
     validateActivitySessionExists(),
     handleValidation,
@@ -109,7 +135,7 @@ const activitySessionHandler = {
     async (req, res, next) => {
       const { campers } = req.body;
       const activitySession = req.activitySession;
-      console.log({activitySession});
+      console.log({ activitySession });
       const camperActivities = await activitySession.addCampers(campers);
       res.json({ camperActivities });
     },
@@ -120,7 +146,7 @@ const activitySessionHandler = {
     validateStaffOns(),
     handleValidation,
     async (req, res, next) => {
-      const {activitySession,staffOns} = req;
+      const { activitySession, staffOns } = req;
       try {
         const response = await activitySession.addStaff(staffOns);
         res.send(response);

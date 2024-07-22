@@ -322,7 +322,8 @@ module.exports = class User {
     p.period_number, 
     p.id as period_id,
     act.name as activity_name, 
-    acts.id as activity_session_id
+    acts.id as activity_session_id,
+    acts.location as activity_location
     FROM staff_sessions ss
     JOIN days d ON d.week_id = ss.week_number
     JOIN periods p ON p.day_id = d.id
@@ -350,6 +351,7 @@ module.exports = class User {
         id: db.period_id,
         number: db.period_number,
         activityName: db.activity_name || "OFF",
+        location: db.activity_location,
         activitySessionId: db.activity_session_id
       }
 

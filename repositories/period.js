@@ -119,6 +119,7 @@ module.exports = {
       const activitiesCampersQuery = `
         SELECT
         act.id as activity_id,
+        acts.location as location,
         act.name as activity_name,
         acts.id as activity_session_id,
         camp.first_name as camper_first,
@@ -151,6 +152,7 @@ module.exports = {
         const {
           activity_id: activityId,
           activity_name: activityName,
+          location: location,
           camper_id: camperId,
           activity_session_id: activitySessionId,
           camper_first: camperFirst,
@@ -163,6 +165,7 @@ module.exports = {
         const activityData = {
           id: activityId,
           name: activityName,
+          location:location,
           sessionId: activitySessionId,
           campers: [],
           staff: [],

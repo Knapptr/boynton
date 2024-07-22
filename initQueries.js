@@ -15,6 +15,13 @@ module.exports = {
     CONSTRAINT users_pkey PRIMARY KEY (username)
     )`,
 
+  activityLocations: `
+CREATE TABLE IF NOT EXISTS activity_locations
+  (
+    name CHARACTER VARYING(255) NOT NULL,
+    CONSTRAINT act_loc_pk PRIMARY KEY (name)
+  )
+  `,
   camperWeeks: `
   CREATE TABLE IF NOT EXISTS camper_weeks
   (
@@ -79,6 +86,7 @@ module.exports = {
   id serial NOT NULL ,
   period_id integer NOT NULL ,
   activity_id integer NOT NULL,
+  location CHARACTER VARYING(255),
   CONSTRAINT act_sess_p_key PRIMARY KEY (id),
   CONSTRAINT activity_id FOREIGN KEY (activity_id) REFERENCES activities (id)
   ON UPDATE CASCADE
@@ -87,7 +95,9 @@ module.exports = {
   CONSTRAINT p UNIQUE (period_id, id),
   CONSTRAINT period_id FOREIGN KEY (period_id) REFERENCES periods (id)
   ON UPDATE CASCADE
-  ON DELETE CASCADE
+  ON DELETE CASCADE,
+  CONSTRAINT location_fkey FOREIGN KEY (location) REFERENCES activity_locations (name)
+  
   )
   `,
   activities: `

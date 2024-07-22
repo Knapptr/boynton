@@ -11,6 +11,7 @@ router.post(
 // Programming staff only
 router.use(programmingOnly);
 router.post("/", activitySessionHandler.create);
+router.post("/:activitySessionId/location", activitySessionHandler.setLocation)
 router.delete("/:activitySessionId", activitySessionHandler.delete);
 router.post(
   "/:activitySessionId/staff",

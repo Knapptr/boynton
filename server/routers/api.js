@@ -20,6 +20,8 @@ const staffSessionRouter = require("./staffSessions");
 const programAreaRouter = require("./programAreas");
 const awardsRouter = require("./awards");
 const { adminOnly } = require("../middleware/authRole");
+const { default: ActivityLocationRouter } = require("./activityLocations.js");
+const activityLocationRouter = require("./activityLocations.js");
 
 router.use(passport.authenticate("jwt", { session: false }));
 //log all api requs
@@ -45,6 +47,7 @@ router.use("/program-areas", programAreaRouter);
 router.use("/awards", awardsRouter);
 router.use("/camper-comment", commentRouter);
 router.use("/schedule",scheduleRouter);
+router.use("/activity-locations",activityLocationRouter);
 
 // Admin Only Routes
 router.use(adminOnly);

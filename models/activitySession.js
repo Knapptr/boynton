@@ -5,6 +5,7 @@ const Period = require("./period");
 class ActivitySession {
   constructor({
     name,
+    location,
     id,
     capacity,
     description,
@@ -28,6 +29,7 @@ class ActivitySession {
     this.campers = campers;
     this.capacity = capacity;
     this.periodId = periodId;
+    this.location = location;
     this.weekTitle = weekTitle;
     this.weekNumber = weekNumber;
     this.weekDisplay = weekDisplay;
@@ -152,6 +154,7 @@ SELECT
     act_s.id as id,
       act.capacity as capacity,
       act_s.period_id as period_id,
+      act_s.location as location,
       act.name as activity_name,
       act.description as activity_description,
       act.id as activity_id,
@@ -187,6 +190,7 @@ SELECT
       activity_name: name,
       all_week: allWeek,
       activity_description: description,
+      location: location,
       activity_id: activityId,
       day_name: dayName,
       day_id: dayId,
@@ -277,6 +281,7 @@ SELECT
       weekDisplay,
       weekNumber,
       campers,
+      location,
       staff,
       dayId,
       overflow: overflowActivities,
@@ -316,6 +321,17 @@ RETURNING *`;
     }));
   }
 
+  async setLocation(locationName){
+    const query = "UPDATE activity_sessions SET location = $1 WHERE activity_sessions.id = $2";
+    const values = [locationName,this.id];
+    try{
+
+    const result = await pool.query(query,values);
+    return true;
+    }catch(e){
+      return false
+    }
+  }
   async delete() {
     const query = `
       WITH target_period AS(

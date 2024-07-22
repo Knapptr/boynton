@@ -65,6 +65,7 @@ class Week {
         per.period_number as period_number,
         per.day_id as period_day,
         actsess.id as activity_session_id,
+        actsess.location as activity_session_location,
         act.name as activity_name,
         act.description as activity_description
         FROM
@@ -124,6 +125,7 @@ class Week {
             name: data.activity_name,
             sessionId: data.activity_session_id,
             description: data.activity_description,
+            location: data.activity_session_location,
           })
         }
         // re assemble current day
