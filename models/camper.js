@@ -148,6 +148,7 @@ ORDER BY camp.last_name, camp.first_name, camp.age
 		SELECT act.name, 
 act.id as activity_id, 
 actsess.id as activity_session_id,
+      actsess.location as activity_location,
 p.id as period_id,
 p.period_number as period_number,
 d.name as day_name,
@@ -182,7 +183,8 @@ WHERE c.id = $1
               id: act.period_id,
               activitySessionId: act.activity_session_id,
               activity: act.name,
-              activityId: act.activity_id
+              activityId: act.activity_id,
+              activityLocation: act.activity_location
             },
           },
         },
