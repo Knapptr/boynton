@@ -49,6 +49,7 @@ const repos = [
   dayRepo,
   periodRepo,
   freetimes,
+  activityLocations,
   activityRepo,
   activitySessionsRepo,
   cabinRepo,
@@ -63,8 +64,7 @@ const repos = [
   scoreRepo,
   programAreaRepo,
   awardRepo,
-  camperComments,
-  activityLocations
+  camperComments
 ];
 
 module.exports = async () => {
