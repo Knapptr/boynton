@@ -2,25 +2,26 @@ const pool = require("../db");
 const { getTodayFormatted } = require("../utils/getDates");
 
 class CamperComment {
-  constructor({id,camperId,username,content,date}){
+  constructor({id,camperId,username,content,date,dueDate}){
     this.id=id;
     this.camperId = camperId;
     this.username = username;
     this.content = content;
+    this.dueDate = dueDate;
     this.date = date;
   }
 
-  static async create({camperId,username,content}){
+  static async create({camperId,username,content,dueDate}){
     content = content.trim();
     const query = `
     INSERT INTO camper_comments
-    (username, camper_id, content, date)
-    VALUES ($1, $2, $3, $4)
+    (username, camper_id, content, date,due_date)
+    VALUES ($1, $2, $3, $4,$5)
     ON CONFLICT DO NOTHING
     RETURNING *
     `
     const date = new Date().toISOString();
-    const values = [username,camperId,content,date ];
+    const values = [username,camperId,content,date, dueDate ];
 
     const result = await pool.query(query,values);
     console.log({result});
@@ -37,8 +38,8 @@ class CamperComment {
     if(result.rowCount === 0 ){
       return false
     }
-    const {id, username,content,date,camper_id:camperId} = result.rows[0];
-    return new CamperComment({id, username,content,date,camperId});
+    const {id, username,content,date,camper_id:camperId,due_date: dueDate} = result.rows[0];
+    return new CamperComment({id, username,content,date,camperId,dueDate});
 
   }
   async delete(){
@@ -48,6 +49,13 @@ class CamperComment {
     const result = await pool.query(query,values);
     return result.rows[0];
   }
+
+  static async getTwoDays(){
+    const query = "SELECT * from camper_comments JOIN campers ON campers.id = camper_comments.camper_id WHERE due_date = CURRENT_DATE OR due_date = CURRENT_DATE + INTERVAL '1 day'"
+    const result = await pool.query(query);
+    return result.rows;
+  }
 }
+
 
 module.exports = CamperComment;

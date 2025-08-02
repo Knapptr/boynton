@@ -176,6 +176,7 @@ CREATE TABLE IF NOT EXISTS activity_locations
     camper_id INTEGER NOT NULL,
     username CHARACTER VARYING, 
     date TIMESTAMP NOT NULL,
+    due_date TIMESTAMP,
     content CHARACTER VARYING NOT NULL,
     CONSTRAINT fk_camper_id FOREIGN KEY (camper_id) REFERENCES campers(id)
     ON DELETE CASCADE

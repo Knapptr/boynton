@@ -26,9 +26,9 @@ router.post("/", [
   handleValidation,
   async (req, res, next) => {
     console.log("this step");
-    const { camperId, username, content } = req.body;
+    const { camperId, username, content, dueDate  } = req.body;
     const { camper, user } = req;
-    const comment = await CamperComment.create({ camperId, username, content });
+    const comment = await CamperComment.create({ camperId, username, content,dueDate });
     res.json(comment);
     //////////SLACK
     const message = {
@@ -85,5 +85,10 @@ router.delete("/:id", [
     res.json(deletedComment);
   },
 ]);
+
+router.get("/soon", async ({req,res,next})=>{
+const results = await CamperComment.getTwoDays();
+  res.json(results);
+})
 
 module.exports = router;

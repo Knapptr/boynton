@@ -208,6 +208,7 @@ WHERE c.id = $1
       firstName: c.first_name,
       lastName: c.last_name,
       date: c.date,
+      dueDate: c.due_date,
       content: c.content,
     }));
     //aggregate all data
