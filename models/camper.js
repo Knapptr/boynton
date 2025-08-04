@@ -199,7 +199,7 @@ WHERE c.id = $1
     }));
     // get camperComments
     const commentQuery =
-      "SELECT * from camper_comments cc  JOIN users u on u.username = cc.username WHERE cc.camper_id = $1 ORDER BY date DESC";
+      "SELECT due_date AT TIME ZONE 'America/New_York', * from camper_comments cc  JOIN users u on u.username = cc.username WHERE cc.camper_id = $1 ORDER BY date DESC";
     const commentValues = [id];
     const commentResponse = await pool.query(commentQuery, commentValues);
     const comments = commentResponse.rows.map((c) => ({

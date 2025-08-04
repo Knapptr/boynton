@@ -51,7 +51,7 @@ class CamperComment {
   }
 
   static async getTwoDays(){
-    const query = "SELECT * from camper_comments JOIN campers ON campers.id = camper_comments.camper_id WHERE due_date = CURRENT_DATE OR due_date = CURRENT_DATE + INTERVAL '1 day'"
+    const query = "SELECT due_date AT TIME ZONE 'America/New_York', * from camper_comments JOIN campers ON campers.id = camper_comments.camper_id WHERE due_date = CURRENT_DATE OR due_date = CURRENT_DATE + INTERVAL '1 day'"
     const result = await pool.query(query);
     return result.rows;
   }
